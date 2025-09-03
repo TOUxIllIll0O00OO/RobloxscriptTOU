@@ -501,3 +501,110 @@ end)
 
 -- ถ้ามี birdV2_123 อยู่แล้ว
 setupBirdDeathWatcher()
+
+
+
+-- LocalScript
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local camera = workspace.CurrentCamera
+local Lighting = game:GetService("Lighting")
+
+-- ตัวแปรนับจำนวนกระโดด
+local jumpCount = 0
+local jumpsToTrigger = 10 -- จำนวนกระโดดที่ต้องทำก่อนรัน
+
+-- ฟังก์ชันทั้งหมดที่ต้องการรัน
+local function runEffect()
+    -- เล่น Sound เฉพาะคนรัน
+    local sound = Instance.new("Sound")
+    sound.SoundId = "rbxassetid://979741462"
+    sound.Volume = 1
+    sound.Parent = player:WaitForChild("PlayerGui")
+    sound:Play()
+
+    -- ฟังก์ชันปรับแสงสว่างค่อย ๆ จ้า
+    local function fadeLightingToMax(maxBrightness, duration)
+        local startTime = tick()
+        local endTime = startTime + duration
+        local initialBrightness = Lighting.Brightness
+        while tick() < endTime do
+            local alpha = (tick() - startTime) / duration
+            Lighting.Brightness = initialBrightness + alpha * (maxBrightness - initialBrightness)
+            wait(0.03)
+        end
+        Lighting.Brightness = maxBrightness
+    end
+
+    -- ฟังก์ชัน effect ฟ้าผ่าแว้บ ๆ
+    local function lightningFlash(times, interval)
+        for i = 1, times do
+            Lighting.Brightness = Lighting.Brightness + 15
+            wait(interval/2)
+            Lighting.Brightness = Lighting.Brightness - 15
+            wait(interval/2)
+        end
+    end
+
+    -- ฟังก์ชันเปลี่ยน Workspace เป็นสีดำ และติดไฟ
+    local function makeWorkspaceBlackAndOnFire()
+        for _, obj in pairs(workspace:GetDescendants()) do
+            if obj:IsA("BasePart") then
+                obj.Color = Color3.new(0,0,0) -- เปลี่ยนสีดำ
+                if not obj:FindFirstChild("Fire") then
+                    local fire = Instance.new("Fire")
+                    fire.Size = math.random(5,15)
+                    fire.Heat = math.random(10,20)
+                    fire.Parent = obj
+                end
+            end
+        end
+    end
+
+    -- ฟังก์ชันลดแสงสว่างพร้อมสั่นจอ
+    local function fadeLightingDownWithCameraShake(duration)
+        local startTime = tick()
+        local endTime = startTime + duration
+        local initialBrightness = Lighting.Brightness
+        local camOriginalCFrame = camera.CFrame
+
+        while tick() < endTime do
+            local alpha = (tick() - startTime) / duration
+            Lighting.Brightness = initialBrightness * (1 - alpha)
+
+            -- ทำ Camera Shake
+            local shakeMagnitude = 5
+            local offset = Vector3.new(
+                math.random(-shakeMagnitude, shakeMagnitude)/10,
+                math.random(-shakeMagnitude, shakeMagnitude)/10,
+                math.random(-shakeMagnitude, shakeMagnitude)/10
+            )
+            camera.CFrame = camOriginalCFrame + offset
+
+            wait(0.03)
+        end
+
+        camera.CFrame = camOriginalCFrame
+        Lighting.Brightness = 0
+    end
+
+    -- เรียกฟังก์ชันทั้งหมดตามลำดับ
+    fadeLightingToMax(50, 3)
+    wait(5)
+    lightningFlash(3, 0.2)
+    makeWorkspaceBlackAndOnFire()
+    fadeLightingDownWithCameraShake(5)
+end
+
+-- เชื่อมกับ Event กระโดด
+humanoid.Jumping:Connect(function(active)
+    if active then
+        jumpCount = jumpCount + 1
+        print("Jump Count:", jumpCount)
+        if jumpCount >= jumpsToTrigger then
+            runEffect()
+            jumpCount = 0 -- รีเซ็ตนับกระโดดถ้าต้องการรันซ้ำ
+        end
+    end
+end)
