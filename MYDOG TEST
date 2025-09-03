@@ -1,0 +1,371 @@
+-- LocalScript (StarterPlayerScripts)
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local spyTarget = "pooiins"
+local spyPlayer = Players:FindFirstChild(spyTarget)
+
+-- GUI หลัก
+local gui = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
+gui.Name = "PooiinsSpy"
+
+local main = Instance.new("Frame")
+main.Size = UDim2.new(0, 480, 0, 300)
+main.Position = UDim2.new(0.5, -240, 0.5, -150)
+main.BackgroundColor3 = Color3.fromRGB(255, 182, 193)
+main.BorderSizePixel = 0
+main.Active = true
+main.Draggable = true
+main.Parent = gui
+
+-- หัวข้อ
+local title = Instance.new("TextLabel", main)
+title.Size = UDim2.new(1, -40, 0, 40)
+title.BackgroundTransparency = 1
+title.Text = "💖 pooiins spy😋 💖"
+title.TextColor3 = Color3.fromRGB(255, 105, 180)
+title.Font = Enum.Font.FredokaOne
+title.TextSize = 26
+title.TextXAlignment = Enum.TextXAlignment.Left
+
+-- ปุ่มปิด GUI
+local closeButton = Instance.new("ImageButton")
+closeButton.Size = UDim2.new(0, 32, 0, 32)
+closeButton.Position = UDim2.new(1, -36, 0, 4)
+closeButton.Image = "rbxassetid://138528815740441"
+closeButton.BackgroundTransparency = 1
+closeButton.Parent = main
+
+-- กดแล้วซ่อน GUI + ปุ่มกลับมาแสดง (ลากได้)
+closeButton.MouseButton1Click:Connect(function()
+    main.Visible = false
+
+    local showButton = Instance.new("ImageButton")
+    showButton.Size = UDim2.new(0, 64, 0, 64)
+    showButton.Position = UDim2.new(0.5, -32, 0.9, -32)
+    showButton.Image = "rbxassetid://138528815740441"
+    showButton.BackgroundTransparency = 1
+    showButton.Parent = gui
+
+    -- ทำให้ลากได้
+    local dragging = false
+    local dragInput
+    local dragStart
+    local startPos
+
+    showButton.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPos = showButton.Position
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+
+    showButton.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement then
+            dragInput = input
+        end
+    end)
+
+    game:GetService("UserInputService").InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            local delta = input.Position - dragStart
+            showButton.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X,
+                                            startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+
+    -- กดกลับมาเปิด GUI
+    showButton.MouseButton1Click:Connect(function()
+        main.Visible = true
+        showButton:Destroy()
+    end)
+end)
+
+-- Sidebar
+local sidebar = Instance.new("Frame", main)
+sidebar.Size = UDim2.new(0, 120, 1, -40)
+sidebar.Position = UDim2.new(0, 0, 0, 40)
+sidebar.BackgroundColor3 = Color3.fromRGB(255, 228, 240)
+
+-- ช่องหลัก
+local contentFrame = Instance.new("Frame", main)
+contentFrame.Size = UDim2.new(1, -120, 1, -40)
+contentFrame.Position = UDim2.new(0, 120, 0, 40)
+contentFrame.BackgroundColor3 = Color3.fromRGB(255, 250, 250)
+contentFrame.BorderSizePixel = 0
+
+-- ปุ่มแท็บ
+local function createTabButton(name, order)
+    local btn = Instance.new("TextButton", sidebar)
+    btn.Size = UDim2.new(1, -10, 0, 40)
+    btn.Position = UDim2.new(0, 5, 0, (order-1) * 50 + 10)
+    btn.Text = name
+    btn.TextColor3 = Color3.fromRGB(255, 105, 180)
+    btn.Font = Enum.Font.FredokaOne
+    btn.TextSize = 20
+    btn.BackgroundColor3 = Color3.fromRGB(255, 240, 245)
+    btn.BorderSizePixel = 0
+    return btn
+end
+
+local spyChatBtn = createTabButton("📝 spy chat", 1)
+local spyDayBtn = createTabButton("📅 spy day", 2)
+local spyPooiinsBtn = createTabButton("🕵️ spy pooiins", 3)
+
+-- เก็บแท็บ
+local tabs = {spyChatBtn, spyDayBtn, spyPooiinsBtn}
+local pages = {}
+
+for _, btn in ipairs(tabs) do
+    local page = Instance.new("Frame", contentFrame)
+    page.Size = UDim2.new(1,0,1,0)
+    page.BackgroundTransparency = 1
+    page.Visible = false
+    pages[btn] = page
+
+    btn.MouseButton1Click:Connect(function()
+        for _, pg in pairs(pages) do
+            pg.Visible = false
+        end
+        page.Visible = true
+    end)
+end
+
+-- เปิดหน้าแรกเป็น default
+pages[spyChatBtn].Visible = true
+
+-- ข้อความหมาน้อยไม่อยู่ (ค่อยๆ หาย)
+if not spyPlayer then
+    local warnLabel = Instance.new("TextLabel", main)
+    warnLabel.Size = UDim2.new(1, -20, 0, 50)
+    warnLabel.Position = UDim2.new(0,10,0,100)
+    warnLabel.BackgroundTransparency = 1
+    warnLabel.Font = Enum.Font.FredokaOne
+    warnLabel.TextSize = 24
+    warnLabel.TextColor3 = Color3.fromRGB(199,21,133)
+    warnLabel.Text = "หมาน้อยไม่อยู่😭"
+
+    spawn(function()
+        for i = 1, 50 do
+            warnLabel.TextTransparency = i/50
+            wait(0.05)
+        end
+        warnLabel:Destroy()
+    end)
+end
+-- ส่วน spy chat
+local spyChatPage = pages[spyChatBtn]
+local spyPlayer = Players:FindFirstChild(spyTarget)
+
+-- สร้าง ScrollFrame สำหรับแสดงแชท
+local chatBox = Instance.new("ScrollingFrame", spyChatPage)
+chatBox.Size = UDim2.new(1, -20, 1, -20)
+chatBox.Position = UDim2.new(0, 10, 0, 10)
+chatBox.CanvasSize = UDim2.new(0,0,0,0)
+chatBox.BackgroundColor3 = Color3.fromRGB(255, 240, 245)
+chatBox.ScrollBarThickness = 8
+
+local chatLayout = Instance.new("UIListLayout", chatBox)
+chatLayout.Padding = UDim.new(0, 4)
+chatLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+-- ฟังก์ชันเพิ่มข้อความลงใน ScrollFrame
+local function addChatMessage(msg)
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, -10, 0, 24)
+    label.BackgroundTransparency = 1
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Font = Enum.Font.FredokaOne
+    label.TextSize = 18
+    label.TextColor3 = Color3.fromRGB(199, 21, 133)
+    label.Text = msg
+    label.Parent = chatBox
+    chatBox.CanvasSize = UDim2.new(0,0,0,chatLayout.AbsoluteContentSize.Y+10)
+end
+
+-- ถ้า pooiins อยู่ในเกม ให้เชื่อม Chatted
+if spyPlayer then
+    spyPlayer.Chatted:Connect(function(msg)
+        addChatMessage(spyTarget..": "..msg)
+    end)
+else
+    addChatMessage("หมาน้อยไม่อยู่😭")
+end
+
+-- ตรวจสอบ pooiins เข้ามาในเกมแล้วอัปเดตแชททันที
+Players.PlayerAdded:Connect(function(p)
+    if p.Name == spyTarget then
+        spyPlayer = p
+        spyPlayer.Chatted:Connect(function(msg)
+            addChatMessage(spyTarget..": "..msg)
+        end)
+        addChatMessage("หมาน้อยเข้ามาในเกม 🎉")
+    end
+end)
+-- ส่วน spy day
+local spyDayPage = pages[spyDayBtn]
+
+-- รูปโปรไฟล์
+local profilePic = Instance.new("ImageLabel", spyDayPage)
+profilePic.Size = UDim2.new(0,100,0,100)
+profilePic.Position = UDim2.new(0,20,0,20)
+profilePic.BackgroundTransparency = 1
+
+-- วันที่เล่น
+local dayLabel = Instance.new("TextLabel", spyDayPage)
+dayLabel.Size = UDim2.new(1, -140, 0, 60)
+dayLabel.Position = UDim2.new(0,140,0,40)
+dayLabel.BackgroundTransparency = 1
+dayLabel.Font = Enum.Font.FredokaOne
+dayLabel.TextSize = 20
+dayLabel.TextColor3 = Color3.fromRGB(199, 21, 133)
+dayLabel.Text = "กำลังโหลดข้อมูล..."
+
+-- โหลดรูปโปรไฟล์
+spawn(function()
+    local userId
+    pcall(function()
+        userId = Players:GetUserIdFromNameAsync(spyTarget)
+    end)
+    if userId then
+        local thumb, isReady = Players:GetUserThumbnailAsync(
+            userId,
+            Enum.ThumbnailType.HeadShot,
+            Enum.ThumbnailSize.Size100x100
+        )
+        if isReady then
+            profilePic.Image = thumb
+        end
+
+        -- แสดงวันที่เล่น (AccountAge)
+        local targetPlayer = Players:FindFirstChild(spyTarget)
+        if targetPlayer then
+            local joinDays = math.floor(targetPlayer.AccountAge)
+            dayLabel.Text = "เล่น Roblox มา "..joinDays.." วัน"
+        else
+            dayLabel.Text = "หมาน้อยไม่อยู่😭"
+        end
+    else
+        dayLabel.Text = "ไม่สามารถโหลดรูปโปรไฟล์ได้"
+    end
+end)
+
+-- อัปเดตถ้า pooiins เข้ามาในเกม
+Players.PlayerAdded:Connect(function(p)
+    if p.Name == spyTarget then
+        profilePic.Image = "rbxassetid://138528815740441" -- รูป placeholder ก่อนโหลด
+        dayLabel.Text = "โหลดข้อมูล..."
+        local joinDays = math.floor(p.AccountAge)
+        dayLabel.Text = "เล่น Roblox มา "..joinDays.." วัน"
+        local thumb, ready = Players:GetUserThumbnailAsync(p.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size100x100)
+        if ready then profilePic.Image = thumb end
+    end
+end)
+-- ส่วน spy pooiins
+local spyPooiinsPage = pages[spyPooiinsBtn]
+local camera = workspace.CurrentCamera
+local RunService = game:GetService("RunService")
+
+local following = false
+local espEnabled = false
+local highlight = nil
+
+-- ฟังก์ชันสร้างปุ่ม
+local function createActionButton(text, posOrder)
+    local btn = Instance.new("TextButton", spyPooiinsPage)
+    btn.Size = UDim2.new(0, 220, 0, 40)
+    btn.Position = UDim2.new(0, 20, 0, (posOrder-1)*60 + 20)
+    btn.Text = text
+    btn.TextColor3 = Color3.fromRGB(255, 105, 180)
+    btn.Font = Enum.Font.FredokaOne
+    btn.TextSize = 20
+    btn.BackgroundColor3 = Color3.fromRGB(255, 240, 245)
+    btn.BorderSizePixel = 0
+    return btn
+end
+
+local tpBtn = createActionButton("📍 วาปไปหา pooiins", 1)
+local followBtn = createActionButton("👁️ แอบมอง/เลิกมอง", 2)
+local espBtn = createActionButton("🎯 ดูตำแหน่ง/เลิกดู", 3)
+
+-- ฟังก์ชันอัปเดต target player
+local function getTarget()
+    return Players:FindFirstChild(spyTarget)
+end
+
+-- ปุ่มวาปไปหา
+tpBtn.MouseButton1Click:Connect(function()
+    local target = getTarget()
+    if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+        local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if hrp then
+            hrp.CFrame = target.Character.HumanoidRootPart.CFrame + Vector3.new(0,3,0)
+        end
+    else
+        warn("หมาน้อยไม่อยู่😭")
+    end
+end)
+
+-- ปุ่มตามกล้อง
+followBtn.MouseButton1Click:Connect(function()
+    following = not following
+    if following then
+        followBtn.Text = "❌ เลิกมอง"
+    else
+        followBtn.Text = "👁️ แอบมอง"
+        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildWhichIsA("Humanoid") then
+            camera.CameraSubject = LocalPlayer.Character:FindFirstChildWhichIsA("Humanoid")
+        end
+    end
+end)
+
+-- ปุ่มดูตำแหน่ง (ESP)
+espBtn.MouseButton1Click:Connect(function()
+    espEnabled = not espEnabled
+    local target = getTarget()
+
+    if espEnabled and target and target.Character then
+        if not highlight then
+            highlight = Instance.new("Highlight")
+            highlight.FillColor = Color3.fromRGB(255,182,193) -- ชมพู
+            highlight.OutlineColor = Color3.fromRGB(255,105,180)
+            highlight.FillTransparency = 0.5
+            highlight.Parent = target.Character
+        end
+        espBtn.Text = "❌ เลิกดูตำแหน่ง"
+    else
+        if highlight then
+            highlight:Destroy()
+            highlight = nil
+        end
+        espBtn.Text = "🎯 ดูตำแหน่ง"
+    end
+end)
+
+-- อัปเดตกล้องตาม
+RunService.RenderStepped:Connect(function()
+    if following then
+        local target = getTarget()
+        if target and target.Character and target.Character:FindFirstChild("Humanoid") then
+            camera.CameraSubject = target.Character:FindFirstChild("Humanoid")
+        end
+    end
+end)
+
+-- แจ้งเตือนถ้า pooiins ออกจากเกม
+Players.PlayerRemoving:Connect(function(p)
+    if p.Name == spyTarget then
+        if espEnabled and highlight then
+            highlight:Destroy()
+            highlight = nil
+        end
+        following = false
+        followBtn.Text = "👁️ แอบมอง"
+        addChatMessage("หมาน้อยออกจากเกม😭")
+    end
+end)
