@@ -4,7 +4,7 @@ local lp = Players.LocalPlayer
 local fakeID = "ยังจะมาดูอีก😔"
 local antiStealEnabled = false
 
--- ฟังก์ชันแจ้งเตือนข้างจอ
+-- ฟังก์ชันแจ้งเตือนข้างจอแบบลอย Smooth
 local function showAlert(msg)
     local gui = lp.PlayerGui:FindFirstChild("AntiStealAlertGui")
     if not gui then
@@ -15,10 +15,10 @@ local function showAlert(msg)
     end
 
     local frame = Instance.new("Frame", gui)
-    frame.Size = UDim2.new(0,300,0,50)
-    frame.Position = UDim2.new(1,-310,0,50)
+    frame.Size = UDim2.new(0, 320, 0, 60)
+    frame.Position = UDim2.new(1, -330, 0, 50)
     frame.BackgroundColor3 = Color3.fromRGB(0,0,0)
-    frame.BackgroundTransparency = 0.4
+    frame.BackgroundTransparency = 0.5
     frame.BorderSizePixel = 0
 
     local text = Instance.new("TextLabel", frame)
@@ -30,14 +30,18 @@ local function showAlert(msg)
     text.TextColor3 = Color3.fromRGB(255,50,50)
     text.Text = "[Anti-Steal] "..msg
 
-    task.delay(3,function()
+    local tweenService = game:GetService("TweenService")
+    local goal = {Position = UDim2.new(1, -330, 0, 10), BackgroundTransparency=1, TextTransparency=1}
+    local tweenInfo = TweenInfo.new(3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+    local tween = tweenService:Create(frame, tweenInfo, goal)
+    tween:Play()
+    tween.Completed:Connect(function()
         frame:Destroy()
     end)
 end
 
 -- Hook Anti-Steal
 local function hookAntiSteal()
-    if not antiStealEnabled then return end
     local mt = getrawmetatable(game)
     local oldIndex = mt.__index
     setreadonly(mt,false)
@@ -88,8 +92,8 @@ gui.Name = "TOU_BOOMBOX_HUB"
 gui.ResetOnSpawn = false
 
 local mainFrame = Instance.new("Frame", gui)
-mainFrame.Size = UDim2.new(0,400,0,250) -- ขนาดใหญ่
-mainFrame.Position = UDim2.new(0,20,0.5,-125)
+mainFrame.Size = UDim2.new(0,500,0,300)
+mainFrame.Position = UDim2.new(0,20,0.5,-150)
 mainFrame.BackgroundColor3 = Color3.fromRGB(25,25,25)
 mainFrame.Active = true
 mainFrame.Draggable = true
@@ -104,7 +108,7 @@ title.TextColor3=Color3.fromRGB(0,255,150)
 title.TextScaled=true
 title.Font=Enum.Font.FredokaOne
 
--- ปุ่มปิด/ย่อ (จะอยู่ตลอด)
+-- ปุ่มปิด/ย่อ (อยู่บนสุด ไม่หาย)
 local closeBtn = Instance.new("TextButton", mainFrame)
 closeBtn.Size=UDim2.new(0,50,0,50)
 closeBtn.Position=UDim2.new(1,-50,0,0)
@@ -137,7 +141,7 @@ miniBtn.MouseButton1Click:Connect(function()
 end)
 -- Sidebar
 local sidebar = Instance.new("Frame", mainFrame)
-sidebar.Size = UDim2.new(0,140,1,0)
+sidebar.Size = UDim2.new(0,160,1,0)
 sidebar.Position = UDim2.new(0,0,0,0)
 sidebar.BackgroundColor3 = Color3.fromRGB(30,30,30)
 
@@ -153,8 +157,8 @@ tabBtn1.TextScaled=true
 
 -- หน้าแท็บ
 local pageFrame = Instance.new("Frame", mainFrame)
-pageFrame.Size = UDim2.new(1,-140,1,0)
-pageFrame.Position = UDim2.new(0,140,0,0)
+pageFrame.Size = UDim2.new(1,-160,1,0)
+pageFrame.Position = UDim2.new(0,160,0,0)
 pageFrame.BackgroundColor3 = Color3.fromRGB(20,20,20)
 pageFrame.Visible=false
 
@@ -170,7 +174,7 @@ pageLabel.TextSize=22
 
 -- ปุ่มเปิด/ปิด Anti-Steal
 local toggleBtn = Instance.new("TextButton", pageFrame)
-toggleBtn.Size=UDim2.new(0,140,0,50)
+toggleBtn.Size=UDim2.new(0,160,0,60)
 toggleBtn.Position=UDim2.new(0,20,0,90)
 toggleBtn.BackgroundColor3=Color3.fromRGB(200,50,50) -- ปิด
 toggleBtn.TextColor3=Color3.fromRGB(255,255,255)
@@ -195,7 +199,21 @@ toggleBtn.MouseButton1Click:Connect(function()
         toggleBtn.Text="ปิดอยู่"
     end
 end)
--- ฟังก์ชันแจ้งเตือนแบบลอย Smooth
+-- ปรับ GUI หลักสวยขึ้น
+mainFrame.Size = UDim2.new(0,520,0,320)
+title.TextSize = 30
+
+-- Sidebar ปรับใหญ่
+sidebar.Size = UDim2.new(0,160,1,0)
+tabBtn1.TextSize = 22
+
+-- หน้าแท็บปรับใหญ่
+pageFrame.Size = UDim2.new(1,-160,1,0)
+pageLabel.TextSize = 26
+toggleBtn.Size = UDim2.new(0,160,0,60)
+toggleBtn.TextSize = 24
+
+-- แจ้งเตือนแบบลอย Smooth
 local function showAlertSmooth(msg)
     local gui = lp.PlayerGui:FindFirstChild("AntiStealAlertGui")
     if not gui then
@@ -206,12 +224,11 @@ local function showAlertSmooth(msg)
     end
 
     local frame = Instance.new("Frame", gui)
-    frame.Size = UDim2.new(0, 320, 0, 60)
-    frame.Position = UDim2.new(1, -330, 0, 50)
+    frame.Size = UDim2.new(0, 340, 0, 60)
+    frame.Position = UDim2.new(1, -350, 0, 50)
     frame.BackgroundColor3 = Color3.fromRGB(0,0,0)
     frame.BackgroundTransparency = 0.5
     frame.BorderSizePixel = 0
-    frame.AnchorPoint = Vector2.new(0,0)
 
     local text = Instance.new("TextLabel", frame)
     text.Size = UDim2.new(1,-10,1,-10)
@@ -222,9 +239,8 @@ local function showAlertSmooth(msg)
     text.TextColor3 = Color3.fromRGB(255,50,50)
     text.Text = "[Anti-Steal] "..msg
 
-    -- ลอยขึ้นและหาย
     local tweenService = game:GetService("TweenService")
-    local goal = {Position = UDim2.new(1, -330, 0, 10), BackgroundTransparency=1, TextTransparency=1}
+    local goal = {Position = UDim2.new(1, -350, 0, 10), BackgroundTransparency=1, TextTransparency=1}
     local tweenInfo = TweenInfo.new(3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
     local tween = tweenService:Create(frame, tweenInfo, goal)
     tween:Play()
@@ -233,19 +249,43 @@ local function showAlertSmooth(msg)
     end)
 end
 
--- แทน showAlert ด้วย showAlertSmooth
+-- แทนฟังก์ชัน showAlert เก่า
 showAlert = showAlertSmooth
+-- ฟังก์ชัน Hook Anti-Steal ใหม่เสมอ
+local function maintainAntiSteal()
+    task.spawn(function()
+        while true do
+            task.wait(1)
+            if antiStealEnabled then
+                pcall(hookAntiSteal)
+            end
+        end
+    end)
+end
 
--- ปรับ GUI หลักใหญ่ขึ้น + สีสวยขึ้น
-mainFrame.Size = UDim2.new(0,500,0,300)
-title.TextSize = 30
+-- เรียกใช้ทันที
+maintainAntiSteal()
 
--- Sidebar ปรับใหญ่ขึ้น
-sidebar.Size = UDim2.new(0,160,1,0)
-tabBtn1.TextSize = 22
+-- รีเช็คเมื่อ Character เปลี่ยน
+lp.CharacterAdded:Connect(function(char)
+    task.wait(1)
+    if antiStealEnabled then
+        pcall(hookAntiSteal)
+    end
+end)
 
--- หน้าแท็บปรับใหญ่ขึ้น
-pageFrame.Size = UDim2.new(1,-160,1,0)
-pageLabel.TextSize = 26
-toggleBtn.Size = UDim2.new(0,160,0,60)
-toggleBtn.TextSize = 24
+-- รีเช็ค PlayerGui
+lp:GetPropertyChangedSignal("PlayerGui"):Connect(function()
+    task.wait(0.5)
+    if antiStealEnabled then
+        pcall(hookAntiSteal)
+    end
+end)
+
+-- เรียก Hook Anti-Steal ครั้งแรก
+if antiStealEnabled then
+    hookAntiSteal()
+end
+
+-- แจ้งเตือนเมื่อสคริปต์รัน
+showAlert("TOU BOOMBOX HUB พร้อมใช้งาน!")
