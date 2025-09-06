@@ -71,29 +71,14 @@ local function hookAntiSteal()
     setreadonly(soundMt,true)
 end
 
--- รีเช็ค metatable ทุก 1 วิ
-task.spawn(function()
-    while task.wait(1) do
-        local mt = getrawmetatable(game)
-        if not mt or type(mt.__index)~="function" then
-            hookAntiSteal()
-        end
-    end
-end)
-
-lp.CharacterAdded:Connect(function()
-    task.wait(1)
-    hookAntiSteal()
-end)
-
 -- GUI หลัก
 local gui = Instance.new("ScreenGui",lp:WaitForChild("PlayerGui"))
 gui.Name = "TOU_BOOMBOX_HUB"
 gui.ResetOnSpawn = false
 
 local mainFrame = Instance.new("Frame", gui)
-mainFrame.Size = UDim2.new(0,500,0,300)
-mainFrame.Position = UDim2.new(0,20,0.5,-150)
+mainFrame.Size = UDim2.new(0,500,0,320)
+mainFrame.Position = UDim2.new(0,20,0.5,-160)
 mainFrame.BackgroundColor3 = Color3.fromRGB(25,25,25)
 mainFrame.Active = true
 mainFrame.Draggable = true
@@ -108,7 +93,7 @@ title.TextColor3=Color3.fromRGB(0,255,150)
 title.TextScaled=true
 title.Font=Enum.Font.FredokaOne
 
--- ปุ่มปิด/ย่อ (อยู่บนสุด ไม่หาย)
+-- ปุ่มปิด GUI (อยู่บนสุดตลอด)
 local closeBtn = Instance.new("TextButton", mainFrame)
 closeBtn.Size=UDim2.new(0,50,0,50)
 closeBtn.Position=UDim2.new(1,-50,0,0)
@@ -118,6 +103,7 @@ closeBtn.BackgroundColor3=Color3.fromRGB(40,40,40)
 closeBtn.Font=Enum.Font.FredokaOne
 closeBtn.TextScaled=true
 
+-- ปุ่ม GUI ย่อ
 local miniBtn = Instance.new("TextButton", gui)
 miniBtn.Size=UDim2.new(0,150,0,50)
 miniBtn.Position=UDim2.new(0,20,0.5,-25)
@@ -199,8 +185,8 @@ toggleBtn.MouseButton1Click:Connect(function()
         toggleBtn.Text="ปิดอยู่"
     end
 end)
--- ปรับ GUI หลักสวยขึ้น
-mainFrame.Size = UDim2.new(0,520,0,320)
+-- ปรับขนาด GUI หลักใหญ่ขึ้น
+mainFrame.Size = UDim2.new(0,520,0,360)
 title.TextSize = 30
 
 -- Sidebar ปรับใหญ่
@@ -213,7 +199,7 @@ pageLabel.TextSize = 26
 toggleBtn.Size = UDim2.new(0,160,0,60)
 toggleBtn.TextSize = 24
 
--- แจ้งเตือนแบบลอย Smooth
+-- ฟังก์ชันแจ้งเตือนลอย Smooth (ปรับให้สวยขึ้น)
 local function showAlertSmooth(msg)
     local gui = lp.PlayerGui:FindFirstChild("AntiStealAlertGui")
     if not gui then
@@ -249,9 +235,9 @@ local function showAlertSmooth(msg)
     end)
 end
 
--- แทนฟังก์ชัน showAlert เก่า
+-- แทนฟังก์ชันแจ้งเตือนเดิม
 showAlert = showAlertSmooth
--- ฟังก์ชัน Hook Anti-Steal ใหม่เสมอ
+-- ฟังก์ชัน maintainAntiSteal ให้ Hook Anti-Steal ทำงานตลอด
 local function maintainAntiSteal()
     task.spawn(function()
         while true do
@@ -274,7 +260,7 @@ lp.CharacterAdded:Connect(function(char)
     end
 end)
 
--- รีเช็ค PlayerGui
+-- รีเช็คเมื่อ PlayerGui เปลี่ยน
 lp:GetPropertyChangedSignal("PlayerGui"):Connect(function()
     task.wait(0.5)
     if antiStealEnabled then
@@ -282,10 +268,10 @@ lp:GetPropertyChangedSignal("PlayerGui"):Connect(function()
     end
 end)
 
--- เรียก Hook Anti-Steal ครั้งแรก
+-- เรียก Hook Anti-Steal ครั้งแรก หากเปิดอยู่
 if antiStealEnabled then
     hookAntiSteal()
 end
 
--- แจ้งเตือนเมื่อสคริปต์รัน
+-- แจ้งเตือนตอนสคริปต์รัน
 showAlert("TOU BOOMBOX HUB พร้อมใช้งาน!")
