@@ -1,0 +1,251 @@
+-- LocalScript
+local Players = game:GetService("Players")
+local lp = Players.LocalPlayer
+local fakeID = "ยังจะมาดูอีก😔"
+local antiStealEnabled = false
+
+-- ฟังก์ชันแจ้งเตือนข้างจอ
+local function showAlert(msg)
+    local gui = lp.PlayerGui:FindFirstChild("AntiStealAlertGui")
+    if not gui then
+        gui = Instance.new("ScreenGui")
+        gui.Name = "AntiStealAlertGui"
+        gui.ResetOnSpawn = false
+        gui.Parent = lp.PlayerGui
+    end
+
+    local frame = Instance.new("Frame", gui)
+    frame.Size = UDim2.new(0,300,0,50)
+    frame.Position = UDim2.new(1,-310,0,50)
+    frame.BackgroundColor3 = Color3.fromRGB(0,0,0)
+    frame.BackgroundTransparency = 0.4
+    frame.BorderSizePixel = 0
+
+    local text = Instance.new("TextLabel", frame)
+    text.Size = UDim2.new(1,-10,1,-10)
+    text.Position = UDim2.new(0,5,0,5)
+    text.BackgroundTransparency = 1
+    text.Font = Enum.Font.SourceSansBold
+    text.TextSize = 20
+    text.TextColor3 = Color3.fromRGB(255,50,50)
+    text.Text = "[Anti-Steal] "..msg
+
+    task.delay(3,function()
+        frame:Destroy()
+    end)
+end
+
+-- Hook Anti-Steal
+local function hookAntiSteal()
+    if not antiStealEnabled then return end
+    local mt = getrawmetatable(game)
+    local oldIndex = mt.__index
+    setreadonly(mt,false)
+    mt.__index = newcclosure(function(obj,key)
+        if key=="SoundId" and typeof(obj)=="Instance" and obj:IsA("Sound") then
+            if obj:IsDescendantOf(lp.Character or lp.CharacterAdded:Wait()) or obj:IsDescendantOf(lp:WaitForChild("PlayerGui")) then
+                showAlert("มีคนพยายามขโมยเสียง!")
+                return fakeID
+            end
+        end
+        return oldIndex(obj,key)
+    end)
+    setreadonly(mt,true)
+
+    local soundMt = getrawmetatable(Instance.new("Sound"))
+    local oldSoundIndex = soundMt.__index
+    setreadonly(soundMt,false)
+    soundMt.__index = newcclosure(function(self,key)
+        if key=="SoundId" and antiStealEnabled then
+            if self:IsDescendantOf(lp.Character or lp.CharacterAdded:Wait()) or self:IsDescendantOf(lp:WaitForChild("PlayerGui")) then
+                showAlert("มีคนพยายามขโมยเสียง!")
+                return fakeID
+            end
+        end
+        return oldSoundIndex(self,key)
+    end)
+    setreadonly(soundMt,true)
+end
+
+-- รีเช็ค metatable ทุก 1 วิ
+task.spawn(function()
+    while task.wait(1) do
+        local mt = getrawmetatable(game)
+        if not mt or type(mt.__index)~="function" then
+            hookAntiSteal()
+        end
+    end
+end)
+
+lp.CharacterAdded:Connect(function()
+    task.wait(1)
+    hookAntiSteal()
+end)
+
+-- GUI หลัก
+local gui = Instance.new("ScreenGui",lp:WaitForChild("PlayerGui"))
+gui.Name = "TOU_BOOMBOX_HUB"
+gui.ResetOnSpawn = false
+
+local mainFrame = Instance.new("Frame", gui)
+mainFrame.Size = UDim2.new(0,400,0,250) -- ขนาดใหญ่
+mainFrame.Position = UDim2.new(0,20,0.5,-125)
+mainFrame.BackgroundColor3 = Color3.fromRGB(25,25,25)
+mainFrame.Active = true
+mainFrame.Draggable = true
+
+-- Title
+local title = Instance.new("TextLabel", mainFrame)
+title.Size = UDim2.new(1,-50,0,50)
+title.Position = UDim2.new(0,0,0,0)
+title.BackgroundTransparency = 1
+title.Text="TOU BOOMBOX HUB"
+title.TextColor3=Color3.fromRGB(0,255,150)
+title.TextScaled=true
+title.Font=Enum.Font.FredokaOne
+
+-- ปุ่มปิด/ย่อ (จะอยู่ตลอด)
+local closeBtn = Instance.new("TextButton", mainFrame)
+closeBtn.Size=UDim2.new(0,50,0,50)
+closeBtn.Position=UDim2.new(1,-50,0,0)
+closeBtn.Text="X"
+closeBtn.TextColor3=Color3.fromRGB(255,100,100)
+closeBtn.BackgroundColor3=Color3.fromRGB(40,40,40)
+closeBtn.Font=Enum.Font.FredokaOne
+closeBtn.TextScaled=true
+
+local miniBtn = Instance.new("TextButton", gui)
+miniBtn.Size=UDim2.new(0,150,0,50)
+miniBtn.Position=UDim2.new(0,20,0.5,-25)
+miniBtn.Text="เปิด TOU HUB"
+miniBtn.BackgroundColor3=Color3.fromRGB(40,40,40)
+miniBtn.TextColor3=Color3.fromRGB(0,255,150)
+miniBtn.Font=Enum.Font.FredokaOne
+miniBtn.TextScaled=true
+miniBtn.Visible=false
+miniBtn.Active=true
+miniBtn.Draggable=true
+
+closeBtn.MouseButton1Click:Connect(function()
+	mainFrame.Visible=false
+	miniBtn.Visible=true
+end)
+
+miniBtn.MouseButton1Click:Connect(function()
+	mainFrame.Visible=true
+	miniBtn.Visible=false
+end)
+-- Sidebar
+local sidebar = Instance.new("Frame", mainFrame)
+sidebar.Size = UDim2.new(0,140,1,0)
+sidebar.Position = UDim2.new(0,0,0,0)
+sidebar.BackgroundColor3 = Color3.fromRGB(30,30,30)
+
+-- ปุ่มแท็บ "ป้องกันขโมยเสียง"
+local tabBtn1 = Instance.new("TextButton", sidebar)
+tabBtn1.Size = UDim2.new(1,0,0,50)
+tabBtn1.Position = UDim2.new(0,0,0,60)
+tabBtn1.BackgroundColor3 = Color3.fromRGB(45,45,45)
+tabBtn1.Text="ป้องกันขโมยเสียง"
+tabBtn1.TextColor3=Color3.fromRGB(255,255,255)
+tabBtn1.Font=Enum.Font.SourceSans
+tabBtn1.TextScaled=true
+
+-- หน้าแท็บ
+local pageFrame = Instance.new("Frame", mainFrame)
+pageFrame.Size = UDim2.new(1,-140,1,0)
+pageFrame.Position = UDim2.new(0,140,0,0)
+pageFrame.BackgroundColor3 = Color3.fromRGB(20,20,20)
+pageFrame.Visible=false
+
+-- Label หน้าแท็บ
+local pageLabel = Instance.new("TextLabel", pageFrame)
+pageLabel.Size = UDim2.new(0,250,0,50)
+pageLabel.Position = UDim2.new(0,20,0,20)
+pageLabel.BackgroundTransparency=1
+pageLabel.TextColor3=Color3.fromRGB(255,255,255)
+pageLabel.Text="ป้องกันขโมยเสียง"
+pageLabel.Font=Enum.Font.SourceSansBold
+pageLabel.TextSize=22
+
+-- ปุ่มเปิด/ปิด Anti-Steal
+local toggleBtn = Instance.new("TextButton", pageFrame)
+toggleBtn.Size=UDim2.new(0,140,0,50)
+toggleBtn.Position=UDim2.new(0,20,0,90)
+toggleBtn.BackgroundColor3=Color3.fromRGB(200,50,50) -- ปิด
+toggleBtn.TextColor3=Color3.fromRGB(255,255,255)
+toggleBtn.Text="ปิดอยู่"
+toggleBtn.Font=Enum.Font.SourceSansBold
+toggleBtn.TextScaled=true
+
+-- Event เปิดหน้าแท็บ
+tabBtn1.MouseButton1Click:Connect(function()
+    pageFrame.Visible=true
+end)
+
+-- Event Toggle Anti-Steal
+toggleBtn.MouseButton1Click:Connect(function()
+    antiStealEnabled = not antiStealEnabled
+    if antiStealEnabled then
+        toggleBtn.BackgroundColor3=Color3.fromRGB(50,200,100) -- เขียว
+        toggleBtn.Text="เปิดอยู่"
+        hookAntiSteal()
+    else
+        toggleBtn.BackgroundColor3=Color3.fromRGB(200,50,50) -- แดง
+        toggleBtn.Text="ปิดอยู่"
+    end
+end)
+-- ฟังก์ชันแจ้งเตือนแบบลอย Smooth
+local function showAlertSmooth(msg)
+    local gui = lp.PlayerGui:FindFirstChild("AntiStealAlertGui")
+    if not gui then
+        gui = Instance.new("ScreenGui")
+        gui.Name = "AntiStealAlertGui"
+        gui.ResetOnSpawn = false
+        gui.Parent = lp.PlayerGui
+    end
+
+    local frame = Instance.new("Frame", gui)
+    frame.Size = UDim2.new(0, 320, 0, 60)
+    frame.Position = UDim2.new(1, -330, 0, 50)
+    frame.BackgroundColor3 = Color3.fromRGB(0,0,0)
+    frame.BackgroundTransparency = 0.5
+    frame.BorderSizePixel = 0
+    frame.AnchorPoint = Vector2.new(0,0)
+
+    local text = Instance.new("TextLabel", frame)
+    text.Size = UDim2.new(1,-10,1,-10)
+    text.Position = UDim2.new(0,5,0,5)
+    text.BackgroundTransparency = 1
+    text.Font = Enum.Font.SourceSansBold
+    text.TextSize = 20
+    text.TextColor3 = Color3.fromRGB(255,50,50)
+    text.Text = "[Anti-Steal] "..msg
+
+    -- ลอยขึ้นและหาย
+    local tweenService = game:GetService("TweenService")
+    local goal = {Position = UDim2.new(1, -330, 0, 10), BackgroundTransparency=1, TextTransparency=1}
+    local tweenInfo = TweenInfo.new(3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+    local tween = tweenService:Create(frame, tweenInfo, goal)
+    tween:Play()
+    tween.Completed:Connect(function()
+        frame:Destroy()
+    end)
+end
+
+-- แทน showAlert ด้วย showAlertSmooth
+showAlert = showAlertSmooth
+
+-- ปรับ GUI หลักใหญ่ขึ้น + สีสวยขึ้น
+mainFrame.Size = UDim2.new(0,500,0,300)
+title.TextSize = 30
+
+-- Sidebar ปรับใหญ่ขึ้น
+sidebar.Size = UDim2.new(0,160,1,0)
+tabBtn1.TextSize = 22
+
+-- หน้าแท็บปรับใหญ่ขึ้น
+pageFrame.Size = UDim2.new(1,-160,1,0)
+pageLabel.TextSize = 26
+toggleBtn.Size = UDim2.new(0,160,0,60)
+toggleBtn.TextSize = 24
