@@ -1,0 +1,217 @@
+getgenv().NamelessLoaded=false -- use this if nameless admin didn't load
+loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/Nameless-Admin/main/Source.lua"))();
+
+
+
+-- 🌟 GUI ป้องกันโดนจับ เท่ๆ
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+-- สร้าง ScreenGui
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "AntiArrestGUI"
+ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+ScreenGui.ResetOnSpawn = false
+
+-- กรอบหลัก
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.Size = UDim2.new(0, 320, 0, 220)
+MainFrame.Position = UDim2.new(0.3, 0, 0.3, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+MainFrame.BorderSizePixel = 0
+
+-- เงา
+local UIScale = Instance.new("UIScale", MainFrame)
+UIScale.Scale = 1
+local UIStroke = Instance.new("UIStroke", MainFrame)
+UIStroke.Color = Color3.fromRGB(0, 255, 127)
+UIStroke.Thickness = 2
+local UICorner = Instance.new("UICorner", MainFrame)
+UICorner.CornerRadius = UDim.new(0, 12)
+
+-- ทำให้ลากได้
+local UserInputService = game:GetService("UserInputService")
+local dragging, dragInput, dragStart, startPos
+
+MainFrame.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or 
+	   input.UserInputType == Enum.UserInputType.Touch then
+		dragging = true
+		dragStart = input.Position
+		startPos = MainFrame.Position
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				dragging = false
+			end
+		end)
+	end
+end)
+
+MainFrame.InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement or 
+	   input.UserInputType == Enum.UserInputType.Touch then
+		dragInput = input
+	end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+	if input == dragInput and dragging then
+		local delta = input.Position - dragStart
+		MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X,
+			startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+	end
+end)
+
+-- ปุ่มซ่อน
+local HideButton = Instance.new("TextButton")
+HideButton.Parent = MainFrame
+HideButton.Size = UDim2.new(0, 60, 0, 30)
+HideButton.Position = UDim2.new(1, -70, 0, 10)
+HideButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+HideButton.Text = "ซ่อน"
+HideButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+HideButton.Font = Enum.Font.FredokaOne
+HideButton.TextSize = 18
+Instance.new("UICorner", HideButton).CornerRadius = UDim.new(0, 8)
+
+-- กรอบซ่อน/แสดง
+local ToggleFrame = Instance.new("Frame")
+ToggleFrame.Parent = ScreenGui
+ToggleFrame.Size = UDim2.new(0, 120, 0, 60)
+ToggleFrame.Position = UDim2.new(0.01, 0, 0.4, 0)
+ToggleFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+ToggleFrame.Visible = false
+Instance.new("UICorner", ToggleFrame).CornerRadius = UDim.new(0, 12)
+
+local ShowButton = Instance.new("TextButton")
+ShowButton.Parent = ToggleFrame
+ShowButton.Size = UDim2.new(1, -10, 1, -10)
+ShowButton.Position = UDim2.new(0, 5, 0, 5)
+ShowButton.BackgroundColor3 = Color3.fromRGB(50, 200, 100)
+ShowButton.Text = "แสดง GUI"
+ShowButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ShowButton.Font = Enum.Font.FredokaOne
+ShowButton.TextSize = 20
+Instance.new("UICorner", ShowButton).CornerRadius = UDim.new(0, 8)
+
+-- ระบบซ่อน/แสดง
+HideButton.MouseButton1Click:Connect(function()
+	MainFrame.Visible = false
+	ToggleFrame.Visible = true
+end)
+ShowButton.MouseButton1Click:Connect(function()
+	MainFrame.Visible = true
+	ToggleFrame.Visible = false
+end)
+-- ข้อความหัวข้อ
+local Title = Instance.new("TextLabel")
+Title.Parent = MainFrame
+Title.Size = UDim2.new(1, -20, 0, 40)
+Title.Position = UDim2.new(0, 10, 0, 10)
+Title.BackgroundTransparency = 1
+Title.Text = "ป้องกันโดนจับ🤑"
+Title.TextColor3 = Color3.fromRGB(0, 255, 127)
+Title.Font = Enum.Font.FredokaOne
+Title.TextSize = 24
+Title.TextScaled = true
+
+-- คำอธิบายวิธีใช้
+local InfoLabel = Instance.new("TextLabel")
+InfoLabel.Parent = MainFrame
+InfoLabel.Size = UDim2.new(1, -20, 0, 60)
+InfoLabel.Position = UDim2.new(0, 10, 0, 50)
+InfoLabel.BackgroundTransparency = 1
+InfoLabel.Text = "วิธีใช้ป้องกันจับ\n1) พิมพ์ \"anticframeteleport\" (ใน N/A)"
+InfoLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+InfoLabel.Font = Enum.Font.Gotham
+InfoLabel.TextSize = 16
+InfoLabel.TextWrapped = true
+InfoLabel.TextXAlignment = Enum.TextXAlignment.Left
+InfoLabel.TextYAlignment = Enum.TextYAlignment.Top
+
+-- ปุ่มอ้อโต้เอาของคืน
+local AutoButton = Instance.new("TextButton")
+AutoButton.Parent = MainFrame
+AutoButton.Size = UDim2.new(0, 140, 0, 35)
+AutoButton.Position = UDim2.new(0, 10, 0, 120)
+AutoButton.BackgroundColor3 = Color3.fromRGB(50, 200, 100)
+AutoButton.Text = "อ้อโต้เอาของคืน"
+AutoButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+AutoButton.Font = Enum.Font.FredokaOne
+AutoButton.TextSize = 18
+Instance.new("UICorner", AutoButton).CornerRadius = UDim.new(0, 8)
+
+-- Script อ้อโต้เอาของคืน
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local LocalPlayer = Players.LocalPlayer
+
+local Remote = ReplicatedStorage:WaitForChild("GetItemBack")
+
+local EnableGetItemBack = false
+local Mode = "Loop" -- หรือ "Connect"
+
+local function StartAutoGet()
+	EnableGetItemBack = true
+	if LocalPlayer:FindFirstChild("InJail") then
+		local InJail = LocalPlayer.InJail
+
+		if Mode == "Loop" then
+			task.spawn(function()
+				while EnableGetItemBack and task.wait(1) do
+					if InJail.Value == true then
+						Remote:FireServer()
+					end
+				end
+			end)
+		elseif Mode == "Connect" then
+			InJail:GetPropertyChangedSignal("Value"):Connect(function()
+				if EnableGetItemBack and InJail.Value == true then
+					Remote:FireServer()
+				end
+			end)
+		end
+	end
+end
+
+AutoButton.MouseButton1Click:Connect(function()
+	if not EnableGetItemBack then
+		StartAutoGet()
+		AutoButton.Text = "✅ ทำงานอยู่"
+		AutoButton.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+	else
+		EnableGetItemBack = false
+		AutoButton.Text = "อ้อโต้เอาของคืน"
+		AutoButton.BackgroundColor3 = Color3.fromRGB(50, 200, 100)
+	end
+end)
+-- ปุ่มคัดลอกคำสั่ง
+local CopyButton = Instance.new("TextButton")
+CopyButton.Parent = MainFrame
+CopyButton.Size = UDim2.new(0, 140, 0, 35)
+CopyButton.Position = UDim2.new(0, 10, 0, 170)
+CopyButton.BackgroundColor3 = Color3.fromRGB(100, 100, 220)
+CopyButton.Text = "คำสั่ง"
+CopyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+CopyButton.Font = Enum.Font.FredokaOne
+CopyButton.TextSize = 18
+Instance.new("UICorner", CopyButton).CornerRadius = UDim.new(0, 8)
+
+-- ทำงานตอนกดปุ่ม
+CopyButton.MouseButton1Click:Connect(function()
+	if setclipboard then
+		setclipboard("anticframeteleport")
+		CopyButton.Text = "✅ คัดลอกแล้ว!"
+		task.delay(2, function()
+			CopyButton.Text = "คำสั่ง"
+		end)
+	else
+		warn("setclipboard ใช้ไม่ได้ใน executor นี้")
+		CopyButton.Text = "❌ ใช้ไม่ได้"
+		task.delay(2, function()
+			CopyButton.Text = "คำสั่ง"
+		end)
+	end
+end)
