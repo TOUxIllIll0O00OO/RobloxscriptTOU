@@ -1,4 +1,3 @@
--- LocalScript
 local Players = game:GetService("Players")
 local lp = Players.LocalPlayer
 local fakeID = "ยังจะมาดูอีก😔"
@@ -77,8 +76,8 @@ gui.Name = "TOU_BOOMBOX_HUB"
 gui.ResetOnSpawn = false
 
 local mainFrame = Instance.new("Frame", gui)
-mainFrame.Size = UDim2.new(0,500,0,320)
-mainFrame.Position = UDim2.new(0,20,0.5,-160)
+mainFrame.Size = UDim2.new(0,500,0,360)
+mainFrame.Position = UDim2.new(0,20,0.5,-180)
 mainFrame.BackgroundColor3 = Color3.fromRGB(25,25,25)
 mainFrame.Active = true
 mainFrame.Draggable = true
@@ -129,16 +128,16 @@ end)
 local sidebar = Instance.new("Frame", mainFrame)
 sidebar.Size = UDim2.new(0,160,1,0)
 sidebar.Position = UDim2.new(0,0,0,0)
-sidebar.BackgroundColor3 = Color3.fromRGB(30,30,30)
+sidebar.BackgroundColor3 = Color3.fromRGB(35,35,35)
 
 -- ปุ่มแท็บ "ป้องกันขโมยเสียง"
 local tabBtn1 = Instance.new("TextButton", sidebar)
 tabBtn1.Size = UDim2.new(1,0,0,50)
 tabBtn1.Position = UDim2.new(0,0,0,60)
-tabBtn1.BackgroundColor3 = Color3.fromRGB(45,45,45)
+tabBtn1.BackgroundColor3 = Color3.fromRGB(55,55,55)
 tabBtn1.Text="ป้องกันขโมยเสียง"
 tabBtn1.TextColor3=Color3.fromRGB(255,255,255)
-tabBtn1.Font=Enum.Font.SourceSans
+tabBtn1.Font=Enum.Font.FredokaOne
 tabBtn1.TextScaled=true
 
 -- หน้าแท็บ
@@ -150,22 +149,22 @@ pageFrame.Visible=false
 
 -- Label หน้าแท็บ
 local pageLabel = Instance.new("TextLabel", pageFrame)
-pageLabel.Size = UDim2.new(0,250,0,50)
+pageLabel.Size = UDim2.new(0,300,0,50)
 pageLabel.Position = UDim2.new(0,20,0,20)
 pageLabel.BackgroundTransparency=1
-pageLabel.TextColor3=Color3.fromRGB(255,255,255)
+pageLabel.TextColor3=Color3.fromRGB(0,255,150)
 pageLabel.Text="ป้องกันขโมยเสียง"
-pageLabel.Font=Enum.Font.SourceSansBold
-pageLabel.TextSize=22
+pageLabel.Font=Enum.Font.FredokaOne
+pageLabel.TextSize=26
 
 -- ปุ่มเปิด/ปิด Anti-Steal
 local toggleBtn = Instance.new("TextButton", pageFrame)
-toggleBtn.Size=UDim2.new(0,160,0,60)
+toggleBtn.Size=UDim2.new(0,180,0,60)
 toggleBtn.Position=UDim2.new(0,20,0,90)
 toggleBtn.BackgroundColor3=Color3.fromRGB(200,50,50) -- ปิด
 toggleBtn.TextColor3=Color3.fromRGB(255,255,255)
 toggleBtn.Text="ปิดอยู่"
-toggleBtn.Font=Enum.Font.SourceSansBold
+toggleBtn.Font=Enum.Font.FredokaOne
 toggleBtn.TextScaled=true
 
 -- Event เปิดหน้าแท็บ
@@ -180,27 +179,29 @@ toggleBtn.MouseButton1Click:Connect(function()
         toggleBtn.BackgroundColor3=Color3.fromRGB(50,200,100) -- เขียว
         toggleBtn.Text="เปิดอยู่"
         hookAntiSteal()
+        showAlert("ป้องกันเสียงเปิดแล้ว!")
     else
         toggleBtn.BackgroundColor3=Color3.fromRGB(200,50,50) -- แดง
         toggleBtn.Text="ปิดอยู่"
+        showAlert("ป้องกันเสียงปิดแล้ว!")
     end
 end)
--- ปรับขนาด GUI หลักใหญ่ขึ้น
-mainFrame.Size = UDim2.new(0,520,0,360)
-title.TextSize = 30
+-- ปรับขนาด GUI ให้ใหญ่ขึ้นและอ่านง่าย
+mainFrame.Size = UDim2.new(0,520,0,380)
+title.TextSize = 32
 
 -- Sidebar ปรับใหญ่
 sidebar.Size = UDim2.new(0,160,1,0)
-tabBtn1.TextSize = 22
+tabBtn1.TextSize = 24
 
 -- หน้าแท็บปรับใหญ่
 pageFrame.Size = UDim2.new(1,-160,1,0)
-pageLabel.TextSize = 26
-toggleBtn.Size = UDim2.new(0,160,0,60)
+pageLabel.TextSize = 28
+toggleBtn.Size = UDim2.new(0,180,0,60)
 toggleBtn.TextSize = 24
 
--- ฟังก์ชันแจ้งเตือนลอย Smooth (ปรับให้สวยขึ้น)
-local function showAlertSmooth(msg)
+-- ปรับฟังก์ชันแจ้งเตือนลอย Smooth ให้สวยขึ้น
+function showAlert(msg)
     local gui = lp.PlayerGui:FindFirstChild("AntiStealAlertGui")
     if not gui then
         gui = Instance.new("ScreenGui")
@@ -220,9 +221,9 @@ local function showAlertSmooth(msg)
     text.Size = UDim2.new(1,-10,1,-10)
     text.Position = UDim2.new(0,5,0,5)
     text.BackgroundTransparency = 1
-    text.Font = Enum.Font.SourceSansBold
+    text.Font = Enum.Font.FredokaOne
     text.TextSize = 20
-    text.TextColor3 = Color3.fromRGB(255,50,50)
+    text.TextColor3 = Color3.fromRGB(0,255,150)
     text.Text = "[Anti-Steal] "..msg
 
     local tweenService = game:GetService("TweenService")
@@ -235,9 +236,9 @@ local function showAlertSmooth(msg)
     end)
 end
 
--- แทนฟังก์ชันแจ้งเตือนเดิม
-showAlert = showAlertSmooth
--- ฟังก์ชัน maintainAntiSteal ให้ Hook Anti-Steal ทำงานตลอด
+-- แจ้งเตือนตอนสคริปต์รัน
+showAlert("TOU BOOMBOX HUB พร้อมใช้งาน!")
+-- ฟังก์ชัน maintainAntiSteal ให้ Hook Anti-Steal ทำงานต่อเนื่อง
 local function maintainAntiSteal()
     task.spawn(function()
         while true do
@@ -274,4 +275,4 @@ if antiStealEnabled then
 end
 
 -- แจ้งเตือนตอนสคริปต์รัน
-showAlert("TOU BOOMBOX HUB พร้อมใช้งาน!")
+showAlert("Anti-Steal พร้อมใช้งาน!")
