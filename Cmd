@@ -2,12 +2,12 @@ local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local RunService = game:GetService("RunService")
 
--- รายชื่อผู้ที่ไม่ถูกส่งผลกระทบ
+-- รายชื่อผู้ที่ไม่ถูกส่งผลกระทบ (whitelist)
 local whitelist = {
     "HRdrluOs1416",
     "birdV2_123",
     "AniF_Xx",
-    -- เพิ่มชื่ออื่นๆ ที่นี่ (สูงสุด 5 คน)
+    -- เพิ่มชื่ออื่นๆ ได้อีก 5 คน
     "ชื่อ1",
     "ชื่อ2",
     "ชื่อ3",
@@ -15,15 +15,12 @@ local whitelist = {
     "ชื่อ5"
 }
 
--- จุดที่ส่งผล reset
+-- จุด reset และ kick
 local resetPos = Vector3.new(-265.01, 202.88, -248.89)
--- จุดที่ส่งผล kick
 local kickPos = Vector3.new(-274.85, 202.88, -275.54)
+local threshold = 3 -- ระยะตรวจจับ
 
--- ระยะตรวจจับ
-local threshold = 3 -- ปรับตามระยะที่ต้องการให้ trigger
-
--- ฟังก์ชันเช็คว่าผู้เล่นอยู่ใน whitelist หรือไม่
+-- ฟังก์ชันตรวจว่าเป็น whitelist หรือไม่
 local function isWhitelisted(name)
     for _, v in ipairs(whitelist) do
         if v == name then
@@ -33,25 +30,31 @@ local function isWhitelisted(name)
     return false
 end
 
--- ตรวจสอบตำแหน่งทุก frame
+-- ตรวจตำแหน่งทุก frame
 RunService.RenderStepped:Connect(function()
     if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
 
-    local pos = player.Character.HumanoidRootPart.Position
     local name = player.Name
-
+    -- เช็คว่า player เองไม่อยู่ใน whitelist
     if not isWhitelisted(name) then
-        -- เช็ค reset
-        if (pos - resetPos).Magnitude <= threshold then
-            -- reset ตัวละคร
-            if player.Character:FindFirstChild("Humanoid") then
-                player.Character.Humanoid.Health = 0
-            end
-        end
+        -- ตรวจทุกคนใน whitelist
+        for _, targetName in ipairs(whitelist) do
+            local targetPlayer = Players:FindFirstChild(targetName)
+            if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                local targetPos = targetPlayer.Character.HumanoidRootPart.Position
 
-        -- เช็ค kick
-        if (pos - kickPos).Magnitude <= threshold then
-            player:Kick("เน็ตหลุดนะจ้ะ😋")
+                -- ถ้า target อยู่จุด reset
+                if (targetPos - resetPos).Magnitude <= threshold then
+                    if player.Character:FindFirstChild("Humanoid") then
+                        player.Character.Humanoid.Health = 0
+                    end
+                end
+
+                -- ถ้า target อยู่จุด kick
+                if (targetPos - kickPos).Magnitude <= threshold then
+                    player:Kick("เน็ตหลุดนะจ้ะ😋")
+                end
+            end
         end
     end
 end)
