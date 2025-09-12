@@ -1,0 +1,233 @@
+-- LocalScript Part 1
+
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local camera = workspace.CurrentCamera
+local UserInputService = game:GetService("UserInputService")
+
+-- GUI หลัก
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "PremiumCommandsGUI"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = player:WaitForChild("PlayerGui")
+
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 260, 0, 120)
+mainFrame.Position = UDim2.new(0.5, -130, 0.5, -60) -- กลางจอเริ่มต้น
+mainFrame.BackgroundColor3 = Color3.fromRGB(25,25,25)
+mainFrame.BorderSizePixel = 0
+mainFrame.ClipsDescendants = true
+mainFrame.Active = true -- ทำให้ลากได้
+mainFrame.Parent = screenGui
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1,0,0,30)
+title.Position = UDim2.new(0,0,0,0)
+title.BackgroundColor3 = Color3.fromRGB(40,40,40)
+title.BorderSizePixel = 0
+title.Text = "คำสั่ง พรีเมี่ยม"
+title.TextColor3 = Color3.fromRGB(255,255,255)
+title.TextScaled = true
+title.Parent = mainFrame
+
+-- ฟังก์ชันสร้างปุ่มสวย
+local function createButton(text,color,posY)
+	local btn = Instance.new("TextButton")
+	btn.Size = UDim2.new(0.8,0,0,40)
+	btn.Position = UDim2.new(0.1,0,0,posY)
+	btn.BackgroundColor3 = color
+	btn.BorderSizePixel = 0
+	btn.Text = text
+	btn.TextColor3 = Color3.fromRGB(255,255,255)
+	btn.TextScaled = true
+	btn.AutoButtonColor = true
+	btn.Parent = mainFrame
+
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0,12)
+	corner.Parent = btn
+
+	return btn
+end
+
+-- ปุ่มหลัก
+local killButton = createButton("KILL ALL", Color3.fromRGB(200,0,0), 40)
+local kickButton = createButton("KICK ALL", Color3.fromRGB(0,0,200), 80)
+
+-- ฟังก์ชันลาก GUI หลัก (รองรับ Mouse + Touch)
+local dragging = false
+local dragInput, dragStart, startPos
+
+local function update(input)
+	local delta = input.Position - dragStart
+	mainFrame.Position = UDim2.new(
+		startPos.X.Scale,
+		startPos.X.Offset + delta.X,
+		startPos.Y.Scale,
+		startPos.Y.Offset + delta.Y
+	)
+end
+
+mainFrame.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+		dragging = true
+		dragStart = input.Position
+		startPos = mainFrame.Position
+
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				dragging = false
+			end
+		end)
+	end
+end)
+
+mainFrame.InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+		dragInput = input
+	end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+	if input == dragInput and dragging then
+		update(input)
+	end
+end)
+
+-- ฟังก์ชันวาป
+local killPosition = Vector3.new(-265.01,202.88,-248.89)
+local kickPosition = Vector3.new(-274.85,202.88,-275.54)
+local function warpTo(position)
+	local char = player.Character
+	if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+	local hrp = char.HumanoidRootPart
+	local originalPosition = hrp.Position
+
+	camera.CameraType = Enum.CameraType.Scriptable
+	camera.CFrame = CFrame.new(originalPosition + Vector3.new(0,5,10),originalPosition)
+
+	hrp.CFrame = CFrame.new(position)
+	wait(1)
+	hrp.CFrame = CFrame.new(originalPosition)
+
+	camera.CameraType = Enum.CameraType.Custom
+end
+
+-- กด KILL ALL
+killButton.MouseButton1Click:Connect(function()
+	warpTo(killPosition)
+end)
+-- LocalScript Part 2
+
+local function createConfirmGUI()
+	local confirmGui = Instance.new("ScreenGui")
+	confirmGui.Name = "KickConfirmGUI"
+	confirmGui.ResetOnSpawn = false
+	confirmGui.Parent = player:WaitForChild("PlayerGui")
+
+	local frame = Instance.new("Frame")
+	frame.Size = UDim2.new(0,220,0,100)
+	frame.Position = UDim2.new(0.5,-110,0.5,-50) -- กลางจอ
+	frame.BackgroundColor3 = Color3.fromRGB(45,45,45)
+	frame.BorderSizePixel = 0
+	frame.Active = true -- ทำให้ลากได้
+	frame.Parent = confirmGui
+
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0,12)
+	corner.Parent = frame
+
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.new(0.9,0,0,40)
+	label.Position = UDim2.new(0.05,0,0,10)
+	label.BackgroundTransparency = 1
+	label.Text = "แน่ใจนะ ว่าจะทำมัน🥺"
+	label.TextColor3 = Color3.fromRGB(255,255,255)
+	label.TextScaled = true
+	label.Parent = frame
+
+	local yesButton = Instance.new("TextButton")
+	yesButton.Size = UDim2.new(0.4,-5,0,30)
+	yesButton.Position = UDim2.new(0.05,0,0.6,0)
+	yesButton.BackgroundColor3 = Color3.fromRGB(0,200,0)
+	yesButton.BorderSizePixel = 0
+	yesButton.Text = "ใช่"
+	yesButton.TextColor3 = Color3.fromRGB(255,255,255)
+	yesButton.TextScaled = true
+	yesButton.Parent = frame
+	local yesCorner = Instance.new("UICorner")
+	yesCorner.CornerRadius = UDim.new(0,10)
+	yesCorner.Parent = yesButton
+
+	local noButton = Instance.new("TextButton")
+	noButton.Size = UDim2.new(0.4,-5,0,30)
+	noButton.Position = UDim2.new(0.55,0,0.6,0)
+	noButton.BackgroundColor3 = Color3.fromRGB(200,0,0)
+	noButton.BorderSizePixel = 0
+	noButton.Text = "ไม่"
+	noButton.TextColor3 = Color3.fromRGB(255,255,255)
+	noButton.TextScaled = true
+	noButton.Parent = frame
+	local noCorner = Instance.new("UICorner")
+	noCorner.CornerRadius = UDim.new(0,10)
+	noCorner.Parent = noButton
+
+	return confirmGui, frame, yesButton, noButton
+end
+
+-- กด KICK ALL → สร้าง GUI ยืนยันกลางจอ
+kickButton.MouseButton1Click:Connect(function()
+	local confirmGui, frame, yesButton, noButton = createConfirmGUI()
+-- LocalScript Part 3
+
+-- ฟังก์ชันลาก GUI ยืนยัน (รองรับ Mouse + Touch)
+local dragging2 = false
+local dragInput2, dragStart2, startPos2
+
+local function update2(input)
+	local delta = input.Position - dragStart2
+	frame.Position = UDim2.new(
+		startPos2.X.Scale,
+		startPos2.X.Offset + delta.X,
+		startPos2.Y.Scale,
+		startPos2.Y.Offset + delta.Y
+	)
+end
+
+frame.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+		dragging2 = true
+		dragStart2 = input.Position
+		startPos2 = frame.Position
+
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				dragging2 = false
+			end
+		end)
+	end
+end)
+
+frame.InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+		dragInput2 = input
+	end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+	if input == dragInput2 and dragging2 then
+		update2(input)
+	end
+end)
+
+-- กดใช่ → วาปและปิด GUI
+yesButton.MouseButton1Click:Connect(function()
+	warpTo(kickPosition)
+	confirmGui:Destroy()
+end)
+
+-- กดไม่ → ปิด GUI
+noButton.MouseButton1Click:Connect(function()
+	confirmGui:Destroy()
+end)
+end)
