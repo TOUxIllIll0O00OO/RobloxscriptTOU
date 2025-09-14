@@ -148,3 +148,35 @@ end
 
 -- กดปุ่มยิง
 FireButton.MouseButton1Click:Connect(FireWeapon)
+local NormalSpeed = 16
+local SkateSpeed = 45
+
+SkateButton.MouseButton1Click:Connect(function()
+    local humanoid = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid")
+    if not humanoid then return end
+
+    SkateActive = not SkateActive
+
+    if SkateActive then
+        -- ปิดปุ่มยิงชั่วคราว
+        EnabledFire = false
+        FireButton.Text = "🚫"
+
+        -- เพิ่มความเร็ว
+        humanoid.WalkSpeed = SkateSpeed
+
+        -- เล่นอนิเมชั่น Skate
+        SkateAnim:Play()
+        WalkAnim:Stop()
+        IdleAnim:Stop()
+    else
+        -- กลับสู่ปกติ
+        EnabledFire = true
+        FireButton.Text = "ยิง"
+
+        humanoid.WalkSpeed = NormalSpeed
+
+        -- หยุด Skate animation
+        SkateAnim:Stop()
+    end
+end)
