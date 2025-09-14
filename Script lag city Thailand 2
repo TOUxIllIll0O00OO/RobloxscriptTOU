@@ -1,0 +1,82 @@
+local player = game:GetService("Players").LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+
+-- UI สร้าง
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "FirefliesSpamUI"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = player:WaitForChild("PlayerGui")
+
+local button = Instance.new("TextButton")
+button.Size = UDim2.new(0, 120, 0, 50)
+button.Position = UDim2.new(0, 10, 0, 10)
+button.Text = "เริ่มยิง Fireflies"
+button.Parent = ScreenGui
+button.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
+button.TextColor3 = Color3.new(1, 1, 1)
+button.Font = Enum.Font.SourceSansBold
+button.TextScaled = true
+
+-- ตัวแปรเปิด/ปิด
+local running = false
+
+-- Loop
+task.spawn(function()
+    while true do
+        if running then
+            local remote = character:FindFirstChild("Fireflies") and character.Fireflies:FindFirstChild("RemoteEvent")
+            if remote then
+                remote:FireServer()
+            end
+        end
+        task.wait(0.001)
+    end
+end)
+
+-- ปุ่มสลับ เปิด/ปิด
+button.MouseButton1Click:Connect(function()
+    running = not running
+    button.Text = running and "หยุดยิง Fireflies" or "เริ่มยิง Fireflies"
+    button.BackgroundColor3 = running and Color3.new(1, 0.2, 0.2) or Color3.new(0.2, 0.2, 0.2)
+end)
+
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+-- 🖼 ใส่ Asset ID ของรูปคุณที่อัปโหลดแล้ว
+local imageId = "rbxassetid://ใส่ไอดีของคุณตรงนี้" -- ตัวอย่าง: "rbxassetid://15234213421"
+
+-- สร้างหน้าจอ UI
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "ScriptAnnouncement"
+screenGui.Parent = player:WaitForChild("PlayerGui")
+screenGui.IgnoreGuiInset = true
+screenGui.ResetOnSpawn = false
+
+-- สร้างรูปภาพเต็มจอ
+local imageLabel = Instance.new("ImageLabel")
+imageLabel.Parent = screenGui
+imageLabel.Size = UDim2.new(1, 0, 1, 0)
+imageLabel.Position = UDim2.new(0, 0, 0, 0)
+imageLabel.BackgroundTransparency = 1
+imageLabel.Image = imageId
+imageLabel.ImageTransparency = 0.1
+
+-- สร้างข้อความกลางจอ
+local textLabel = Instance.new("TextLabel")
+textLabel.Parent = screenGui
+textLabel.Size = UDim2.new(1, 0, 0.2, 0)
+textLabel.Position = UDim2.new(0, 0, 0.4, 0)
+textLabel.BackgroundTransparency = 1
+textLabel.Text = "script by:TOUx1"
+textLabel.TextColor3 = Color3.new(1, 1, 1)
+textLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
+textLabel.TextStrokeTransparency = 0.5
+textLabel.Font = Enum.Font.GothamBlack
+textLabel.TextScaled = true
+
+-- แสดงนาน 5 วินาที
+task.wait(5)
+
+-- ลบ UI
+screenGui:Destroy()
