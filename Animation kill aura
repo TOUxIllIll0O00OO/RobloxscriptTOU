@@ -1,69 +1,63 @@
---// LocalScript GUI + Animation Controller
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local RunService = game:GetService("RunService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 -- ตัวแปรควบคุม
-local EnabledFire = true
-local SkateActive = false
 local FireCooldown = false
-local CurrentSpeed = 16
+local PlayingShoot = false
+local SkateActive = false
+local EnabledFire = true
 
--- GUI หลัก
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "AnimationGUI"
-ScreenGui.Parent = game.CoreGui
+-- สร้าง GUI ปุ่มยิง
+local FireGui = Instance.new("ScreenGui")
+FireGui.Name = "FireGui"
+FireGui.Parent = game.CoreGui
 
-local Frame = Instance.new("Frame")
-Frame.Size = UDim2.new(0, 250, 0, 200)
-Frame.Position = UDim2.new(0.4,0,0.4,0)
-Frame.BackgroundColor3 = Color3.fromRGB(30,30,30)
-Frame.Active = true
-Frame.Draggable = true
-Frame.Parent = ScreenGui
-
-local UICorner = Instance.new("UICorner", Frame)
-UICorner.CornerRadius = UDim.new(0,8)
-
--- ปุ่มยิง
 local FireButton = Instance.new("TextButton")
-FireButton.Size = UDim2.new(0, 80, 0, 40)
-FireButton.Position = UDim2.new(0, 10, 0, 10)
+FireButton.Size = UDim2.new(0, 100, 0, 100)
+FireButton.Position = UDim2.new(0.8, 0, 0.7, 0)
 FireButton.Text = "ยิง"
-FireButton.BackgroundColor3 = Color3.fromRGB(70,70,70)
-FireButton.TextColor3 = Color3.fromRGB(255,255,255)
 FireButton.Font = Enum.Font.SourceSansBold
-FireButton.TextSize = 18
-FireButton.Parent = Frame
-local FireUICorner = Instance.new("UICorner", FireButton)
-FireUICorner.CornerRadius = UDim.new(0,20)
+FireButton.TextSize = 30
+FireButton.BackgroundColor3 = Color3.fromRGB(200,50,50)
+FireButton.TextColor3 = Color3.fromRGB(255,255,255)
+FireButton.Parent = FireGui
 
--- ปุ่ม Skate
+local UICorner1 = Instance.new("UICorner", FireButton)
+UICorner1.CornerRadius = UDim.new(0,50)
+
+-- สร้าง GUI ปุ่ม Skate 🛹
+local SkateGui = Instance.new("ScreenGui")
+SkateGui.Name = "SkateGui"
+SkateGui.Parent = game.CoreGui
+
 local SkateButton = Instance.new("TextButton")
-SkateButton.Size = UDim2.new(0, 80, 0, 40)
-SkateButton.Position = UDim2.new(0, 100, 0, 10)
+SkateButton.Size = UDim2.new(0, 100, 0, 100)
+SkateButton.Position = UDim2.new(0.6, 0, 0.7, 0)
 SkateButton.Text = "🛹"
-SkateButton.BackgroundColor3 = Color3.fromRGB(70,30,70)
-SkateButton.TextColor3 = Color3.fromRGB(255,255,255)
 SkateButton.Font = Enum.Font.SourceSansBold
-SkateButton.TextSize = 18
-SkateButton.Parent = Frame
-local SkateUICorner = Instance.new("UICorner", SkateButton)
-SkateUICorner.CornerRadius = UDim.new(0,20)
+SkateButton.TextSize = 30
+SkateButton.BackgroundColor3 = Color3.fromRGB(50,50,200)
+SkateButton.TextColor3 = Color3.fromRGB(255,255,255)
+SkateButton.Parent = SkateGui
 
--- ช่องแจ้งข้อความกลางจอ
+local UICorner2 = Instance.new("UICorner", SkateButton)
+UICorner2.CornerRadius = UDim.new(0,50)
+
+-- ข้อความกลางจอ
+local CenterMsgGui = Instance.new("ScreenGui")
+CenterMsgGui.Parent = game.CoreGui
 local CenterMsg = Instance.new("TextLabel")
-CenterMsg.Size = UDim2.new(0, 300, 0, 50)
-CenterMsg.Position = UDim2.new(0.5, -150, 0.3, -25)
+CenterMsg.Size = UDim2.new(0,400,0,50)
+CenterMsg.Position = UDim2.new(0.5,-200,0.4,0)
+CenterMsg.Text = ""
+CenterMsg.TextColor3 = Color3.fromRGB(255,255,255)
 CenterMsg.BackgroundTransparency = 0.5
 CenterMsg.BackgroundColor3 = Color3.fromRGB(0,0,0)
-CenterMsg.TextColor3 = Color3.fromRGB(255,0,0)
 CenterMsg.Font = Enum.Font.SourceSansBold
-CenterMsg.TextSize = 25
-CenterMsg.Text = ""
+CenterMsg.TextScaled = true
 CenterMsg.Visible = false
-CenterMsg.Parent = ScreenGui
+CenterMsg.Parent = CenterMsgGui
 -- Animation IDs
 local AnimWalkId = 133669151185294
 local AnimShootId = 121573002971812
@@ -83,11 +77,11 @@ local IdleAnim = loadAnim(AnimIdleId)
 local SkateAnim = loadAnim(AnimSkateId)
 
 -- ตัวแปรควบคุมสถานะ
-local PlayingShoot = false
+PlayingShoot = false
 
 -- ฟังก์ชันเล่นเดิน/ยืน
 local function UpdateMovementAnimation()
-    if SkateActive then return end -- ถ้า Skate ไม่เล่น Walk/Idle
+    if SkateActive or PlayingShoot then return end -- ถ้า Skate หรือยิงอยู่ ไม่เล่น Walk/Idle
     local humanoid = LocalPlayer.Character:FindFirstChild("Humanoid")
     if not humanoid then return end
     local speed = humanoid.MoveDirection.Magnitude
@@ -108,8 +102,8 @@ end
 RunService.Heartbeat:Connect(function()
     UpdateMovementAnimation()
 end)
--- ฟังก์ชันแสดงข้อความกลางจอ
-local function ShowCenterMsg(text, duration)
+-- ฟังก์ชันโชว์ข้อความกลางจอ
+local function showCenterMsg(text,duration)
     CenterMsg.Text = text
     CenterMsg.Visible = true
     task.delay(duration or 1, function()
@@ -117,52 +111,40 @@ local function ShowCenterMsg(text, duration)
     end)
 end
 
--- ยิง Animation + คูลดาวน์
-FireButton.MouseButton1Click:Connect(function()
-    if not EnabledFire then
-        ShowCenterMsg("ไม่สามารถยิงได้ 🚫", 1.5)
+-- ฟังก์ชันยิง (เรียก Kill Aura 0.5 วิ)
+local function FireWeapon()
+    if FireCooldown then return end
+    if SkateActive then
+        showCenterMsg("ไม่สามารถยิงได้🚫",1)
         return
     end
-    if FireCooldown then return end
     FireCooldown = true
     PlayingShoot = true
-    -- เล่น Animation ยิง
+
+    -- หยุดเดิน/Idle
     WalkAnim:Stop()
     IdleAnim:Stop()
+
+    -- เล่นอนิเมชั่นยิง
     ShootAnim:Play()
-    -- เวลา Animation ยิง 0.5 วิ
-    task.delay(0.5, function()
-        ShootAnim:Stop()
-        PlayingShoot = false
-    end)
-    -- คูลดาวน์ปุ่ม 1 วิ
-    task.delay(1, function()
-        FireCooldown = false
-    end)
-end)
 
--- ปุ่ม Skate 🛹
-SkateButton.MouseButton1Click:Connect(function()
-    SkateActive = not SkateActive
-    local humanoid = LocalPlayer.Character:FindFirstChild("Humanoid")
-    if not humanoid then return end
+    -- Kill Aura รัว 0.5 วินาที
+    local targetPlayer = nil
+    task.spawn(function()
+        local startTime = tick()
+        while tick() - startTime < 0.5 do
+            -- ใส่โค้ด Kill Aura ที่คุณมีที่นี่
+            -- ตัวอย่างเรียก ShootAdvanced(targetPlayer) หรือ WarpAndShootAdvanced(targetPlayer)
+            -- pcall(ShootAdvanced,targetPlayer) -- ตัวอย่าง
+            task.wait(0.1)
+        end
+    end)
 
-    if SkateActive then
-        -- ปิดการยิงชั่วคราว
-        EnabledFire = false
-        FireButton.Text = "🚫"
-        humanoid.WalkSpeed = 45
-        -- เล่น Skate Animation
-        WalkAnim:Stop()
-        IdleAnim:Stop()
-        ShootAnim:Stop()
-        SkateAnim:Play()
-    else
-        -- เปิดยิงได้อีกครั้ง
-        EnabledFire = true
-        FireButton.Text = "ยิง"
-        humanoid.WalkSpeed = 16
-        SkateAnim:Stop()
-        UpdateMovementAnimation()
-    end
-end)
+    -- รอจนยิงจบ
+    ShootAnim.Stopped:Wait()
+    PlayingShoot = false
+    FireCooldown = false
+end
+
+-- กดปุ่มยิง
+FireButton.MouseButton1Click:Connect(FireWeapon)
