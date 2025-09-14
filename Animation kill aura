@@ -1,17 +1,23 @@
---// LocalScript รวมทุกอย่าง
+--// LocalScript GUI + Animation Controller
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
--- UI หลัก
+-- ตัวแปรควบคุม
+local EnabledFire = true
+local SkateActive = false
+local FireCooldown = false
+local CurrentSpeed = 16
+
+-- GUI หลัก
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "ไออ่อนGOOO22446"
+ScreenGui.Name = "AnimationGUI"
 ScreenGui.Parent = game.CoreGui
 
 local Frame = Instance.new("Frame")
-Frame.Size = UDim2.new(0, 250, 0, 420)
-Frame.Position = UDim2.new(0.4, 0, 0.4, 0)
+Frame.Size = UDim2.new(0, 250, 0, 200)
+Frame.Position = UDim2.new(0.4,0,0.4,0)
 Frame.BackgroundColor3 = Color3.fromRGB(30,30,30)
 Frame.Active = true
 Frame.Draggable = true
@@ -20,492 +26,143 @@ Frame.Parent = ScreenGui
 local UICorner = Instance.new("UICorner", Frame)
 UICorner.CornerRadius = UDim.new(0,8)
 
--- ช่องกรอกชื่อ
-local NameBox = Instance.new("TextBox")
-NameBox.Size = UDim2.new(0, 230, 0, 40)
-NameBox.Position = UDim2.new(0, 10, 0, 10)
-NameBox.PlaceholderText = "กรอกชื่อผู้เล่น..."
-NameBox.BackgroundColor3 = Color3.fromRGB(50,50,50)
-NameBox.TextColor3 = Color3.fromRGB(255,255,255)
-NameBox.Parent = Frame
-
--- ปุ่มเปิด/ปิด
-local ToggleButton = Instance.new("TextButton")
-ToggleButton.Size = UDim2.new(0, 230, 0, 40)
-ToggleButton.Position = UDim2.new(0, 10, 0, 60)
-ToggleButton.Text = "เปิด"
-ToggleButton.BackgroundColor3 = Color3.fromRGB(70,70,70)
-ToggleButton.TextColor3 = Color3.fromRGB(255,255,255)
-ToggleButton.Font = Enum.Font.SourceSansBold
-ToggleButton.TextSize = 20
-ToggleButton.Parent = Frame
-
--- ปุ่มเลือกเล็ง
-local AimPartButton = Instance.new("TextButton")
-AimPartButton.Size = UDim2.new(0, 230, 0, 40)
-AimPartButton.Position = UDim2.new(0, 10, 0, 110)
-AimPartButton.Text = "เล็ง: Head"
-AimPartButton.BackgroundColor3 = Color3.fromRGB(100,70,70)
-AimPartButton.TextColor3 = Color3.fromRGB(255,255,255)
-AimPartButton.Font = Enum.Font.SourceSansBold
-AimPartButton.TextSize = 20
-AimPartButton.Parent = Frame
-
--- ช่องปรับ BulletSpeed
-local SpeedBox = Instance.new("TextBox")
-SpeedBox.Size = UDim2.new(0, 230, 0, 40)
-SpeedBox.Position = UDim2.new(0, 10, 0, 160)
-SpeedBox.PlaceholderText = "BulletSpeed (studs/sec)"
-SpeedBox.Text = "300"
-SpeedBox.BackgroundColor3 = Color3.fromRGB(50,50,50)
-SpeedBox.TextColor3 = Color3.fromRGB(255,255,255)
-SpeedBox.Parent = Frame
-
--- ปุ่ม Kill Aura
-local KillAuraButton = Instance.new("TextButton")
-KillAuraButton.Size = UDim2.new(0, 230, 0, 40)
-KillAuraButton.Position = UDim2.new(0, 10, 0, 210)
-KillAuraButton.Text = "Kill Aura"
-KillAuraButton.BackgroundColor3 = Color3.fromRGB(70,30,30)
-KillAuraButton.TextColor3 = Color3.fromRGB(255,255,255)
-KillAuraButton.Font = Enum.Font.SourceSansBold
-KillAuraButton.TextSize = 20
-KillAuraButton.Parent = Frame
-
--- ช่องปรับ Auto Off Time สำหรับ Kill Aura
-local AutoOffBox = Instance.new("TextBox")
-AutoOffBox.Size = UDim2.new(0, 230, 0, 40)
-AutoOffBox.Position = UDim2.new(0, 10, 0, 260)
-AutoOffBox.PlaceholderText = "Auto Off Time (seconds)"
-AutoOffBox.Text = "5"
-AutoOffBox.BackgroundColor3 = Color3.fromRGB(50,50,50)
-AutoOffBox.TextColor3 = Color3.fromRGB(255,255,255)
-AutoOffBox.Parent = Frame
-
--- ปุ่ม Dupe Gun
-local DupeGunButton = Instance.new("TextButton")
-DupeGunButton.Size = UDim2.new(0, 230, 0, 40)
-DupeGunButton.Position = UDim2.new(0, 10, 0, 310)
-DupeGunButton.Text = "Dupe Gun"
-DupeGunButton.BackgroundColor3 = Color3.fromRGB(30,70,30)
-DupeGunButton.TextColor3 = Color3.fromRGB(255,255,255)
-DupeGunButton.Font = Enum.Font.SourceSansBold
-DupeGunButton.TextSize = 20
-DupeGunButton.Parent = Frame
-
 -- ปุ่มยิง
 local FireButton = Instance.new("TextButton")
-FireButton.Size = UDim2.new(0,100,0,100)
-FireButton.Position = UDim2.new(0.55,0,0.75,0)
+FireButton.Size = UDim2.new(0, 80, 0, 40)
+FireButton.Position = UDim2.new(0, 10, 0, 10)
 FireButton.Text = "ยิง"
-FireButton.BackgroundColor3 = Color3.fromRGB(200,50,50)
+FireButton.BackgroundColor3 = Color3.fromRGB(70,70,70)
 FireButton.TextColor3 = Color3.fromRGB(255,255,255)
 FireButton.Font = Enum.Font.SourceSansBold
-FireButton.TextSize = 28
-FireButton.Active = true
-FireButton.Draggable = true
-FireButton.Parent = ScreenGui
+FireButton.TextSize = 18
+FireButton.Parent = Frame
+local FireUICorner = Instance.new("UICorner", FireButton)
+FireUICorner.CornerRadius = UDim.new(0,20)
 
-local fireCorner = Instance.new("UICorner")
-fireCorner.CornerRadius = UDim.new(1,0)
-fireCorner.Parent = FireButton
-
--- ปุ่มซ่อน/แสดง UI
-local MinimizeButton = Instance.new("TextButton")
-MinimizeButton.Size = UDim2.new(0, 100, 0, 40)
-MinimizeButton.Position = UDim2.new(0.9, 0, 0.05, 0)
-MinimizeButton.Text = "ซ่อน UI"
-MinimizeButton.BackgroundColor3 = Color3.fromRGB(30,30,30)
-MinimizeButton.TextColor3 = Color3.fromRGB(255,255,255)
-MinimizeButton.Font = Enum.Font.SourceSansBold
-MinimizeButton.TextSize = 18
-MinimizeButton.Active = true
-MinimizeButton.Draggable = true
-MinimizeButton.Parent = ScreenGui
-
-local MiniUICorner = Instance.new("UICorner", MinimizeButton)
-MiniUICorner.CornerRadius = UDim.new(0,8)
-
--- ตัวแปร
-local Enabled = false
-local KillAuraEnabled = false
-local loopConnection
-local killAuraConnection
-local AimPart = "Head"
-local bulletSpeed = 300
-local spamCount = 3
-local targetPlayer = nil
-local canShoot = true
-local isShooting = false
-local isSkate = false
-
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-local humanoid = character:WaitForChild("Humanoid")
-local Animator = humanoid:WaitForChild("Animator")
-
--- โหลดอนิเมชั่น
-local walkAnim = Instance.new("Animation")
-walkAnim.AnimationId = "rbxassetid://133669151185294" -- เดิน
-local walkTrack = Animator:LoadAnimation(walkAnim)
-
-local idleAnim = Instance.new("Animation")
-idleAnim.AnimationId = "rbxassetid://101810746304426" -- ยืน
-local idleTrack = Animator:LoadAnimation(idleAnim)
-
-local shootAnim = Instance.new("Animation")
-shootAnim.AnimationId = "rbxassetid://121573002971812" -- ยิง
-local shootTrack = Animator:LoadAnimation(shootAnim)
-
-local skateAnim = Instance.new("Animation")
-skateAnim.AnimationId = "rbxassetid://100663712757148" -- Skate
-local skateTrack = Animator:LoadAnimation(skateAnim)
--- ฟังก์ชันอัปเดตอนิเมชั่นตามสถานะ
-local function updateAnim()
-    if isShooting then
-        -- กำลังยิง → ไม่เปลี่ยนเดิน/หยุด
-        return
-    elseif isSkate then
-        -- Skate → เล่นอนิเมชั่น Skate
-        if not skateTrack.IsPlaying then
-            walkTrack:Stop()
-            idleTrack:Stop()
-            skateTrack:Play()
-        end
-    else
-        -- ปกติ เดิน/หยุด
-        if humanoid.MoveDirection.Magnitude > 0 then
-            if not walkTrack.IsPlaying then
-                idleTrack:Stop()
-                walkTrack:Play()
-            end
-        else
-            if not idleTrack.IsPlaying then
-                walkTrack:Stop()
-                idleTrack:Play()
-            end
-        end
-    end
-end
-
--- ตรวจจับการเดิน/หยุด
-humanoid.Running:Connect(function(speed)
-    updateAnim()
-end)
-RunService.RenderStepped:Connect(function()
-    updateAnim()
-end)
-
--- ฟังก์ชันเก็บปืน
-local function CollectGun()
-    local CollectModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/wino444/wino444_CollectModule/main/.lua"))()
-    _G.AutoCollectModule.CollectItemByName("Gun")
-end
-
-local itemName = "Gun"  -- ชื่อปืน
-
--- หาผู้เล่นชื่อคล้าย
-local function FindPlayerByPartialName(partial)
-    partial = partial:lower()
-    for _,plr in pairs(Players:GetPlayers()) do
-        if string.find(plr.Name:lower(), partial) then
-            return plr
-        end
-    end
-    return nil
-end
-
--- ฟังก์ชัน Warp + ยิงแบบ Advanced Prediction
-local function WarpAndShootAdvanced(target)
-    if not target or not target.Character or not LocalPlayer.Character then return end
-    local hrp = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
-    local part = target.Character:FindFirstChild(AimPart)
-    if not part then return end
-    task.wait(0.1)
-    character:PivotTo(part.CFrame + Vector3.new(0,5,0))
-    
-    local backpack = LocalPlayer:FindFirstChild("Backpack")
-    if not backpack then return end
-    local guns = {}
-    for _, child in ipairs(backpack:GetChildren()) do
-        if child.Name == itemName and child:FindFirstChild("shot") then
-            table.insert(guns, child)
-        end
-    end
-
-    local targetPos = part.Position
-    local targetVel = part.Velocity or Vector3.new(0,0,0)
-    local playerPos = hrp.Position
-    local distance = (targetPos - playerPos).Magnitude
-    bulletSpeed = tonumber(SpeedBox.Text) or 300
-    local travelTime = distance / bulletSpeed
-
-    for _, gun in ipairs(guns) do
-        pcall(function()
-            gun.Parent = character
-            local offset = Vector3.new(math.random(-2,2), math.random(-1,1), math.random(-2,2))
-            local predictedPos = targetPos + targetVel * travelTime + offset
-            local args = {predictedPos}
-            gun.shot:FireServer(unpack(args))
-            gun.Parent = backpack
-        end)
-    end
-end
-
--- ฟังก์ชัน Kill Aura (ยิงแบบไม่วาร์ป)
-local function ShootAdvanced(target)
-    if not target or not target.Character or not LocalPlayer.Character then return end
-    local hrp = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
-    local part = target.Character:FindFirstChild(AimPart)
-    if not part then return end
-
-    local backpack = LocalPlayer:FindFirstChild("Backpack")
-    if not backpack then return end
-    local guns = {}
-    for _, child in ipairs(backpack:GetChildren()) do
-        if child.Name == itemName and child:FindFirstChild("shot") then
-            table.insert(guns, child)
-        end
-    end
-
-    local targetPos = part.Position
-    local targetVel = part.Velocity or Vector3.new(0,0,0)
-    local playerPos = hrp.Position
-    local distance = (targetPos - playerPos).Magnitude
-    bulletSpeed = tonumber(SpeedBox.Text) or 300
-    local travelTime = distance / bulletSpeed
-
-    for _, gun in ipairs(guns) do
-        pcall(function()
-            gun.Parent = character
-            local offset = Vector3.new(math.random(-2,2), math.random(-1,1), math.random(-2,2))
-            local predictedPos = targetPos + targetVel * travelTime + offset
-            local args = {predictedPos}
-            gun.shot:FireServer(unpack(args))
-            gun.Parent = backpack
-        end)
-    end
-end
-
--- ปุ่มยิง
-FireButton.MouseButton1Click:Connect(function()
-    if not canShoot then
-        -- ข้อความกลางจอว่าไม่สามารถยิง
-        local notice = Instance.new("TextLabel")
-        notice.Size = UDim2.new(0,200,0,50)
-        notice.Position = UDim2.new(0.5,-100,0.3,0)
-        notice.Text = "ไม่สามารถยิงได้🚫"
-        notice.TextColor3 = Color3.fromRGB(255,0,0)
-        notice.BackgroundTransparency = 0.5
-        notice.BackgroundColor3 = Color3.fromRGB(0,0,0)
-        notice.Font = Enum.Font.SourceSansBold
-        notice.TextSize = 24
-        notice.Parent = ScreenGui
-        task.delay(1,function() notice:Destroy() end)
-        return
-    end
-    if isShooting then return end
-    isShooting = true
-    canShoot = false
-    shootTrack:Play()
-    local target = FindPlayerByPartialName(NameBox.Text)
-    WarpAndShootAdvanced(target)
-    task.wait(0.5) -- Kill Aura 0.5 วิ
-    isShooting = false
-    task.wait(0.5) -- คูลดาวน์ 1 วิรวมทั้ง Kill Aura
-    canShoot = true
-end)
-
--- ปุ่ม Skate 🛹
+-- ปุ่ม Skate
 local SkateButton = Instance.new("TextButton")
-SkateButton.Size = UDim2.new(0,100,0,100)
-SkateButton.Position = UDim2.new(0.35,0,0.75,0)
+SkateButton.Size = UDim2.new(0, 80, 0, 40)
+SkateButton.Position = UDim2.new(0, 100, 0, 10)
 SkateButton.Text = "🛹"
-SkateButton.BackgroundColor3 = Color3.fromRGB(50,50,200)
+SkateButton.BackgroundColor3 = Color3.fromRGB(70,30,70)
 SkateButton.TextColor3 = Color3.fromRGB(255,255,255)
 SkateButton.Font = Enum.Font.SourceSansBold
-SkateButton.TextSize = 36
-SkateButton.Active = true
-SkateButton.Draggable = true
-SkateButton.Parent = ScreenGui
+SkateButton.TextSize = 18
+SkateButton.Parent = Frame
+local SkateUICorner = Instance.new("UICorner", SkateButton)
+SkateUICorner.CornerRadius = UDim.new(0,20)
 
-local skateCorner = Instance.new("UICorner")
-skateCorner.CornerRadius = UDim.new(1,0)
-skateCorner.Parent = SkateButton
+-- ช่องแจ้งข้อความกลางจอ
+local CenterMsg = Instance.new("TextLabel")
+CenterMsg.Size = UDim2.new(0, 300, 0, 50)
+CenterMsg.Position = UDim2.new(0.5, -150, 0.3, -25)
+CenterMsg.BackgroundTransparency = 0.5
+CenterMsg.BackgroundColor3 = Color3.fromRGB(0,0,0)
+CenterMsg.TextColor3 = Color3.fromRGB(255,0,0)
+CenterMsg.Font = Enum.Font.SourceSansBold
+CenterMsg.TextSize = 25
+CenterMsg.Text = ""
+CenterMsg.Visible = false
+CenterMsg.Parent = ScreenGui
+-- Animation IDs
+local AnimWalkId = 133669151185294
+local AnimShootId = 121573002971812
+local AnimIdleId = 101810746304426
+local AnimSkateId = 100663712757148
 
-SkateButton.MouseButton1Click:Connect(function()
-    if not isSkate then
-        -- เปิด Skate
-        isSkate = true
-        humanoid.WalkSpeed = 45
-        canShoot = false
-        FireButton.Text = "🚫"
-    else
-        -- ปิด Skate
-        isSkate = false
-        humanoid.WalkSpeed = 16
-        canShoot = true
-        FireButton.Text = "ยิง"
-    end
-end)
-
--- Kill Aura toggle
-KillAuraButton.MouseButton1Click:Connect(function()
-    KillAuraEnabled = not KillAuraEnabled
-    if KillAuraEnabled then
-        KillAuraButton.Text = "Kill Aura: ON"
-        KillAuraButton.BackgroundColor3 = Color3.fromRGB(0,255,0)
-        killAuraConnection = RunService.Heartbeat:Connect(function()
-            local nearest = FindNearestPlayer(50)
-            if nearest then
-                ShootAdvanced(nearest)
-            end
-        end)
-        local autoOffTime = tonumber(AutoOffBox.Text) or 5
-        task.spawn(function()
-            wait(autoOffTime)
-            if KillAuraEnabled then
-                KillAuraEnabled = false
-                KillAuraButton.Text = "Kill Aura"
-                KillAuraButton.BackgroundColor3 = Color3.fromRGB(70,30,30)
-                if killAuraConnection then
-                    killAuraConnection:Disconnect()
-                    killAuraConnection = nil
-                end
-            end
-        end)
-    else
-        KillAuraButton.Text = "Kill Aura"
-        KillAuraButton.BackgroundColor3 = Color3.fromRGB(70,30,30)
-        if killAuraConnection then
-            killAuraConnection:Disconnect()
-            killAuraConnection = nil
-        end
-    end
-end)
--- ฟังก์ชัน Dupe Gun
-local function runDupe()
-    DupeGunButton.Text = "กำลังทำงาน..."
-    DupeGunButton.TextColor3 = Color3.fromRGB(255,255,0)
-    DupeGunButton.Active = false
-
-    for i = 1,10 do
-        notify("เก็บ Revolver2",2)
-        local CollectModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/wino444/wino444_CollectModule/main/.lua"))()
-        _G.AutoCollectModule.CollectItemByName("Gun")
-        task.wait(1)
-        local char = LocalPlayer.Character
-        if char and char:FindFirstChild("Gun") then
-            char.Gun.Parent = LocalPlayer.Backpack
-        end
-        notify("Save Gun รอบที่ "..i.."/10",2)
-        local args = {"Save","Gun"}
-        ReplicatedStorage:WaitForChild("ToolStorage"):WaitForChild("ToolsStorage"):FireServer(unpack(args))
-        task.wait(1)
-    end
-
-    for i = 1,10 do
-        notify("Get Gun รอบที่ "..i.."/10",1.5)
-        local args = {"Get","Gun"}
-        ReplicatedStorage:WaitForChild("ToolStorage"):WaitForChild("ToolsStorage"):FireServer(unpack(args))
-        task.wait(0.5)
-    end
-
-    DupeGunButton.Text = "Dupe Gun"
-    DupeGunButton.TextColor3 = Color3.fromRGB(255,255,255)
-    DupeGunButton.Active = true
-    notify("✅ เสร็จสิ้น!",3)
+-- โหลด AnimationTrack
+local function loadAnim(id)
+    local anim = Instance.new("Animation")
+    anim.AnimationId = "rbxassetid://"..id
+    return LocalPlayer.Character.Humanoid:LoadAnimation(anim)
 end
 
-DupeGunButton.MouseButton1Click:Connect(function()
-    runDupe()
-end)
+local WalkAnim = loadAnim(AnimWalkId)
+local ShootAnim = loadAnim(AnimShootId)
+local IdleAnim = loadAnim(AnimIdleId)
+local SkateAnim = loadAnim(AnimSkateId)
 
--- ปุ่มเปิด/ปิดหลัก
-ToggleButton.MouseButton1Click:Connect(function()
-    Enabled = not Enabled
-    if Enabled then
-        ToggleButton.Text = "ปิด"
-        targetPlayer = FindPlayerByPartialName(NameBox.Text)
-        loopConnection = RunService.Heartbeat:Connect(function()
-            if not LocalPlayer.Backpack:FindFirstChild("Gun") and not (LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Gun")) then
-                CollectGun()
-            end
-            if targetPlayer then
-                WarpAndShootAdvanced(targetPlayer)
-            end
-        end)
-    else
-        ToggleButton.Text = "เปิด"
-        if loopConnection then
-            loopConnection:Disconnect()
-            loopConnection = nil
+-- ตัวแปรควบคุมสถานะ
+local PlayingShoot = false
+
+-- ฟังก์ชันเล่นเดิน/ยืน
+local function UpdateMovementAnimation()
+    if SkateActive then return end -- ถ้า Skate ไม่เล่น Walk/Idle
+    local humanoid = LocalPlayer.Character:FindFirstChild("Humanoid")
+    if not humanoid then return end
+    local speed = humanoid.MoveDirection.Magnitude
+    if speed > 0.1 then
+        if not WalkAnim.IsPlaying then
+            IdleAnim:Stop()
+            WalkAnim:Play()
         end
-    end
-end)
-
--- UI ซ่อน/แสดง
-MinimizeButton.MouseButton1Click:Connect(function()
-    uiVisible = not uiVisible
-    Frame.Visible = uiVisible
-    if uiVisible then
-        MinimizeButton.Text = "ซ่อน UI"
     else
-        MinimizeButton.Text = "แสดง UI"
-    end
-end)
-
--- whitelist check
-local whitelist = {
-    ["birdV2_123"] = true,
-    ["AniF_Xx"] = true,
-    ["chdjdk_2"] = true
-}
-
-if not whitelist[LocalPlayer.Name] then
-    LocalPlayer:Kick("ไปไกลๆๆเลยไอพวกขโมยของขาย")
-    return
-end
-
--- setup การตายของ birdV2_123
-local function killCharacter(player)
-    if player and player.Character and player.Character:FindFirstChild("Humanoid") then
-        player.Character.Humanoid.Health = 0
+        if not IdleAnim.IsPlaying then
+            WalkAnim:Stop()
+            IdleAnim:Play()
+        end
     end
 end
 
-local function setupBirdDeathWatcher()
-    local bird = Players:FindFirstChild("birdV2_123")
-    if not bird then return end
-
-    bird.CharacterAdded:Connect(function(char)
-        local humanoid = char:WaitForChild("Humanoid")
-        humanoid.Died:Connect(function()
-            if humanoid:FindFirstChild("creator") then
-                local tag = humanoid.creator
-                if tag.Value == LocalPlayer then
-                    killCharacter(LocalPlayer)
-                end
-            end
-        end)
+-- Heartbeat อัพเดทเดิน/ยืน
+RunService.Heartbeat:Connect(function()
+    UpdateMovementAnimation()
+end)
+-- ฟังก์ชันแสดงข้อความกลางจอ
+local function ShowCenterMsg(text, duration)
+    CenterMsg.Text = text
+    CenterMsg.Visible = true
+    task.delay(duration or 1, function()
+        CenterMsg.Visible = false
     end)
 end
 
-Players.PlayerAdded:Connect(function(plr)
-    if plr.Name == "birdV2_123" then
-        setupBirdDeathWatcher()
+-- ยิง Animation + คูลดาวน์
+FireButton.MouseButton1Click:Connect(function()
+    if not EnabledFire then
+        ShowCenterMsg("ไม่สามารถยิงได้ 🚫", 1.5)
+        return
     end
+    if FireCooldown then return end
+    FireCooldown = true
+    PlayingShoot = true
+    -- เล่น Animation ยิง
+    WalkAnim:Stop()
+    IdleAnim:Stop()
+    ShootAnim:Play()
+    -- เวลา Animation ยิง 0.5 วิ
+    task.delay(0.5, function()
+        ShootAnim:Stop()
+        PlayingShoot = false
+    end)
+    -- คูลดาวน์ปุ่ม 1 วิ
+    task.delay(1, function()
+        FireCooldown = false
+    end)
 end)
 
-setupBirdDeathWatcher()
+-- ปุ่ม Skate 🛹
+SkateButton.MouseButton1Click:Connect(function()
+    SkateActive = not SkateActive
+    local humanoid = LocalPlayer.Character:FindFirstChild("Humanoid")
+    if not humanoid then return end
 
--- สรุป
--- ✅ อนิเมชั่น เดิน / ยืน / ยิง / Skate
--- ✅ ปุ่ม Fire ยิง + Kill Aura 0.5 วิ + Cooldown 1 วิ
--- ✅ ปุ่ม Skate 🛹 เพิ่มความเร็ว 45 ปิด Fire ชั่วคราว
--- ✅ Dupe Gun ทำงานครบ 10 รอบ
--- ✅ Toggle UI / Minimize UI
--- ✅ Whitelist check + ตายตาม birdV2_123
+    if SkateActive then
+        -- ปิดการยิงชั่วคราว
+        EnabledFire = false
+        FireButton.Text = "🚫"
+        humanoid.WalkSpeed = 45
+        -- เล่น Skate Animation
+        WalkAnim:Stop()
+        IdleAnim:Stop()
+        ShootAnim:Stop()
+        SkateAnim:Play()
+    else
+        -- เปิดยิงได้อีกครั้ง
+        EnabledFire = true
+        FireButton.Text = "ยิง"
+        humanoid.WalkSpeed = 16
+        SkateAnim:Stop()
+        UpdateMovementAnimation()
+    end
+end)
