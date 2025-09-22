@@ -9,7 +9,7 @@ local whitelist = {
     "AniF_Xx",
     -- เพิ่มชื่ออื่นๆ ได้อีก 5 คน
     "chdjdk_2",
-    "Bananaxxcv",
+    "BANAΝΑxxcv",
     "ชื่อ3",
     "ชื่อ4",
     "ชื่อ5"
