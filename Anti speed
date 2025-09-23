@@ -1,0 +1,93 @@
+-- Anti Speed Hack Server Script
+-- Place this script inside ServerScriptService
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+-- CONFIG
+local DEFAULT_WALKSPEED = 16        -- normal game walk speed
+local MAX_WALKSPEED = 20            -- maximum allowed WalkSpeed before correction
+local CHECK_INTERVAL = 1.0          -- seconds between movement checks per character
+local MAX_DISTANCE_PER_SEC = 20     -- maximum allowed distance (studs) per second (tune per game)
+local RESPONSE = "reset"            -- "reset" to restore speed, "kick" to kick player
+
+-- Helper: apply response when cheating detected
+local function handleCheat(player, reason)
+    if RESPONSE == "kick" then
+        pcall(function()
+            player:Kick("Speed hack detected: " .. reason)
+        end)
+    else -- default behaviour: reset values
+        local char = player.Character
+        if char then
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if hum then
+                hum.WalkSpeed = DEFAULT_WALKSPEED
+                -- optional: set JumpPower back if you want to restrict jump hacks too
+                -- hum.JumpPower = DEFAULT_JUMPPOWER
+            end
+        end
+    end
+    warn("[AntiSpeed] " .. player.Name .. " flagged: " .. reason)
+end
+
+-- Start monitoring a character's Humanoid/RootPart
+local function monitorCharacter(player, character)
+    local humanoid = character:WaitForChild("Humanoid", 5)
+    local root = character:FindFirstChild("HumanoidRootPart")
+
+    if not humanoid or not root then
+        return
+    end
+
+    -- 1) Watch WalkSpeed property changes
+    humanoid:GetPropertyChangedSignal("WalkSpeed"):Connect(function()
+        if humanoid.WalkSpeed and humanoid.WalkSpeed > MAX_WALKSPEED then
+            handleCheat(player, "WalkSpeed > MAX_WALKSPEED (" .. tostring(humanoid.WalkSpeed) .. ")")
+        end
+    end)
+
+    -- 2) Periodic movement-based detection (distance / sec)
+    spawn(function()
+        local lastPos = root.Position
+        while character.Parent ~= nil do
+            local start = tick()
+            wait(CHECK_INTERVAL)
+            if not root.Parent then break end
+            local now = tick()
+            local dt = now - start + CHECK_INTERVAL - CHECK_INTERVAL -- compensate if wait was exact or not (keeps dt ~ CHECK_INTERVAL)
+            -- we will compute distance and divide by CHECK_INTERVAL (safe approximation)
+            local newPos = root.Position
+            local dist = (newPos - lastPos).magnitude
+            local speedEstimate = dist / CHECK_INTERVAL
+            -- If estimate is unreasonably large, flag
+            if speedEstimate > MAX_DISTANCE_PER_SEC then
+                handleCheat(player, string.format("High travel speed: %.2f studs/sec (threshold %.2f)", speedEstimate, MAX_DISTANCE_PER_SEC))
+                break
+            end
+            lastPos = newPos
+        end
+    end)
+end
+
+-- Connect player events
+Players.PlayerAdded:Connect(function(player)
+    player.CharacterAdded:Connect(function(character)
+        -- small delay to ensure Humanoid/RootPart exist
+        wait(0.2)
+        monitorCharacter(player, character)
+    end)
+end)
+
+-- Optionally, run on existing players (if script added at runtime)
+for _, player in ipairs(Players:GetPlayers()) do
+    if player.Character then
+        monitorCharacter(player, player.Character)
+    end
+    player.CharacterAdded:Connect(function(character)
+        wait(0.2)
+        monitorCharacter(player, character)
+    end)
+end
+
+return
