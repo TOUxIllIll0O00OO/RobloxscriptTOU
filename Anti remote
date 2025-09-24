@@ -1,0 +1,63 @@
+-- Anti-Use-SendData-When-High (Server Script)
+-- Put into ServerScriptService
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+
+-- CONFIG
+local REMOTE_PATH = {"Library","Network","SendData"}  -- path from ReplicatedStorage
+local HEIGHT_THRESHOLD = 461.69                      -- Y >= this -> block
+local WARN_ON_BLOCK = true                           -- print warn when blocked
+
+-- find remote safely
+local function getRemote()
+    local node = ReplicatedStorage
+    for _, name in ipairs(REMOTE_PATH) do
+        node = node:WaitForChild(name, 5)
+        if not node then
+            return nil
+        end
+    end
+    return node
+end
+
+local remote = getRemote()
+if not remote then
+    warn("[AntiSendData] Remote not found at ReplicatedStorage." )
+    return
+end
+
+-- Main handler: validate player's height before processing
+remote.OnServerEvent:Connect(function(player, ...)
+    -- get character and HRP
+    local char = player.Character
+    if not char then
+        if WARN_ON_BLOCK then warn("[AntiSendData] Player "..player.Name.." fired SendData but has no character.") end
+        return
+    end
+
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hrp then
+        if WARN_ON_BLOCK then warn("[AntiSendData] Player "..player.Name.." fired SendData but no HRP.") end
+        return
+    end
+
+    local y = hrp.Position.Y
+    if y >= HEIGHT_THRESHOLD then
+        if WARN_ON_BLOCK then
+            warn(string.format("[AntiSendData] Blocked SendData from %s at Y=%.2f (threshold %.2f)", player.Name, y, HEIGHT_THRESHOLD))
+        end
+        -- Block: simply return (do not process)
+        -- you can also log this event to DataStore or increment a counter here
+        return
+    end
+
+    -- If below threshold, allow processing:
+    -- IMPORTANT: put any server-side processing that should happen on valid SendData HERE.
+    -- If your game already relies on other scripts listening to this RemoteEvent, note that
+    -- those other listeners will still be triggered by the original event; this handler
+    -- is suitable when you want to handle SendData centrally from here.
+    --
+    -- Example: call processing function (replace with your logic)
+    -- processSendData(player, ...)
+end)
