@@ -1,0 +1,329 @@
+-- 💥 SLAP ALL NPCs v2.1 - MULTI-NPC REMOTE SLAUGHTER SYSTEM 😈
+print("🔥 เริ่ม SLAP ALL NPCs v2.1 System... (", os.date("%H:%M %Z on %A, %B %d, %Y"), ")")
+
+-- Services
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+
+-- Variables
+local LocalPlayer = Players.LocalPlayer
+local FIRE_DELAY = 0.1  -- เริ่มต้นความเร็ว 0.1 วินาที
+local isSlappingActive = false
+local slapConnection = nil
+local dragging = false
+local dragInput
+local dragStart
+local startPos
+
+-- GUI Setup
+local gui = Instance.new("ScreenGui")
+gui.Name = "SLAP_ALL_NPCS_v2_1"
+gui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+gui.ResetOnSpawn = false
+
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 220, 0, 120)
+mainFrame.Position = UDim2.new(0.5, -110, 0, 20)
+mainFrame.BackgroundColor3 = Color3.fromRGB(30, 0, 0)
+mainFrame.BorderSizePixel = 0
+mainFrame.Parent = gui
+
+local uiCorner = Instance.new("UICorner")
+uiCorner.CornerRadius = UDim.new(0, 15)
+uiCorner.Parent = mainFrame
+
+local uiStroke = Instance.new("UIStroke")
+uiStroke.Color = Color3.fromRGB(0, 200, 255)
+uiStroke.Thickness = 2
+uiStroke.Parent = mainFrame
+
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Size = UDim2.new(1, 0, 0, 30)
+titleLabel.BackgroundTransparency = 1
+titleLabel.Text = "SLAP ALL NPCs 💥"
+titleLabel.TextColor3 = Color3.fromRGB(0, 255, 150)
+titleLabel.TextScaled = true
+titleLabel.Font = Enum.Font.SourceSansBold
+titleLabel.Parent = mainFrame
+
+local toggleButton = Instance.new("TextButton")
+toggleButton.Size = UDim2.new(0, 180, 0, 40)
+toggleButton.Position = UDim2.new(0.5, -90, 0, 40)
+toggleButton.Text = "🚨 OFF SLAP"
+toggleButton.BackgroundColor3 = Color3.fromRGB(100, 0, 0)
+toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleButton.TextScaled = true
+toggleButton.Font = Enum.Font.GothamBold
+toggleButton.Parent = mainFrame
+
+local btnCorner = Instance.new("UICorner")
+btnCorner.CornerRadius = UDim.new(0, 10)
+btnCorner.Parent = toggleButton
+
+local btnStroke = Instance.new("UIStroke")
+btnStroke.Color = Color3.fromRGB(0, 150, 255)
+btnStroke.Thickness = 2
+btnStroke.Parent = toggleButton
+
+-- Speed Slider
+local speedFrame = Instance.new("Frame")
+speedFrame.Size = UDim2.new(0, 180, 0, 20)
+speedFrame.Position = UDim2.new(0.5, -90, 0, 90)
+speedFrame.BackgroundColor3 = Color3.fromRGB(50, 0, 0)
+speedFrame.Parent = mainFrame
+
+local speedCorner = Instance.new("UICorner")
+speedCorner.CornerRadius = UDim.new(0, 5)
+speedCorner.Parent = speedFrame
+
+local speedLabel = Instance.new("TextLabel")
+speedLabel.Size = UDim2.new(0, 70, 1, 0)
+speedLabel.Position = UDim2.new(0, 0, 0, 0)
+speedLabel.BackgroundTransparency = 1
+speedLabel.Text = "⏱️ " .. string.format("%.2f", FIRE_DELAY) .. "s"
+speedLabel.TextColor3 = Color3.fromRGB(0, 255, 200)
+speedLabel.TextScaled = true
+speedLabel.Font = Enum.Font.Gotham
+speedLabel.Parent = speedFrame
+
+local sliderBar = Instance.new("Frame")
+sliderBar.Size = UDim2.new(1, -70, 0.8, 0)
+sliderBar.Position = UDim2.new(0, 70, 0, 2)
+sliderBar.BackgroundColor3 = Color3.fromRGB(80, 0, 0)
+sliderBar.BorderSizePixel = 0
+sliderBar.Parent = speedFrame
+
+local sliderCorner = Instance.new("UICorner")
+sliderCorner.CornerRadius = UDim.new(0, 3)
+sliderCorner.Parent = sliderBar
+
+local sliderKnob = Instance.new("Frame")
+sliderKnob.Size = UDim2.new(0, 10, 1, 0)
+sliderKnob.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+sliderKnob.BorderSizePixel = 0
+sliderKnob.Parent = sliderBar
+
+local knobCorner = Instance.new("UICorner")
+knobCorner.CornerRadius = UDim.new(0, 2)
+knobCorner.Parent = sliderKnob
+
+-- Sound Effect
+local slapSound = Instance.new("Sound")
+slapSound.SoundId = "rbxassetid://183843523" -- Slap Sound
+slapSound.Volume = 0.3
+slapSound.Parent = mainFrame
+
+-- Draggable GUI
+local function update(input)
+    local delta = input.Position - dragStart
+    mainFrame.Position = UDim2.new(
+        startPos.X.Scale,
+        startPos.X.Offset + delta.X,
+        startPos.Y.Scale,
+        startPos.Y.Offset + delta.Y
+    )
+end
+
+mainFrame.InputBegan:Connect(function(input)
+    if (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) and not draggingSlider then
+        dragging = true
+        dragStart = input.Position
+        startPos = mainFrame.Position
+        
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+mainFrame.InputChanged:Connect(function(input)
+    if (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) and dragging then
+        dragInput = input
+        update(input)
+    end
+end)
+
+-- Slider Logic (Fire Delay)
+local draggingSlider = false
+local sliderStart
+local sliderValue
+
+sliderKnob.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        draggingSlider = true
+        sliderStart = input.Position.X
+        sliderValue = FIRE_DELAY
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                draggingSlider = false
+            end
+        end)
+    end
+end)
+
+sliderKnob.InputChanged:Connect(function(input)
+    if (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) and draggingSlider then
+        local delta = input.Position.X - sliderStart
+        local maxWidth = sliderBar.AbsoluteSize.X
+        local newValue = math.clamp(sliderValue + (delta / maxWidth) * 0.95, 0.05, 1) -- 0.05-1 วินาที
+        FIRE_DELAY = math.floor(newValue * 100) / 100
+        speedLabel.Text = "⏱️ " .. string.format("%.2f", FIRE_DELAY) .. "s"
+        sliderKnob.Position = UDim2.new(0, (FIRE_DELAY - 0.05) / 0.95 * maxWidth, 0, 0)
+        print("⏱️ ปรับความเร็วเป็น:", FIRE_DELAY, "วินาที")
+    end
+end)
+
+-- Remote Attack Function
+local function fireRemoteSlap(npc, damage, force)
+    if not npc or not npc.Parent then return end
+    
+    local args = {
+        npc,
+        damage,
+        force
+    }
+    
+    local remote = game:GetService("ReplicatedStorage"):WaitForChild("RemoteEvents"):WaitForChild("SlapEvent")
+    local success = pcall(function()
+        remote:FireServer(unpack(args))
+    end)
+    
+    if success then
+        print("💥 Slapped:", npc.Name, "Damage:", damage, "Force:", force)
+        slapSound:Play()
+    else
+        print("⚠️ Fire Remote ล้มเหลว:", npc.Name)
+    end
+end
+
+-- NPC Configurations
+local npcConfigs = {
+    { name = "Police", damage = 30, force = 20 },
+    { name = "Big NPC", damage = 20, force = 20 },
+    { name = "NPC", damage = 30, force = 20 },
+    { name = "Rob", damage = 30, force = 20 },
+    { name = "Golden NPC", damage = 30, force = 20 },
+    { name = "Diamond NPC", damage = 30, force = 20 }
+}
+
+-- Find All NPCs
+local function findAllNPCs()
+    local npcs = {}
+    local spawner = workspace:WaitForChild("Spawner", 5)
+    if spawner and spawner:WaitForChild("NPCs", 5) then
+        for _, config in pairs(npcConfigs) do
+            local npc = spawner.NPCs:FindFirstChild(config.name)
+            if npc and npc:FindFirstChild("Humanoid") and npc.Humanoid.Health > 0 then
+                table.insert(npcs, { npc = npc, damage = config.damage, force = config.force })
+            end
+        end
+    end
+    return npcs
+end
+
+-- Start Slapping
+local function startSlapping()
+    if isSlappingActive then return end
+    isSlappingActive = true
+    
+    print("🚨 SLAP ALL NPCs v2.1 เริ่มทำงาน!")
+    print("📏 Range: All NPCs in Map")
+    print("⏱️ Fire Delay:", FIRE_DELAY, "วินาที")
+    
+    slapConnection = RunService.Heartbeat:Connect(function()
+        if not isSlappingActive then return end
+        
+        local npcs = findAllNPCs()
+        for _, npcData in pairs(npcs) do
+            fireRemoteSlap(npcData.npc, npcData.damage, npcData.force)
+            task.wait(FIRE_DELAY) -- รอตามความเร็วที่ตั้ง
+        end
+    end)
+    
+    toggleButton.Text = "🚨 ON SLAP"
+    toggleButton.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
+    TweenService:Create(toggleButton, TweenInfo.new(0.3), {
+        BackgroundColor3 = Color3.fromRGB(0, 200, 0)
+    }):Play()
+end
+
+-- Stop Slapping
+local function stopSlapping()
+    if not isSlappingActive then return end
+    isSlappingActive = false
+    
+    if slapConnection then
+        slapConnection:Disconnect()
+        slapConnection = nil
+    end
+    
+    print("🛑 SLAP ALL NPCs v2.1 หยุดทำงาน!")
+    
+    toggleButton.Text = "🚨 OFF SLAP"
+    toggleButton.BackgroundColor3 = Color3.fromRGB(100, 0, 0)
+    TweenService:Create(toggleButton, TweenInfo.new(0.3), {
+        BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+    }):Play()
+end
+
+-- Toggle Logic
+toggleButton.MouseButton1Click:Connect(function()
+    slapSound:Play()
+    if isSlappingActive then
+        stopSlapping()
+    else
+        startSlapping()
+    end
+end)
+
+-- Hover Effects
+toggleButton.MouseEnter:Connect(function()
+    TweenService:Create(toggleButton, TweenInfo.new(0.2), {
+        Size = UDim2.new(0, 190, 0, 42)
+    }):Play()
+    TweenService:Create(uiStroke, TweenInfo.new(0.2), {
+        Color = Color3.fromRGB(0, 255, 255)
+    }):Play()
+end)
+
+toggleButton.MouseLeave:Connect(function()
+    TweenService:Create(toggleButton, TweenInfo.new(0.2), {
+        Size = UDim2.new(0, 180, 0, 40)
+    }):Play()
+    TweenService:Create(uiStroke, TweenInfo.new(0.2), {
+        Color = Color3.fromRGB(0, 200, 255)
+    }):Play()
+end)
+
+-- Auto Start
+task.wait(1)
+startSlapping()
+
+-- Cleanup
+Players.PlayerRemoving:Connect(function(player)
+    if slapConnection then
+        local npcs = findAllNPCs()
+        if #npcs == 0 then
+            stopSlapping()
+        end
+    end
+end)
+
+LocalPlayer.CharacterRemoving:Connect(function()
+    task.wait(1)
+    if LocalPlayer.Character then
+        task.wait(1)
+        if isSlappingActive then
+            startSlapping()
+        end
+    end
+end)
+
+print("🎉 SLAP ALL NPCs v2.1 พร้อมถล่ม!")
+print("📏 เป้าหมาย: Police, Big NPC, NPC, Rob, Golden NPC, Diamond NPC")
+print("⏱️ ปรับความเร็วได้ (0.05-1s)")
+print("🖱️ ลาก GUI ได้!")
