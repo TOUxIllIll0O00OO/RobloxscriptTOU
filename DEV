@@ -1,0 +1,113 @@
+-- LocalScript: Rainbow DEV Billboard for specific players
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local TARGET_NAMES = {
+    ["birdV2_123"] = true,
+    ["AniF_Xx"] = true,
+}
+
+local TEXT = " DEV "
+local TEXT_SIZE = 46
+local STUDS_ABOVE_HEAD = 6   -- ปรับให้สูงกว่าเดิม
+local BILLBOARD_SIZE = UDim2.new(0, 200, 0, 90)
+
+local billboards = {}
+
+local function HSVToRGB(h, s, v)
+    if s == 0 then
+        return Color3.new(v, v, v)
+    end
+    h = h * 6
+    local i = math.floor(h)
+    local f = h - i
+    local p = v * (1 - s)
+    local q = v * (1 - s * f)
+    local t = v * (1 - s * (1 - f))
+    local r, g, b
+    i = i % 6
+    if i == 0 then r, g, b = v, t, p
+    elseif i == 1 then r, g, b = q, v, p
+    elseif i == 2 then r, g, b = p, v, t
+    elseif i == 3 then r, g, b = p, q, v
+    elseif i == 4 then r, g, b = t, p, v
+    else r, g, b = v, p, q end
+    return Color3.new(r, g, b)
+end
+
+local function createBillboardForCharacter(player, character)
+    if not character then return end
+    if billboards[player] then billboards[player].gui:Destroy(); billboards[player] = nil end
+
+    local hrp = character:FindFirstChild("HumanoidRootPart") or character:FindFirstChild("Head")
+    if not hrp then return end
+
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "DEV_Billboard"
+    billboard.AlwaysOnTop = true
+    billboard.Size = BILLBOARD_SIZE
+    billboard.Adornee = hrp
+    billboard.StudsOffset = Vector3.new(0, STUDS_ABOVE_HEAD, 0)
+    billboard.Parent = workspace
+
+    local textLabel = Instance.new("TextLabel")
+    textLabel.Name = "DEV_Text"
+    textLabel.BackgroundTransparency = 1
+    textLabel.Size = UDim2.new(1, 0, 1, 0)
+    textLabel.Font = Enum.Font.SourceSansBold
+    textLabel.Text = TEXT
+    textLabel.TextSize = TEXT_SIZE
+    textLabel.TextStrokeTransparency = 0.4
+    textLabel.TextStrokeColor3 = Color3.new(0,0,0)
+    textLabel.Parent = billboard
+
+    billboards[player] = { gui = billboard, label = textLabel, hue = 0 }
+end
+
+local function removeBillboard(player)
+    if billboards[player] then
+        if billboards[player].gui then billboards[player].gui:Destroy() end
+        billboards[player] = nil
+    end
+end
+
+local function onPlayerAdded(plr)
+    if not TARGET_NAMES[plr.Name] then return end
+
+    if plr.Character then
+        createBillboardForCharacter(plr, plr.Character)
+    end
+
+    plr.CharacterAdded:Connect(function(chr)
+        task.wait(0.2)
+        createBillboardForCharacter(plr, chr)
+    end)
+
+    plr.AncestryChanged:Connect(function()
+        if not plr.Parent then
+            removeBillboard(plr)
+        end
+    end)
+
+    plr.CharacterRemoving:Connect(function()
+        removeBillboard(plr)
+    end)
+end
+
+for _, plr in ipairs(Players:GetPlayers()) do
+    if TARGET_NAMES[plr.Name] then
+        onPlayerAdded(plr)
+    end
+end
+
+Players.PlayerAdded:Connect(onPlayerAdded)
+Players.PlayerRemoving:Connect(removeBillboard)
+
+RunService.RenderStepped:Connect(function(dt)
+    for _, data in pairs(billboards) do
+        if data and data.label then
+            data.hue = (data.hue + dt * 0.15) % 1
+            data.label.TextColor3 = HSVToRGB(data.hue, 1, 1)
+        end
+    end
+end)
