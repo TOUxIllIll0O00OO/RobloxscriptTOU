@@ -167,13 +167,13 @@ local function createGui()
 	warpFrame.Parent = contentFrame
 
 	local warpPoints = {
-		{Label = "วาปไปประตู 1 รีเบิร์ด", Y = 40},
-		{Label = "วาปไปประตู 5 รีเบิร์ด", Y = 70},
-		{Label = "วาปไปประตู 15 รีเบิร์ด", Y = 100},
-		{Label = "วาปไปประตู 30 รีเบิร์ด", Y = 130},
-		{Label = "วาปไปประตู 60 รีเบิร์ด", Y = 160},
-		{Label = "วาปไปประตูคิง", Y = 190},
-		{Label = "วาปตรงกลางแมพ", Y = 220}
+		{Label = "วาปไปประตู 1 รีเบิร์ด", Position = Vector3.new(-2623.02, 7.27, -409.07), Y = 40},
+		{Label = "วาปไปประตู 5 รีเบิร์ด", Position = Vector3.new(2250.78, 7.27, 1073.23), Y = 70},
+		{Label = "วาปไปประตู 15 รีเบิร์ด", Position = Vector3.new(-6758.96, 7.27, -1284.92), Y = 100},
+		{Label = "วาปไปประตู 30 รีเบิร์ด", Position = Vector3.new(4603.28, 991.45, -3897.87), Y = 130},
+		{Label = "วาปไปประตู 60 รีเบิร์ด", Position = Vector3.new(-8685.62, 6.70, 2392.33), Y = 160},
+		{Label = "วาปไปประตูคิง", Position = Vector3.new(-8625.93, 17.12, -5730.47), Y = 190},
+		{Label = "วาปตรงกลางแมพ", Position = Vector3.new(10.00, 7.27, 179.95), Y = 220}
 	}
 
 	for i, point in ipairs(warpPoints) do
@@ -204,36 +204,16 @@ local function createGui()
 		buttonCorner.Parent = warpButton
 
 		warpButton.MouseButton1Click:Connect(function()
-			if point.Label == "วาปตรงกลางแมพ" then
-				local character = LocalPlayer.Character
-				if character and character:FindFirstChild("HumanoidRootPart") then
-					character.HumanoidRootPart.CFrame = CFrame.new(Vector3.new(10.00, 7.27, 179.95))
-					warpButton.Text = "วาร์ปแล้ว!"
-					task.wait(1)
-					warpButton.Text = "วาป"
-				else
-					warpButton.Text = "ไม่พบตัวละคร!"
-					task.wait(1)
-					warpButton.Text = "วาป"
-				end
+			local character = LocalPlayer.Character
+			if character and character:FindFirstChild("HumanoidRootPart") then
+				character.HumanoidRootPart.CFrame = CFrame.new(point.Position)
+				warpButton.Text = "วาร์ปแล้ว!"
+				task.wait(1)
+				warpButton.Text = "วาป"
 			else
-				local success, result = pcall(function()
-					local args = {
-						"travelToArea",
-						Workspace:WaitForChild("areaCircles"):WaitForChild("areaCircle")
-					}
-					local areaTravelRemote = ReplicatedStorage:WaitForChild("rEvents"):WaitForChild("areaTravelRemote")
-					areaTravelRemote:InvokeServer(unpack(args))
-				end)
-				if success then
-					warpButton.Text = "วาร์ปแล้ว!"
-					task.wait(1)
-					warpButton.Text = "วาป"
-				else
-					warpButton.Text = "ไม่พบ Remote!"
-					task.wait(1)
-					warpButton.Text = "วาป"
-				end
+				warpButton.Text = "ไม่พบตัวละคร!"
+				task.wait(1)
+				warpButton.Text = "วาป"
 			end
 		end)
 	end
