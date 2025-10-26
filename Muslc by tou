@@ -5,6 +5,7 @@ local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
+local Stats = game:GetService("Stats")
 
 -- 🗑 ลบ GUI เก่าถ้ามี
 local function clearGui()
@@ -13,6 +14,9 @@ local function clearGui()
 	end
 	if PlayerGui:FindFirstChild("ToggleGui") then
 		PlayerGui.ToggleGui:Destroy()
+	end
+	if PlayerGui:FindFirstChild("FpsPingGui") then
+		PlayerGui.FpsPingGui:Destroy()
 	end
 end
 clearGui()
@@ -27,7 +31,8 @@ local savedStates = {
 	WeightExercise = nil,
 	SpinEnabled = false,
 	RebirthEnabled = false,
-	ProteinEnabled = false
+	ProteinEnabled = false,
+	FpsPingEnabled = false -- เพิ่มสถานะสำหรับ FPS+PING
 }
 local guiState = {
 	Enabled = false, -- สถานะการเปิด/ปิด MainGUI
@@ -244,7 +249,9 @@ local function createGui()
 
 	-- 🏃‍♂️ ช่องปรับความเร็ว
 	local speedLabel = Instance.new("TextLabel")
-	speedLabel.Text = "ความเร็ว:"
+	speedLabel.Text = "ความ
+
+เร็ว:"
 	speedLabel.Size = UDim2.new(0, 80, 0, 25)
 	speedLabel.Position = UDim2.new(0, 10, 0, 40)
 	speedLabel.TextColor3 = Color3.new(1, 1, 1)
@@ -373,6 +380,130 @@ local function createGui()
 	saveToggle.ZIndex = 10
 	saveToggle.Parent = settingFrame
 
+	-- 📊 ข้อความและปุ่ม "ขึ้น FPS+PING"
+	local fpsPingLabel = Instance.new("TextLabel")
+	fpsPingLabel.Text = "ขึ้น FPS+PING:"
+	fpsPingLabel.Size = UDim2.new(0, 150, 0, 25)
+	fpsPingLabel.Position = UDim2.new(0, 10, 0, 80)
+	fpsPingLabel.TextColor3 = Color3.new(1, 1, 1)
+	f使命
+
+ฟังก์ชันสร้าง GUI แสดง FPS และ PING
+	local function createFpsPingGui()
+		local fpsPingGui = Instance.new("ScreenGui")
+		fpsPingGui.Name = "FpsPingGui"
+		fpsPingGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+		fpsPingGui.IgnoreGuiInset = true
+		fpsPingGui.Parent = PlayerGui
+
+		local fpsPingFrame = Instance.new("Frame")
+		fpsPingFrame.Size = UDim2.new(0, 150, 0, 100)
+		fpsPingFrame.Position = UDim2.new(0.5, -75, 0.5, -50)
+		fpsPingFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+		fpsPingFrame.BorderSizePixel = 0
+		fpsPingFrame.Active = true
+		fpsPingFrame.Draggable = true
+		fpsPingFrame.ZIndex = 10
+		fpsPingFrame.Parent = fpsPingGui
+
+		local corner = Instance.new("UICorner")
+		corner.CornerRadius = UDim.new(0, 8)
+		corner.Parent = fpsPingFrame
+
+		local fpsLabel = Instance.new("TextLabel")
+		fpsLabel.Text = "FPS: 0.00"
+		fpsLabel.Size = UDim2.new(1, -10, 0, 40)
+		fpsLabel.Position = UDim2.new(0, 5, 0, 10)
+		fpsLabel.TextColor3 = Color3.new(1, 1, 1)
+		fpsLabel.BackgroundTransparency = 1
+		fpsLabel.TextScaled = true
+		fpsLabel.TextWrapped = true
+		fpsLabel.ZIndex = 10
+		fpsLabel.Parent = fpsPingFrame
+
+		local pingLabel = Instance.new("TextLabel")
+		pingLabel.Text = "PING: N/A"
+		pingLabel.Size = UDim2.new(1, -10, 0, 40)
+		pingLabel.Position = UDim2.new(0, 5, 0, 50)
+		pingLabel.TextColor3 = Color3.new(1, 1, 1)
+		pingLabel.BackgroundTransparency = 1
+		pingLabel.TextScaled = true
+		pingLabel.TextWrapped = true
+		pingLabel.ZIndex = 10
+		pingLabel.Parent = fpsPingFrame
+
+		return fpsPingGui, fpsLabel, pingLabel
+	end
+
+	local fpsPingEnabled = savedStates.FpsPingEnabled
+	local fpsPingToggle = Instance.new("TextButton")
+	fpsPingToggle.Size = UDim2.new(0, 80, 0, 25)
+	fpsPingToggle.Position = UDim2.new(0, 170, 0, 80)
+	fpsPingToggle.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+	fpsPingToggle.Text = fpsPingEnabled and "เปิด" or "ปิด"
+	fpsPingToggle.TextColor3 = Color3.new(1, 1, 1)
+	fpsPingToggle.TextScaled = true
+	fpsPingToggle.TextWrapped = true
+	fpsPingToggle.ZIndex = 10
+	fpsPingToggle.Parent = settingFrame
+
+	local buttonCorner = Instance.new("UICorner")
+	buttonCorner.CornerRadius = UDim.new(0, 8)
+	buttonCorner.Parent = fpsPingToggle
+
+	-- 📊 ฟังก์ชันอัปเดต FPS และ PING
+	local function updateFpsPing(fpsLabel, pingLabel)
+		local frameCount = 0
+		local lastTime = tick()
+		local connection
+
+		connection = RunService.Heartbeat:Connect(function(deltaTime)
+			frameCount = frameCount + 1
+			if tick() - lastTime >= 0.5 then
+				local fps = math.round(frameCount / (tick() - lastTime) * 100) / 100
+				fpsLabel.Text = string.format("FPS: %.2f", fps)
+				local success, ping = pcall(function()
+					return Stats.Network.ServerStatsItem["Data Ping"].Value
+				end)
+				pingLabel.Text = success and string.format("PING: %.0f ms", ping) or "PING: N/A"
+				frameCount = 0
+				lastTime = tick()
+			end
+		end)
+
+		return connection
+	end
+
+	-- 🖱 ฟังก์ชันควบคุม FPS+PING
+	local fpsPingGui, fpsLabel, pingLabel = nil, nil, nil
+	fpsPingToggle.MouseButton1Click:Connect(function()
+		fpsPingEnabled = not fpsPingEnabled
+		savedStates.FpsPingEnabled = fpsPingEnabled
+		fpsPingToggle.Text = fpsPingEnabled and "เปิด" or "ปิด"
+
+		if fpsPingEnabled then
+			if not PlayerGui:FindFirstChild("FpsPingGui") then
+				fpsPingGui, fpsLabel, pingLabel = createFpsPingGui()
+				fpsPingGui.Enabled = true
+				updateFpsPing(fpsLabel, pingLabel)
+			end
+		else
+			if PlayerGui:FindFirstChild("FpsPingGui") then
+				PlayerGui.FpsPingGui:Destroy()
+				fpsPingGui, fpsLabel, pingLabel = nil, nil, nil
+			end
+		end
+	end)
+
+	-- คืนค่าสถานะ FPS+PING ถ้าเปิดอยู่
+	if savedStates.FpsPingEnabled then
+		fpsPingEnabled = true
+		fpsPingToggle.Text = "เปิด"
+		fpsPingGui, fpsLabel, pingLabel = createFpsPingGui()
+		fpsPingGui.Enabled = true
+		updateFpsPing(fpsLabel, pingLabel)
+	end
+
 	-------------------------------------
 	-- 🏋️‍♂️ หน้าหลัก "อ้อโต้ยกน้ำหนัก"
 	-------------------------------------
@@ -462,187 +593,6 @@ local function createGui()
 	rebirthToggle.TextWrapped = true
 	rebirthToggle.ZIndex = 10
 	rebirthToggle.Parent = weightFrame
-
-	-- 🍫 ข้อความและปุ่ม "อ้อโต้กินโปรตัน"
-	local proteinLabel = Instance.new("TextLabel")
-	proteinLabel.Text = "อ้อโต้กินโปรตัน:"
-	proteinLabel.Size = UDim2.new(0, 150, 0, 25)
-	proteinLabel.Position = UDim2.new(0, 10, 0, 150)
-	proteinLabel.TextColor3 = Color3.new(1, 1, 1)
-	proteinLabel.BackgroundTransparency = 1
-	proteinLabel.TextScaled = true
-	proteinLabel.TextWrapped = true
-	proteinLabel.ZIndex = 10
-	proteinLabel.Parent = weightFrame
-
-	local proteinToggle = Instance.new("TextButton")
-	proteinToggle.Size = UDim2.new(0, 100, 0, 25)
-	proteinToggle.Position = UDim2.new(0, 170, 0, 150)
-	proteinToggle.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-	proteinToggle.Text = savedStates.ProteinEnabled and "เปิด" or "ปิด"
-	proteinToggle.TextColor3 = Color3.new(1, 1, 1)
-	proteinToggle.TextScaled = true
-	proteinToggle.TextWrapped = true
-	proteinToggle.ZIndex = 10
-	proteinToggle.Parent = weightFrame
-
-	-- 🏋️‍♂️ ตัวแปรสำหรับออโต้ยกน้ำหนัก, สปิน, รีเบิร์ด, และกินโปรตัน
-	local selectedExercise = savedStates.WeightExercise
-	local running = savedStates.WeightRunning
-	local spinEnabled = savedStates.SpinEnabled
-	local rebirthEnabled = savedStates.RebirthEnabled
-	local proteinEnabled = savedStates.ProteinEnabled
-	local muscleEvent = LocalPlayer:WaitForChild("muscleEvent")
-	local backpack = LocalPlayer:WaitForChild("Backpack")
-	local fortuneWheelRemote = ReplicatedStorage:WaitForChild("rEvents"):WaitForChild("openFortuneWheelRemote")
-	local fortuneWheel = ReplicatedStorage:WaitForChild("fortuneWheelChances"):WaitForChild("Fortune Wheel")
-	local rebirthRemote = ReplicatedStorage:WaitForChild("rEvents"):WaitForChild("rebirthRemote")
-
-	-- 🖱 ฟังก์ชันปุ่มเลือก
-	chooseButton.MouseButton1Click:Connect(function()
-		-- ลบ SelectionGui เก่าถ้ามี
-		if PlayerGui:FindFirstChild("SelectionGui") then
-			PlayerGui.SelectionGui:Destroy()
-		end
-
-		local choices = {"Weight", "Handstands", "Pushups", "Situps"}
-		local selectionGui = Instance.new("Frame")
-		selectionGui.Name = "SelectionGui"
-		selectionGui.Size = UDim2.new(0, 200, 0, 180)
-		selectionGui.Position = UDim2.new(0.5, -100, 0.5, -90)
-		selectionGui.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-		selectionGui.BorderSizePixel = 0
-		selectionGui.Active = true
-		selectionGui.Draggable = true
-		selectionGui.ZIndex = 10
-		selectionGui.Parent = gui
-
-		local corner = Instance.new("UICorner")
-		corner.CornerRadius = UDim.new(0, 8)
-		corner.Parent = selectionGui
-
-		for i, choice in ipairs(choices) do
-			local btn = Instance.new("TextButton")
-			btn.Size = UDim2.new(1, -10, 0, 35)
-			btn.Position = UDim2.new(0, 5, 0, (i - 1) * 40 + 5)
-			btn.Text = choice
-			btn.TextScaled = true
-			btn.TextWrapped = true
-			btn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-			btn.TextColor3 = Color3.new(1, 1, 1)
-			btn.ZIndex = 10
-			btn.Parent = selectionGui
-
-			local btnCorner = Instance.new("UICorner")
-			btnCorner.CornerRadius = UDim.new(0, 8)
-			btnCorner.Parent = btn
-
-			btn.MouseButton1Click:Connect(function()
-				selectedExercise = choice
-				savedStates.WeightExercise = choice
-				chooseButton.Text = "เลือก: " .. choice
-				selectionGui:Destroy()
-			end)
-		end
-	end)
-
-	-- ▶️ ฟังก์ชันปุ่มเริ่ม/หยุด
-	startButton.MouseButton1Click:Connect(function()
-		if not selectedExercise then
-			startButton.Text = "เลือกก่อน!"
-			task.wait(1)
-			startButton.Text = running and "หยุด" or "เริ่ม"
-			return
-		end
-
-		running = not running
-		savedStates.WeightRunning = running
-		startButton.Text = running and "หยุด" or "เริ่ม"
-
-		if running then
-			-- ตรวจสอบและถือไอเทม
-			local tool = backpack:FindFirstChild(selectedExercise)
-			if tool and humanoid then
-				humanoid:EquipTool(tool)
-			else
-				startButton.Text = "ไม่พบไอเทม!"
-				task.wait(1)
-				startButton.Text = running and "หยุด" or "เริ่ม"
-				running = false
-				savedStates.WeightRunning = false
-				return
-			end
-
-			-- รัน muscleEvent แบบรัวๆ
-			spawn(function()
-				while running do
-					if muscleEvent then
-						muscleEvent:FireServer("rep")
-					else
-						startButton.Text = "ไม่พบ muscleEvent!"
-						task.wait(1)
-						startButton.Text = running and "หยุด" or "เริ่ม"
-						running = false
-						savedStates.WeightRunning = false
-						break
-					end
-					task.wait(math.random(0.08, 0.12))
-				end
-			end)
-		end
-	end)
-
-	-- 🎰 ฟังก์ชันปุ่มอ้อโต้สปิน
-	spinToggle.MouseButton1Click:Connect(function()
-		spinEnabled = not spinEnabled
-		savedStates.SpinEnabled = spinEnabled
-		spinToggle.Text = spinEnabled and "เปิด" or "ปิด"
-
-		if spinEnabled then
-			spawn(function()
-				while spinEnabled do
-					if fortuneWheelRemote and fortuneWheel then
-						local args = {"openFortuneWheel", fortuneWheel}
-						fortuneWheelRemote:InvokeServer(unpack(args))
-					else
-						spinToggle.Text = "ไม่พบ Remote!"
-						task.wait(1)
-						spinToggle.Text = spinEnabled and "เปิด" or "ปิด"
-						spinEnabled = false
-						savedStates.SpinEnabled = false
-						break
-					end
-					task.wait(1)
-				end
-			end)
-		end
-	end)
-
-	-- 🔄 ฟังก์ชันปุ่มอ้อโต้รีเบิร์ด
-	rebirthToggle.MouseButton1Click:Connect(function()
-		rebirthEnabled = not rebirthEnabled
-		savedStates.RebirthEnabled = rebirthEnabled
-		rebirthToggle.Text = rebirthEnabled and "เปิด" or "ปิด"
-
-		if rebirthEnabled then
-			spawn(function()
-				while rebirthEnabled do
-					if rebirthRemote then
-						local args = {"rebirthRequest"}
-						rebirthRemote:InvokeServer(unpack(args))
-					else
-						rebirthToggle.Text = "ไม่พบ Remote!"
-						task.wait(1)
-						rebirthToggle.Text = rebirthEnabled and "เปิด" or "ปิด"
-						rebirthEnabled = false
-						savedStates.RebirthEnabled = false
-						break
-					end
-					task.wait(1)
-				end
-			end)
-		end
-	end)
 
 	-- 🍫 ฟังก์ชันปุ่มอ้อโต้กินโปรตัน
 	proteinToggle.MouseButton1Click:Connect(function()
@@ -776,6 +726,13 @@ local function createGui()
 					foundTool:Activate()
 				end
 			end
+			if savedStates.FpsPingEnabled then
+				fpsPingEnabled = true
+				fpsPingToggle.Text = "เปิด"
+				fpsPingGui, fpsLabel, pingLabel = createFpsPingGui()
+				fpsPingGui.Enabled = true
+				updateFpsPing(fpsLabel, pingLabel)
+			end
 		end
 	end)
 
@@ -892,6 +849,12 @@ LocalPlayer.CharacterAdded:Connect(function(char)
 			task.wait(0.1)
 			foundTool:Activate()
 		end
+	end
+	-- คืนค่า FPS+PING GUI
+	if savedStates.FpsPingEnabled and not PlayerGui:FindFirstChild("FpsPingGui") then
+		local fpsPingGui, fpsLabel, pingLabel = createFpsPingGui()
+		fpsPingGui.Enabled = true
+		updateFpsPing(fpsLabel, pingLabel)
 	end
 	-- ตรวจสอบและสร้าง GUI ใหม่ถ้าหายไป
 	if not PlayerGui:FindFirstChild("MainGUI") or not PlayerGui:FindFirstChild("ToggleGui") then
