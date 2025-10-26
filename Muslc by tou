@@ -311,7 +311,7 @@ local success, err = pcall(function()
         jumpToggle.Position = UDim2.new(0, 190, 0, 80)
         jumpToggle.Parent = playerFrame
 
-        -- เพิ่มปุ่ม "ปรับขนาดตัว2" ในแท็บ "ผู้เล่น"
+        -- ปุ่ม "ปรับขนาดตัว2"
         local sizeLabel = Instance.new("TextLabel")
         sizeLabel.Text = "ปรับขนาดตัว2:"
         sizeLabel.Size = UDim2.new(0, 80, 0, 25)
@@ -389,33 +389,55 @@ local success, err = pcall(function()
 
             if sizeEnabled then
                 local size = tonumber(savedStates.SizeValue) or 2
-                if changeSpeedSizeRemote then
-                    local args = {"changeSize", size}
-                    local success, err = pcall(function()
-                        changeSpeedSizeRemote:InvokeServer(unpack(args))
-                    end)
-                    if not success then
-                        sizeToggle.Text = "ข้อผิดพลาด!"
-                        task.wait(1)
-                        sizeToggle.Text = sizeEnabled and "เปิด" or "ปิด"
-                        sizeEnabled = false
-                        savedStates.SizeEnabled = false
-                        print("ปรับขนาดตัวล้มเหลว: " .. err)
+                local success, err = pcall(function()
+                    -- ลองค้นหา Remote ในตำแหน่งที่เป็นไปได้
+                    local remote = ReplicatedStorage:FindFirstChild("rEvents") and ReplicatedStorage.rEvents:FindFirstChild("changeSpeedSizeRemote")
+                    if not remote then
+                        -- ลองค้นหาใน ReplicatedStorage โดยตรง
+                        remote = ReplicatedStorage:FindFirstChild("changeSpeedSizeRemote")
                     end
-                else
-                    sizeToggle.Text = "ไม่พบ Remote!"
-                    task.wait(1)
+                    if remote then
+                        local args = {"changeSize", size}
+                        remote:InvokeServer(unpack(args))
+                        print("เรียก changeSpeedSizeRemote: Size =", size)
+                    else
+                        -- วิธีสำรอง: ปรับ BodyScale โดยตรง
+                        if humanoid then
+                            local bodyScale = humanoid:FindFirstChildOfClass("BodyWidthScale") or humanoid:FindFirstChildOfClass("BodyDepthScale") or humanoid:FindFirstChildOfClass("BodyHeightScale")
+                            if bodyScale then
+                                bodyScale.Value = size
+                                print("ปรับ BodyScale โดยตรง: Size =", size)
+                            else
+                                error("ไม่พบ BodyScale!")
+                            end
+                        else
+                            error("ไม่พบ Humanoid!")
+                        end
+                    end
+                end)
+                if not success then
+                    sizeToggle.Text = "ข้อผิดพลาด: " .. tostring(err)
+                    task.wait(2)
                     sizeToggle.Text = sizeEnabled and "เปิด" or "ปิด"
                     sizeEnabled = false
                     savedStates.SizeEnabled = false
-                    print("ปรับขนาดตัวล้มเหลว: ไม่พบ changeSpeedSizeRemote")
+                    print("ปรับขนาดตัวล้มเหลว: " .. err)
                 end
             else
-                if changeSpeedSizeRemote then
-                    local args = {"changeSize", 1}
-                    pcall(function()
-                        changeSpeedSizeRemote:InvokeServer(unpack(args))
-                    end)
+                local success, err = pcall(function()
+                    local remote = ReplicatedStorage:FindFirstChild("rEvents") and ReplicatedStorage.rEvents:FindFirstChild("changeSpeedSizeRemote") or ReplicatedStorage:FindFirstChild("changeSpeedSizeRemote")
+                    if remote then
+                        local args = {"changeSize", 1}
+                        remote:InvokeServer(unpack(args))
+                    elseif humanoid then
+                        local bodyScale = humanoid:FindFirstChildOfClass("BodyWidthScale") or humanoid:FindFirstChildOfClass("BodyDepthScale") or humanoid:FindFirstChildOfClass("BodyHeightScale")
+                        if bodyScale then
+                            bodyScale.Value = 1
+                        end
+                    end
+                end)
+                if not success then
+                    print("รีเซ็ตขนาดตัวล้มเหลว: " .. err)
                 end
             end
         end)
@@ -995,7 +1017,7 @@ local success, err = pcall(function()
         local fortuneWheel = ReplicatedStorage:WaitForChild("fortuneWheelChances", 5) and ReplicatedStorage.fortuneWheelChances:WaitForChild("Fortune Wheel", 5)
         local rebirthRemote = ReplicatedStorage:WaitForChild("rEvents", 5) and ReplicatedStorage.rEvents:WaitForChild("rebirthRemote", 5)
         local brawlEvent = ReplicatedStorage:WaitForChild("rEvents", 5) and ReplicatedStorage.rEvents:WaitForChild("brawlEvent", 5)
-        local changeSpeedSizeRemote = ReplicatedStorage:WaitForChild("rEvents", 5) and ReplicatedStorage.rEvents:WaitForChild("changeSpeedSizeRemote", 5)
+        local changeSpeedSizeRemote = ReplicatedStorage:FindFirstChild("rEvents") and ReplicatedStorage.rEvents:FindFirstChild("changeSpeedSizeRemote") or ReplicatedStorage:FindFirstChild("changeSpeedSizeRemote")
 
         if not muscleEvent then warn("ไม่พบ muscleEvent!") end
         if not backpack then warn("ไม่พบ Backpack!") end
@@ -1162,7 +1184,7 @@ local success, err = pcall(function()
             if proteinEnabled then
                 spawn(function()
                     while proteinEnabled and humanoid and backpack do
-                        local proteinTools = {"Protein Bar", "Protein Shake", "ULTRA Shake", "TOUGH Bar"}
+                        local proteinTools = {"Protein Bar", "Protein Shake", "ULTRA Shake", "TOUGH Bar", "Energy Bar"}
                         local foundTool = nil
                         for _, toolName in ipairs(proteinTools) do
                             local tool = backpack:FindFirstChild(toolName)
@@ -1240,7 +1262,7 @@ local success, err = pcall(function()
                 humanoid:EquipTool(child)
                 print("ถือ Tool อัตโนมัติ:", child.Name)
             end
-            if proteinEnabled and table.find({"Protein Bar", "Protein Shake", "ULTRA Shake", "TOUGH Bar"}, child.Name) and humanoid then
+            if proteinEnabled and table.find({"Protein Bar", "Protein Shake", "ULTRA Shake", "TOUGH Bar", "Energy Bar"}, child.Name) and humanoid then
                 task.wait(0.1)
                 local success, err = pcall(function()
                     humanoid:EquipTool(child)
@@ -1284,127 +1306,6 @@ local success, err = pcall(function()
                 end
                 if savedStates.WeightRunning and savedStates.WeightExercise then
                     running = true
-                    startButton.Text = "หยุด"
-                    chooseButton.Text = "เลือก: " .. savedStates.WeightExercise
-                    selectedExercise = savedStates.WeightExercise
-                    local tool = backpack and backpack:FindFirstChild(savedStates.WeightExercise)
-                    if tool and humanoid then
-                        humanoid:EquipTool(tool)
-                    end
-                    spawn(function()
-                        while running and saveEnabled do
-                            if muscleEvent then
-                                muscleEvent:FireServer("rep")
-                            end
-                            task.wait(math.random(0.08, 0.12))
-                        end
-                    end)
-                end
-                if savedStates.SpinEnabled then
-                    spinEnabled = true
-                    spinToggle.Text = "เปิด"
-                    spawn(function()
-                        while spinEnabled and saveEnabled do
-                            if fortuneWheelRemote and fortuneWheel then
-                                local args = {"openFortuneWheel", fortuneWheel}
-                                fortuneWheelRemote:InvokeServer(unpack(args))
-                            end
-                            task.wait(1)
-                        end
-                    end)
-                end
-                if savedStates.RebirthEnabled then
-                    rebirthEnabled = true
-                    rebirthToggle.Text = "เปิด"
-                    spawn(function()
-                        while rebirthEnabled and saveEnabled do
-                            if rebirthRemote then
-                                local args = {"rebirthRequest"}
-                                rebirthRemote:InvokeServer(unpack(args))
-                            end
-                            task.wait(1)
-                        end
-                    end)
-                end
-                if savedStates.ProteinEnabled then
-                    proteinEnabled = true
-                    proteinToggle.Text = "เปิด"
-                    spawn(function()
-                        while proteinEnabled and saveEnabled and humanoid and backpack do
-                            local proteinTools = {"Protein Bar", "Protein Shake", "ULTRA Shake", "TOUGH Bar"}
-                            local foundTool = nil
-                            for _, toolName in ipairs(proteinTools) do
-                                local tool = backpack:FindFirstChild(toolName)
-                                if tool then
-                                    foundTool = tool
-                                    break
-                                end
-                            end
-                            if foundTool then
-                                local success, err = pcall(function()
-                                    humanoid:EquipTool(foundTool)
-                                    task.wait(0.1)
-                                    foundTool:Activate()
-                                    print("กินโปรตันใน SaveEnabled:", foundTool.Name)
-                                end)
-                                if not success then
-                                    print("กินโปรตันล้มเหลวใน SaveEnabled: " .. err)
-                                end
-                            end
-                            task.wait(1)
-                        end
-                    end)
-                end
-                if savedStates.FpsPingEnabled then
-                    fpsPingEnabled = true
-                    fpsPingToggle.Text = "เปิด"
-                    fpsPingGui, fpsLabel, pingLabel = createFpsPingGui()
-                    fpsPingGui.Enabled = true
-                    updateFpsPing(fpsLabel, pingLabel)
-                end
-                if savedStates.ServerInfoEnabled then
-                    serverInfoEnabled = true
-                    serverInfoToggle.Text = "เปิด"
-                    serverInfoGui, cleanupConnections = createPlayerInfoGui()
-                    serverInfoGui.Enabled = true
-                end
-                if savedStates.JoinBrawlEnabled then
-                    joinBrawlEnabled = true
-                    joinBrawlToggle.Text = "เปิด"
-                    spawn(function()
-                        while joinBrawlEnabled and saveEnabled do
-                            if brawlEvent then
-                                local args = {"joinBrawl"}
-                                pcall(function()
-                                    brawlEvent:FireServer(unpack(args))
-                                end)
-                            end
-                            task.wait(math.random(0.95, 1.05))
-                        end
-                    end)
-                end
-                if savedStates.SizeEnabled then
-                    sizeEnabled = true
-                    sizeToggle.Text = "เปิด"
-                    if changeSpeedSizeRemote then
-                        local size = tonumber(savedStates.SizeValue) or 2
-                        local args = {"changeSize", size}
-                        pcall(function()
-                            changeSpeedSizeRemote:InvokeServer(unpack(args))
-                        end)
-                    end
-                end
-            end
-        end)
-
-        for name, button in pairs(tabs) do
-            button.MouseButton1Click:Connect(function()
-                showTab(name)
-            end)
-        end
-
-        if savedStates.WeightRunning and savedStates.WeightExercise then
-            running = true
             startButton.Text = "หยุด"
             chooseButton.Text = "เลือก: " .. savedStates.WeightExercise
             selectedExercise = savedStates.WeightExercise
@@ -1452,7 +1353,7 @@ local success, err = pcall(function()
             proteinToggle.Text = "เปิด"
             spawn(function()
                 while proteinEnabled and humanoid and backpack do
-                    local proteinTools = {"Protein Bar", "Protein Shake", "ULTRA Shake", "TOUGH Bar"}
+                    local proteinTools = {"Protein Bar", "Protein Shake", "ULTRA Shake", "TOUGH Bar", "Energy Bar"}
                     local foundTool = nil
                     for _, toolName in ipairs(proteinTools) do
                         local tool = backpack:FindFirstChild(toolName)
@@ -1532,74 +1433,4 @@ local success, err = pcall(function()
             proteinToggle.Text = "เปิด"
             spawn(function()
                 while proteinEnabled and humanoid and backpack do
-                    local proteinTools = {"Protein Bar", "Protein Shake", "ULTRA Shake", "TOUGH Bar"}
-                    local foundTool = nil
-                    for _, toolName in ipairs(proteinTools) do
-                        local tool = backpack:FindFirstChild(toolName)
-                        if tool then
-                            foundTool = tool
-                            break
-                        end
-                    end
-                    if foundTool then
-                        local success, err = pcall(function()
-                            humanoid:EquipTool(foundTool)
-                            task.wait(0.1)
-                            foundTool:Activate()
-                            print("กินโปรตันใน CharacterAdded:", foundTool.Name)
-                        end)
-                        if not success then
-                            print("กินโปรตันล้มเหลวใน CharacterAdded: " .. err)
-                        end
-                    end
-                    task.wait(1)
-                end
-            end)
-        end
-        if savedStates.FpsPingEnabled and not PlayerGui:FindFirstChild("FpsPingGui") then
-            local fpsPingGui, fpsLabel, pingLabel = createFpsPingGui()
-            fpsPingGui.Enabled = true
-            updateFpsPing(fpsLabel, pingLabel)
-        end
-        if savedStates.ServerInfoEnabled and not PlayerGui:FindFirstChild("PlayerInfoGUI") then
-            local serverInfoGui, cleanupConnections = createPlayerInfoGui()
-            serverInfoGui.Enabled = true
-        end
-        if savedStates.JoinBrawlEnabled then
-            joinBrawlEnabled = true
-            joinBrawlToggle.Text = "เปิด"
-            spawn(function()
-                while joinBrawlEnabled do
-                    if brawlEvent then
-                        local args = {"joinBrawl"}
-                        pcall(function()
-                            brawlEvent:FireServer(unpack(args))
-                        end)
-                    end
-                    task.wait(math.random(0.95, 1.05))
-                end
-            end)
-        end
-        if savedStates.SizeEnabled then
-            sizeEnabled = true
-            sizeToggle.Text = "เปิด"
-            if changeSpeedSizeRemote then
-                local size = tonumber(savedStates.SizeValue) or 2
-                local args = {"changeSize", size}
-                pcall(function()
-                    changeSpeedSizeRemote:InvokeServer(unpack(args))
-                end)
-            end
-        end
-        if not PlayerGui:FindFirstChild("MainGUI") or not PlayerGui:FindFirstChild("ToggleGui") then
-            createGui()
-        end
-        print("ตัวละครเกิดใหม่: คืนค่าสถานะ")
-    end)
-
-    createGui()
-end)
-
-if not success then
-    warn("เกิดข้อผิดพลาดในสคริปต์: " .. err)
-end
+                    local proteinTools
