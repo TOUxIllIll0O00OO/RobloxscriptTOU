@@ -20,10 +20,13 @@ clearGui()
 local savedStates = {
 	Speed = false,
 	Jump = false,
+	SpeedValue = "16", -- บันทึกค่า speedBox.Text
+	JumpValue = "50", -- บันทึกค่า jumpBox.Text
 	WeightRunning = false,
 	WeightExercise = nil,
 	SpinEnabled = false,
-	RebirthEnabled = false
+	RebirthEnabled = false,
+	ProteinEnabled = false
 }
 local guiState = {
 	Enabled = false, -- สถานะการเปิด/ปิด MainGUI
@@ -190,7 +193,7 @@ local function createGui()
 	local speedBox = Instance.new("TextBox")
 	speedBox.Size = UDim2.new(0, 80, 0, 25)
 	speedBox.Position = UDim2.new(0, 100, 0, 40)
-	speedBox.Text = "16"
+	speedBox.Text = savedStates.SpeedValue
 	speedBox.TextColor3 = Color3.new(1, 1, 1)
 	speedBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 	speedBox.TextScaled = true
@@ -216,7 +219,7 @@ local function createGui()
 	jumpLabel.Parent = playerFrame
 
 	local jumpBox = speedBox:Clone()
-	jumpBox.Text = "50"
+	jumpBox.Text = savedStates.JumpValue
 	jumpBox.Position = UDim2.new(0, 100, 0, 80)
 	jumpBox.Parent = playerFrame
 
@@ -229,6 +232,14 @@ local function createGui()
 	local speedEnabled = savedStates.Speed
 	local jumpEnabled = savedStates.Jump
 	local humanoid = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+
+	-- 🎮 อัปเดตค่า TextBox เมื่อเปลี่ยน
+	speedBox:GetPropertyChangedSignal("Text"):Connect(function()
+		savedStates.SpeedValue = speedBox.Text
+	end)
+	jumpBox:GetPropertyChangedSignal("Text"):Connect(function()
+		savedStates.JumpValue = jumpBox.Text
+	end)
 
 	-- 🎮 ฟังก์ชันควบคุมความเร็วและกระโดด
 	speedToggle.MouseButton1Click:Connect(function()
@@ -243,10 +254,11 @@ local function createGui()
 		jumpToggle.Text = jumpEnabled and "เปิด" or "ปิด"
 	end)
 
+	-- 🔄 อัปเดตความเร็วและกระโดดอย่างต่อเนื่อง
 	RunService.Heartbeat:Connect(function()
 		if humanoid then
 			if speedEnabled then
-				local speed = tonumber(speedBox.Text) or 16
+				local speed = tonumber(savedStates.SpeedValue) or 16
 				if speed <= 200 then
 					humanoid.WalkSpeed = speed
 				end
@@ -254,7 +266,7 @@ local function createGui()
 				humanoid.WalkSpeed = 16
 			end
 			if jumpEnabled then
-				local jump = tonumber(jumpBox.Text) or 50
+				local jump = tonumber(savedStates.JumpValue) or 50
 				if jump <= 150 then
 					humanoid.JumpPower = jump
 				end
@@ -409,11 +421,35 @@ local function createGui()
 	rebirthToggle.ZIndex = 10
 	rebirthToggle.Parent = weightFrame
 
-	-- 🏋️‍♂️ ตัวแปรสำหรับออโต้ยกน้ำหนัก, สปิน, และรีเบิร์ด
+	-- 🍫 ข้อความและปุ่ม "อ้อโต้กินโปรตัน"
+	local proteinLabel = Instance.new("TextLabel")
+	proteinLabel.Text = "อ้อโต้กินโปรตัน:"
+	proteinLabel.Size = UDim2.new(0, 150, 0, 25)
+	proteinLabel.Position = UDim2.new(0, 10, 0, 150)
+	proteinLabel.TextColor3 = Color3.new(1, 1, 1)
+	proteinLabel.BackgroundTransparency = 1
+	proteinLabel.TextScaled = true
+	proteinLabel.TextWrapped = true
+	proteinLabel.ZIndex = 10
+	proteinLabel.Parent = weightFrame
+
+	local proteinToggle = Instance.new("TextButton")
+	proteinToggle.Size = UDim2.new(0, 100, 0, 25)
+	proteinToggle.Position = UDim2.new(0, 170, 0, 150)
+	proteinToggle.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+	proteinToggle.Text = savedStates.ProteinEnabled and "เปิด" or "ปิด"
+	proteinToggle.TextColor3 = Color3.new(1, 1, 1)
+	proteinToggle.TextScaled = true
+	proteinToggle.TextWrapped = true
+	proteinToggle.ZIndex = 10
+	proteinToggle.Parent = weightFrame
+
+	-- 🏋️‍♂️ ตัวแปรสำหรับออโต้ยกน้ำหนัก, สปิน, รีเบิร์ด, และกินโปรตัน
 	local selectedExercise = savedStates.WeightExercise
 	local running = savedStates.WeightRunning
 	local spinEnabled = savedStates.SpinEnabled
 	local rebirthEnabled = savedStates.RebirthEnabled
+	local proteinEnabled = savedStates.ProteinEnabled
 	local muscleEvent = LocalPlayer:WaitForChild("muscleEvent")
 	local backpack = LocalPlayer:WaitForChild("Backpack")
 	local fortuneWheelRemote = ReplicatedStorage:WaitForChild("rEvents"):WaitForChild("openFortuneWheelRemote")
@@ -566,11 +602,47 @@ local function createGui()
 		end
 	end)
 
+	-- 🍫 ฟังก์ชันปุ่มอ้อโต้กินโปรตัน
+	proteinToggle.MouseButton1Click:Connect(function()
+		proteinEnabled = not proteinEnabled
+		savedStates.ProteinEnabled = proteinEnabled
+		proteinToggle.Text = proteinEnabled and "เปิด" or "ปิด"
+
+		if proteinEnabled then
+			local proteinTools = {"Protein Bar", "Protein Shake", "ULTRA Shake", "TOUGH Bar"}
+			local foundTool = nil
+			for _, toolName in ipairs(proteinTools) do
+				local tool = backpack:FindFirstChild(toolName)
+				if tool then
+					foundTool = tool
+					break
+				end
+			end
+
+			if foundTool and humanoid then
+				humanoid:EquipTool(foundTool)
+				task.wait(0.1) -- หน่วงเล็กน้อยเพื่อให้แน่ใจว่า Tool ถือแล้ว
+				foundTool:Activate()
+			else
+				proteinToggle.Text = "ไม่พบ Tool!"
+				task.wait(1)
+				proteinToggle.Text = proteinEnabled and "เปิด" or "ปิด"
+				proteinEnabled = false
+				savedStates.ProteinEnabled = false
+			end
+		end
+	end)
+
 	-- 🛠 ตรวจสอบเมื่อ Tool ถูกเก็บลง Backpack
 	backpack.ChildAdded:Connect(function(child)
 		if running and child.Name == selectedExercise and humanoid then
 			task.wait(0.1)
 			humanoid:EquipTool(child)
+		end
+		if proteinEnabled and table.find({"Protein Bar", "Protein Shake", "ULTRA Shake", "TOUGH Bar"}, child.Name) and humanoid then
+			task.wait(0.1)
+			humanoid:EquipTool(child)
+			child:Activate()
 		end
 	end)
 
@@ -583,10 +655,22 @@ local function createGui()
 			if savedStates.Speed then
 				speedEnabled = true
 				speedToggle.Text = "เปิด"
+				if humanoid then
+					local speed = tonumber(savedStates.SpeedValue) or 16
+					if speed <= 200 then
+						humanoid.WalkSpeed = speed
+					end
+				end
 			end
 			if savedStates.Jump then
 				jumpEnabled = true
 				jumpToggle.Text = "เปิด"
+				if humanoid then
+					local jump = tonumber(savedStates.JumpValue) or 50
+					if jump <= 150 then
+						humanoid.JumpPower = jump
+					end
+				end
 			end
 			if savedStates.WeightRunning and savedStates.WeightExercise then
 				running = true
@@ -632,6 +716,24 @@ local function createGui()
 					end
 				end)
 			end
+			if savedStates.ProteinEnabled then
+				proteinEnabled = true
+				proteinToggle.Text = "เปิด"
+				local proteinTools = {"Protein Bar", "Protein Shake", "ULTRA Shake", "TOUGH Bar"}
+				local foundTool = nil
+				for _, toolName in ipairs(proteinTools) do
+					local tool = backpack:FindFirstChild(toolName)
+					if tool then
+						foundTool = tool
+						break
+					end
+				end
+				if foundTool and humanoid then
+					humanoid:EquipTool(foundTool)
+					task.wait(0.1)
+					foundTool:Activate()
+				end
+			end
 		end
 	end)
 
@@ -642,7 +744,7 @@ local function createGui()
 		end)
 	end
 
--- คืนค่าสถานะและรันลูปถ้ามี
+	-- คืนค่าสถานะและรันลูปถ้ามี
 	if savedStates.WeightRunning and savedStates.WeightExercise then
 		running = true
 		startButton.Text = "หยุด"
@@ -687,6 +789,24 @@ local function createGui()
 			end
 		end)
 	end
+	if savedStates.ProteinEnabled then
+		proteinEnabled = true
+		proteinToggle.Text = "เปิด"
+		local proteinTools = {"Protein Bar", "Protein Shake", "ULTRA Shake", "TOUGH Bar"}
+		local foundTool = nil
+		for _, toolName in ipairs(proteinTools) do
+			local tool = backpack:FindFirstChild(toolName)
+			if tool then
+				foundTool = tool
+				break
+			end
+		end
+		if foundTool and humanoid then
+			humanoid:EquipTool(foundTool)
+			task.wait(0.1)
+			foundTool:Activate()
+		end
+	end
 
 	showTab("ผู้เล่น") -- เปิดเริ่มต้นที่แท็บผู้เล่น
 end
@@ -694,12 +814,41 @@ end
 -- 🔄 อัปเดต Humanoid และ GUI เมื่อตัวละครโหลดใหม่
 LocalPlayer.CharacterAdded:Connect(function(char)
 	humanoid = char:WaitForChild("Humanoid")
+	-- คืนค่า WalkSpeed และ JumpPower
+	if savedStates.Speed and humanoid then
+		local speed = tonumber(savedStates.SpeedValue) or 16
+		if speed <= 200 then
+			humanoid.WalkSpeed = speed
+		end
+	end
+	if savedStates.Jump and humanoid then
+		local jump = tonumber(savedStates.JumpValue) or 50
+		if jump <= 150 then
+			humanoid.JumpPower = jump
+		end
+	end
 	-- ถือ Tool อัตโนมัติเมื่อเกิดใหม่
 	if savedStates.WeightRunning and savedStates.WeightExercise then
 		local backpack = LocalPlayer:WaitForChild("Backpack")
 		local tool = backpack:FindFirstChild(savedStates.WeightExercise)
 		if tool and humanoid then
 			humanoid:EquipTool(tool)
+		end
+	end
+	if savedStates.ProteinEnabled then
+		local proteinTools = {"Protein Bar", "Protein Shake", "ULTRA Shake", "TOUGH Bar"}
+		local foundTool = nil
+		for _, toolName in ipairs(proteinTools) do
+			local tool = backpack:FindFirstChild(toolName)
+			if tool then
+				foundTool = tool
+				break
+			end
+		end
+		if foundTool and humanoid then
+			humanoid:EquipTool(foundTool)
+			task.wait(0.1)
+			foundTool:Activate()
 		end
 	end
 	-- ตรวจสอบและสร้าง GUI ใหม่ถ้าหายไป
