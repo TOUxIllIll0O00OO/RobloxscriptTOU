@@ -1,243 +1,3 @@
--- 🌟 สร้าง GUI Exploit สุดเทพสำหรับ Roblox! 🌟
-local success, err = pcall(function()
-    if not game then
-        error("สคริปต์ต้องรันใน Roblox!")
-        return
-    end
-
-    local Players = game:GetService("Players")
-    local LocalPlayer = Players.LocalPlayer
-    if not LocalPlayer then
-        error("ไม่พบ LocalPlayer!")
-        return
-    end
-    local PlayerGui = LocalPlayer:WaitForChild("PlayerGui", 5)
-    if not PlayerGui then
-        error("ไม่พบ PlayerGui!")
-        return
-    end
-    local RunService = game:GetService("RunService")
-    local ReplicatedStorage = game:GetService("ReplicatedStorage")
-    local Stats = game:GetService("Stats")
-
-    -- 🗑 ลบ GUI เก่าถ้ามี
-    local function clearGui()
-        print("กำลังลบ GUI เก่า")
-        for _, guiName in ipairs({"MainGUI", "ToggleGui", "FpsPingGui", "PlayerInfoGUI"}) do
-            if PlayerGui:FindFirstChild(guiName) then
-                PlayerGui[guiName]:Destroy()
-            end
-        end
-    end
-    clearGui()
-
-    -- ⚙️ ตัวแปรสำหรับบันทึกสถานะ GUI และการทำงาน
-    local savedStates = {
-        Speed = false,
-        Jump = false,
-        SpeedValue = "16",
-        JumpValue = "50",
-        WeightRunning = false,
-        WeightExercise = nil,
-        SpinEnabled = false,
-        RebirthEnabled = false,
-        ProteinEnabled = false,
-        FpsPingEnabled = false,
-        ServerInfoEnabled = false
-    }
-    local guiState = {
-        Enabled = true,
-        ToggleButtonPos = UDim2.new(0, 50, 0, 50)
-    }
-
-    -- 🛠 ฟังก์ชันสร้าง GUI และคืนค่าสถานะ
-    local function createGui()
-        print("เริ่มสร้าง GUI")
-        clearGui()
-
-        -- 🖥 สร้าง ScreenGui สำหรับ GUI หลัก
-        local gui = Instance.new("ScreenGui")
-        gui.Name = "MainGUI"
-        gui.ResetOnSpawn = false
-        gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-        gui.IgnoreGuiInset = true
-        gui.Enabled = guiState.Enabled
-        gui.Parent = PlayerGui
-        print("สร้าง MainGUI, Enabled =", gui.Enabled)
-
-        -- 🖥 สร้าง ScreenGui สำหรับปุ่ม "อ้ายโดม😇"
-        local toggleGui = Instance.new("ScreenGui")
-        toggleGui.Name = "ToggleGui"
-        toggleGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-        toggleGui.IgnoreGuiInset = true
-        toggleGui.Parent = PlayerGui
-        print("สร้าง ToggleGui")
-
-        -- 😇 สร้างปุ่ม "อ้ายโดม😇"
-        local toggleButton = Instance.new("TextButton")
-        toggleButton.Size = UDim2.new(0, 100, 0, 40)
-        toggleButton.Position = guiState.ToggleButtonPos
-        toggleButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-        toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-        toggleButton.Text = "อ้ายโดม😇"
-        toggleButton.Font = Enum.Font.GothamBold
-        toggleButton.TextSize = 14
-        toggleButton.TextScaled = true
-        toggleButton.TextWrapped = true
-        toggleButton.Active = true
-        toggleButton.Draggable = true
-        toggleButton.ZIndex = 11
-        toggleButton.Parent = toggleGui
-
-        local toggleCorner = Instance.new("UICorner")
-        toggleCorner.CornerRadius = UDim.new(0, 8)
-        toggleCorner.Parent = toggleButton
-
-        toggleButton:GetPropertyChangedSignal("Position"):Connect(function()
-            guiState.ToggleButtonPos = toggleButton.Position
-        end)
-
-        toggleButton.MouseButton1Click:Connect(function()
-            guiState.Enabled = not guiState.Enabled
-            gui.Enabled = guiState.Enabled
-            print("สลับ GUI: Enabled =", guiState.Enabled)
-        end)
-
-        -- 🖼 สร้างกรอบหลัก
-        local mainFrame = Instance.new("Frame")
-        mainFrame.Size = UDim2.new(0, 520, 0, 360)
-        mainFrame.Position = UDim2.new(0.5, -260, 0.5, -180)
-        mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-        mainFrame.BorderSizePixel = 0
-        mainFrame.Active = true
-        mainFrame.Draggable = true
-        mainFrame.ZIndex = 10
-        mainFrame.Parent = gui
-
-        local corner = Instance.new("UICorner")
-        corner.CornerRadius = UDim.new(0, 10)
-        corner.Parent = mainFrame
-
-        -- 📑 สร้างปุ่มแท็บด้านบน
-        local tabNames = {"วาปไปจุดต่างๆ", "ผู้เล่น", "การตั้งค่า", "อ้อโต้ยกน้ำหนัก"}
-        local tabs = {}
-        local currentTab = nil
-
-        for i, name in ipairs(tabNames) do
-            local tab = Instance.new("TextButton")
-            tab.Size = UDim2.new(0, 120, 0, 35)
-            tab.Position = UDim2.new(0, (i - 1) * 130 + 10, 0, 5)
-            tab.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-            tab.TextColor3 = Color3.fromRGB(255, 255, 255)
-            tab.Text = name
-            tab.Font = Enum.Font.GothamBold
-            tab.TextSize = 14
-            tab.TextScaled = true
-            tab.TextWrapped = true
-            tab.ZIndex = 10
-            tab.Parent = mainFrame
-
-            local corner2 = Instance.new("UICorner")
-            corner2.CornerRadius = UDim.new(0, 8)
-            corner2.Parent = tab
-            tabs[name] = tab
-        end
-
-        -- 📄 พื้นที่แสดงเนื้อหา
-        local contentFrame = Instance.new("Frame")
-        contentFrame.Size = UDim2.new(1, -20, 1, -50)
-        contentFrame.Position = UDim2.new(0, 10, 0, 45)
-        contentFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-        contentFrame.BorderSizePixel = 0
-        contentFrame.ZIndex = 10
-        contentFrame.Parent = mainFrame
-
-        local contentCorner = Instance.new("UICorner")
-        contentCorner.CornerRadius = UDim.new(0, 8)
-        contentCorner.Parent = contentFrame
-
-        -- 🔄 ฟังก์ชันเปลี่ยนแท็บ
-        local function showTab(tabName)
-            for _, frame in pairs(contentFrame:GetChildren()) do
-                if frame:IsA("Frame") then
-                    frame.Visible = false
-                end
-            end
-            for _, btn in pairs(tabs) do
-                btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-            end
-            tabs[tabName].BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-            if contentFrame:FindFirstChild(tabName) then
-                contentFrame[tabName].Visible = true
-            end
-            currentTab = tabName
-            print("เปลี่ยนไปแท็บ:", tabName)
-        end
-
-        -------------------------------------
-        -- 🌌 หน้าหลัก "วาปไปจุดต่างๆ"
-        -------------------------------------
-        local warpFrame = Instance.new("Frame")
-        warpFrame.Name = "วาปไปจุดต่างๆ"
-        warpFrame.Size = UDim2.new(1, 0, 1, 0)
-        warpFrame.Visible = false
-        warpFrame.BackgroundTransparency = 1
-        warpFrame.ZIndex = 10
-        warpFrame.Parent = contentFrame
-
-        local warpPoints = {
-            {Label = "วาปไปประตู 1 รีเบิร์ด", Position = Vector3.new(-2623.02, 7.27, -409.07), Y = 40},
-            {Label = "วาปไปประตู 5 รีเบิร์ด", Position = Vector3.new(2250.78, 7.27, 1073.23), Y = 70},
-            {Label = "วาปไปประตู 15 รีเบิร์ด", Position = Vector3.new(-6758.96, 7.27, -1284.92), Y = 100},
-            {Label = "วาปไปประตู 30 รีเบิร์ด", Position = Vector3.new(4603.28, 991.45, -3897.87), Y = 130},
-            {Label = "วาปไปประตู 60 รีเบิร์ด", Position = Vector3.new(-8685.62, 6.70, 2392.33), Y = 160},
-            {Label = "วาปไปประตูคิง", Position = Vector3.new(-8625.93, 17.12, -5730.47), Y = 190},
-            {Label = "วาปตรงกลางแมพ", Position = Vector3.new(10.00, 7.27, 179.95), Y = 220}
-        }
-
-        for i, point in ipairs(warpPoints) do
-            local warpLabel = Instance.new("TextLabel")
-            warpLabel.Text = point.Label
-            warpLabel.Size = UDim2.new(0, 150, 0, 25)
-            warpLabel.Position = UDim2.new(0, 10, 0, point.Y)
-            warpLabel.TextColor3 = Color3.new(1, 1, 1)
-            warpLabel.BackgroundTransparency = 1
-            warpLabel.TextScaled = true
-            warpLabel.TextWrapped = true
-            warpLabel.ZIndex = 10
-            warpLabel.Parent = warpFrame
-
-            local warpButton = Instance.new("TextButton")
-            warpButton.Size = UDim2.new(0, 80, 0, 25)
-            warpButton.Position = UDim2.new(0, 170, 0, point.Y)
-            warpButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-            warpButton.Text = "วาป"
-            warpButton.TextColor3 = Color3.new(1, 1, 1)
-            warpButton.TextScaled = true
-            warpButton.TextWrapped = true
-            warpButton.ZIndex = 10
-            warpButton.Parent = warpFrame
-
-            local buttonCorner = Instance.new("UICorner")
-            buttonCorner.CornerRadius = UDim.new(0, 8)
-            buttonCorner.Parent = warpButton
-
-            warpButton.MouseButton1Click:Connect(function()
-                local character = LocalPlayer.Character
-                if character and character:FindFirstChild("HumanoidRootPart") then
-                    character.HumanoidRootPart.CFrame = CFrame.new(point.Position)
-                    warpButton.Text = "วาร์ปแล้ว!"
-                    task.wait(1)
-                    warpButton.Text = "วาป"
-                    print("วาร์ปไป:", point.Label)
-                else
-                    warpButton.Text = "ไม่พบตัวละคร!"
-                    task.wait(1)
-                    warpButton.Text = "วาป"
-                    print("วาร์ปล้มเหลว: ไม่พบตัวละคร")
-                end
-            end)
-        end
 -------------------------------------
         -- 🎮 หน้าหลัก "ผู้เล่น"
         -------------------------------------
@@ -339,21 +99,26 @@ local success, err = pcall(function()
 
         RunService.Heartbeat:Connect(function()
             if humanoid then
-                if speedEnabled then
-                    local speed = tonumber(savedStates.SpeedValue) or 16
-                    if speed <= 200 then
+                local success, err = pcall(function()
+                    if speedEnabled then
+                        local speed = tonumber(savedStates.SpeedValue) or 16
                         humanoid.WalkSpeed = speed
+                    else
+                        humanoid.WalkSpeed = 16
                     end
-                else
-                    humanoid.WalkSpeed = 16
-                end
-                if jumpEnabled then
-                    local jump = tonumber(savedStates.JumpValue) or 50
-                    if jump <= 150 then
-                        humanoid.JumpPower = jump
+                    if jumpEnabled then
+                        local jump = tonumber(savedStates.JumpValue) or 50
+                        if jump <= 150 then
+                            humanoid.JumpPower = jump
+                        else
+                            humanoid.JumpPower = 50
+                        end
+                    else
+                        humanoid.JumpPower = 50
                     end
-                else
-                    humanoid.JumpPower = 50
+                end)
+                if not success then
+                    warn("เกิดข้อผิดพลาดใน Heartbeat: " .. err)
                 end
             end
         end)
@@ -529,7 +294,7 @@ local success, err = pcall(function()
             updateFpsPing(fpsLabel, pingLabel)
         end
 
-        -- 📊 ฟีเจอร์ "แสดงข้อมูลทั้งเซิร์ฟ" (ใช้ PlayerInfoGUI)
+        -- 📊 ฟีเจอร์ "แสดงข้อมูลทั้งเซิร์ฟ" (PlayerInfoGUI)
         local function createPlayerInfoGui()
             print("สร้าง PlayerInfoGUI")
             local ScreenGui = Instance.new("ScreenGui")
@@ -612,7 +377,100 @@ local success, err = pcall(function()
                 ThumbStatus.TextWrapped = true
                 ThumbStatus.Parent = PlayerFrame
 
-                -- โหลด Thumbnail แบบ asynchronous พร้อมลองโหลดซ้ำ
+                spawn(function()
+                    local maxRetries = 3
+                    local retryCount = 0
+                    while retryCount < maxRetries do
+                        local success, content = pcall(function()
+                            return "rbxthumb://type=AvatarHeadShot&id=" .. player.UserId .. "&w=100&h=100"
+                        end)
+                        if success and content then
+                            Thumb.Image = content
+                            ThumbStatus.Text = ""
+                            break
+-- 📊 ฟีเจอร์ "แสดงข้อมูลทั้งเซิร์ฟ" (PlayerInfoGUI)
+        local function createPlayerInfoGui()
+            print("สร้าง PlayerInfoGUI")
+            local ScreenGui = Instance.new("ScreenGui")
+            ScreenGui.Name = "PlayerInfoGUI"
+            ScreenGui.ResetOnSpawn = false
+            ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+            ScreenGui.IgnoreGuiInset = true
+            ScreenGui.Parent = PlayerGui
+
+            local MainFrame = Instance.new("Frame")
+            MainFrame.Size = UDim2.new(0, 400, 0, 350)
+            MainFrame.Position = UDim2.new(0.5, -200, 0.5, -175)
+            MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+            MainFrame.BackgroundTransparency = 0.2
+            MainFrame.BorderSizePixel = 0
+            MainFrame.Active = true
+            MainFrame.Draggable = true
+            MainFrame.Parent = ScreenGui
+            Instance.new("UICorner", MainFrame)
+
+            local Title = Instance.new("TextLabel")
+            Title.Text = "📋 Player Stats"
+            Title.Size = UDim2.new(1, 0, 0, 30)
+            Title.BackgroundTransparency = 1
+            Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+            Title.Font = Enum.Font.GothamBold
+            Title.TextScaled = true
+            Title.Parent = MainFrame
+
+            local Scroll = Instance.new("ScrollingFrame")
+            Scroll.Size = UDim2.new(1, -10, 1, -40)
+            Scroll.Position = UDim2.new(0, 5, 0, 35)
+            Scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+            Scroll.ScrollBarThickness = 8
+            Scroll.BackgroundTransparency = 1
+            Scroll.Parent = MainFrame
+
+            local UIList = Instance.new("UIListLayout")
+            UIList.Padding = UDim.new(0, 5)
+            UIList.SortOrder = Enum.SortOrder.LayoutOrder
+            UIList.Parent = Scroll
+
+            local function UpdateCanvasSize()
+                task.wait(0.05)
+                local contentSize = UIList.AbsoluteContentSize
+                Scroll.CanvasSize = UDim2.new(0, 0, 0, contentSize.Y + 10)
+            end
+            UIList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(UpdateCanvasSize)
+
+            local playerBlocks = {}
+            local connections = {}
+
+            local function CreatePlayerBlock(player)
+                if playerBlocks[player] then
+                    playerBlocks[player]:Destroy()
+                end
+
+                local PlayerFrame = Instance.new("Frame")
+                PlayerFrame.Size = UDim2.new(1, -10, 0, 80)
+                PlayerFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+                PlayerFrame.BorderSizePixel = 0
+                PlayerFrame.Parent = Scroll
+                Instance.new("UICorner", PlayerFrame)
+                playerBlocks[player] = PlayerFrame
+
+                local Thumb = Instance.new("ImageLabel")
+                Thumb.Size = UDim2.new(0, 60, 0, 60)
+                Thumb.Position = UDim2.new(0, 10, 0.5, -30)
+                Thumb.BackgroundTransparency = 1
+                Thumb.Image = "rbxasset://textures/ui/GuiImagePlaceholder.png"
+                Thumb.Parent = PlayerFrame
+
+                local ThumbStatus = Instance.new("TextLabel")
+                ThumbStatus.Size = UDim2.new(0, 60, 0, 20)
+                ThumbStatus.Position = UDim2.new(0, 10, 0.5, 30)
+                ThumbStatus.Text = "กำลังโหลด..."
+                ThumbStatus.TextColor3 = Color3.new(1, 1, 0)
+                ThumbStatus.BackgroundTransparency = 1
+                ThumbStatus.TextScaled = true
+                ThumbStatus.TextWrapped = true
+                ThumbStatus.Parent = PlayerFrame
+
                 spawn(function()
                     local maxRetries = 3
                     local retryCount = 0
@@ -870,22 +728,93 @@ local success, err = pcall(function()
         proteinToggle.ZIndex = 10
         proteinToggle.Parent = weightFrame
 
+        -- เพิ่ม "อ้อโต้จอยเวที"
+        local joinBrawlLabel = Instance.new("TextLabel")
+        joinBrawlLabel.Text = "อ้อโต้จอยเวที:"
+        joinBrawlLabel.Size = UDim2.new(0, 150, 0, 25)
+        joinBrawlLabel.Position = UDim2.new(0, 10, 0, 180)
+        joinBrawlLabel.TextColor3 = Color3.new(1, 1, 1)
+        joinBrawlLabel.BackgroundTransparency = 1
+        joinBrawlLabel.TextScaled = true
+        joinBrawlLabel.TextWrapped = true
+        joinBrawlLabel.ZIndex = 10
+        joinBrawlLabel.Parent = weightFrame
+
+        local joinBrawlToggle = Instance.new("TextButton")
+        joinBrawlToggle.Size = UDim2.new(0, 100, 0, 25)
+        joinBrawlToggle.Position = UDim2.new(0, 170, 0, 180)
+        joinBrawlToggle.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+        joinBrawlToggle.Text = savedStates.JoinBrawlEnabled and "เปิด" or "ปิด"
+        joinBrawlToggle.TextColor3 = Color3.new(1, 1, 1)
+        joinBrawlToggle.TextScaled = true
+        joinBrawlToggle.TextWrapped = true
+        joinBrawlToggle.ZIndex = 10
+        joinBrawlToggle.Parent = weightFrame
+
+        local joinBrawlCorner = Instance.new("UICorner")
+        joinBrawlCorner.CornerRadius = UDim.new(0, 8)
+        joinBrawlCorner.Parent = joinBrawlToggle
+
+        -- เพิ่ม "ปรับขนาดตัว2"
+        local sizeLabel = Instance.new("TextLabel")
+        sizeLabel.Text = "ปรับขนาดตัว2:"
+        sizeLabel.Size = UDim2.new(0, 80, 0, 25)
+        sizeLabel.Position = UDim2.new(0, 10, 0, 210)
+        sizeLabel.TextColor3 = Color3.new(1, 1, 1)
+        sizeLabel.BackgroundTransparency = 1
+        sizeLabel.TextScaled = true
+        sizeLabel.TextWrapped = true
+        sizeLabel.ZIndex = 10
+        sizeLabel.Parent = weightFrame
+
+        local sizeBox = Instance.new("TextBox")
+        sizeBox.Size = UDim2.new(0, 80, 0, 25)
+        sizeBox.Position = UDim2.new(0, 100, 0, 210)
+        sizeBox.Text = savedStates.SizeValue or "2"
+        sizeBox.TextColor3 = Color3.new(1, 1, 1)
+        sizeBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        sizeBox.TextScaled = true
+        sizeBox.TextWrapped = true
+        sizeBox.ZIndex = 10
+        sizeBox.Parent = weightFrame
+
+        local sizeToggle = Instance.new("TextButton")
+        sizeToggle.Size = UDim2.new(0, 80, 0, 25)
+        sizeToggle.Position = UDim2.new(0, 190, 0, 210)
+        sizeToggle.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+        sizeToggle.Text = savedStates.SizeEnabled and "เปิด" or "ปิด"
+        sizeToggle.TextColor3 = Color3.new(1, 1, 1)
+        sizeToggle.TextScaled = true
+        sizeToggle.TextWrapped = true
+        sizeToggle.ZIndex = 10
+        sizeToggle.Parent = weightFrame
+
+        local sizeCorner = Instance.new("UICorner")
+        sizeCorner.CornerRadius = UDim.new(0, 8)
+        sizeCorner.Parent = sizeToggle
+
         local selectedExercise = savedStates.WeightExercise
         local running = savedStates.WeightRunning
         local spinEnabled = savedStates.SpinEnabled
         local rebirthEnabled = savedStates.RebirthEnabled
         local proteinEnabled = savedStates.ProteinEnabled
+        local joinBrawlEnabled = savedStates.JoinBrawlEnabled or false
+        local sizeEnabled = savedStates.SizeEnabled or false
         local muscleEvent = LocalPlayer:WaitForChild("muscleEvent", 5)
         local backpack = LocalPlayer:WaitForChild("Backpack", 5)
         local fortuneWheelRemote = ReplicatedStorage:WaitForChild("rEvents", 5) and ReplicatedStorage.rEvents:WaitForChild("openFortuneWheelRemote", 5)
         local fortuneWheel = ReplicatedStorage:WaitForChild("fortuneWheelChances", 5) and ReplicatedStorage.fortuneWheelChances:WaitForChild("Fortune Wheel", 5)
         local rebirthRemote = ReplicatedStorage:WaitForChild("rEvents", 5) and ReplicatedStorage.rEvents:WaitForChild("rebirthRemote", 5)
+        local brawlEvent = ReplicatedStorage:WaitForChild("rEvents", 5) and ReplicatedStorage.rEvents:WaitForChild("brawlEvent", 5)
+        local changeSpeedSizeRemote = ReplicatedStorage:WaitForChild("rEvents", 5) and ReplicatedStorage.rEvents:WaitForChild("changeSpeedSizeRemote", 5)
 
         if not muscleEvent then warn("ไม่พบ muscleEvent!") end
         if not backpack then warn("ไม่พบ Backpack!") end
         if not fortuneWheelRemote then warn("ไม่พบ openFortuneWheelRemote!") end
         if not fortuneWheel then warn("ไม่พบ Fortune Wheel!") end
         if not rebirthRemote then warn("ไม่พบ rebirthRemote!") end
+        if not brawlEvent then warn("ไม่พบ brawlEvent!") end
+        if not changeSpeedSizeRemote then warn("ไม่พบ changeSpeedSizeRemote!") end
 
         chooseButton.MouseButton1Click:Connect(function()
             if PlayerGui:FindFirstChild("SelectionGui") then
@@ -967,7 +896,7 @@ local success, err = pcall(function()
                         if muscleEvent then
                             muscleEvent:FireServer("rep")
                         else
-                            startButton.Text = "ไม่พบ muscleEvent!"
+                            startButton.Text = "ไม่พบ Remote!"
                             task.wait(1)
                             startButton.Text = running and "หยุด" or "เริ่ม"
                             running = false
@@ -1067,6 +996,88 @@ local success, err = pcall(function()
             end
         end)
 
+        joinBrawlToggle.MouseButton1Click:Connect(function()
+            joinBrawlEnabled = not joinBrawlEnabled
+            savedStates.JoinBrawlEnabled = joinBrawlEnabled
+            joinBrawlToggle.Text = joinBrawlEnabled and "เปิด" or "ปิด"
+            print("สลับออโต้จอยเวที:", joinBrawlEnabled)
+
+            if joinBrawlEnabled then
+                spawn(function()
+                    while joinBrawlEnabled do
+                        if brawlEvent then
+                            local args = {"joinBrawl"}
+                            local success, err = pcall(function()
+                                brawlEvent:FireServer(unpack(args))
+                            end)
+                            if not success then
+                                joinBrawlToggle.Text = "ข้อผิดพลาด!"
+                                task.wait(1)
+                                joinBrawlToggle.Text = joinBrawlEnabled and "เปิด" or "ปิด"
+                                joinBrawlEnabled = false
+                                savedStates.JoinBrawlEnabled = false
+                                print("ออโต้จอยเวทีล้มเหลว: " .. err)
+                                break
+                            end
+                        else
+                            joinBrawlToggle.Text = "ไม่พบ Remote!"
+                            task.wait(1)
+                            joinBrawlToggle.Text = joinBrawlEnabled and "เปิด" or "ปิด"
+                            joinBrawlEnabled = false
+                            savedStates.JoinBrawlEnabled = false
+                            print("ออโต้จอยเวทีล้มเหลว: ไม่พบ brawlEvent")
+                            break
+                        end
+                        task.wait(math.random(0.95, 1.05))
+                    end
+                end)
+            end
+        end)
+
+        sizeBox:GetPropertyChangedSignal("Text"):Connect(function()
+            savedStates.SizeValue = sizeBox.Text
+            print("บันทึก SizeValue:", savedStates.SizeValue)
+        end)
+
+        sizeToggle.MouseButton1Click:Connect(function()
+            sizeEnabled = not sizeEnabled
+            savedStates.SizeEnabled = sizeEnabled
+            sizeToggle.Text = sizeEnabled and "เปิด" or "ปิด"
+            print("สลับปรับขนาดตัว:", sizeEnabled)
+
+            if sizeEnabled then
+                local size = tonumber(savedStates.SizeValue) or 2
+                if changeSpeedSizeRemote then
+                    local args = {"changeSize", size}
+                    local success, err = pcall(function()
+                        changeSpeedSizeRemote:InvokeServer(unpack(args))
+                    end)
+                    if not success then
+                        sizeToggle.Text = "ข้อผิดพลาด!"
+                        task.wait(1)
+                        sizeToggle.Text = sizeEnabled and "เปิด" or "ปิด"
+                        sizeEnabled = false
+                        savedStates.SizeEnabled = false
+                        print("ปรับขนาดตัวล้มเหลว: " .. err)
+                    end
+                else
+                    sizeToggle.Text = "ไม่พบ Remote!"
+                    task.wait(1)
+                    sizeToggle.Text = sizeEnabled and "เปิด" or "ปิด"
+                    sizeEnabled = false
+                    savedStates.SizeEnabled = false
+                    print("ปรับขนาดตัวล้มเหลว: ไม่พบ changeSpeedSizeRemote")
+                end
+            else
+                if changeSpeedSizeRemote then
+                    local args = {"changeSize", 1}
+                    pcall(function()
+                        changeSpeedSizeRemote:InvokeServer(unpack(args))
+                    end)
+                end
+            end
+        end)
+
         backpack.ChildAdded:Connect(function(child)
             if running and child.Name == selectedExercise and humanoid then
                 task.wait(0.1)
@@ -1092,9 +1103,7 @@ local success, err = pcall(function()
                     speedToggle.Text = "เปิด"
                     if humanoid then
                         local speed = tonumber(savedStates.SpeedValue) or 16
-                        if speed <= 200 then
-                            humanoid.WalkSpeed = speed
-                        end
+                        humanoid.WalkSpeed = speed
                     end
                 end
                 if savedStates.Jump then
@@ -1182,6 +1191,32 @@ local success, err = pcall(function()
                     serverInfoGui, cleanupConnections = createPlayerInfoGui()
                     serverInfoGui.Enabled = true
                 end
+                if savedStates.JoinBrawlEnabled then
+                    joinBrawlEnabled = true
+                    joinBrawlToggle.Text = "เปิด"
+                    spawn(function()
+                        while joinBrawlEnabled and saveEnabled do
+                            if brawlEvent then
+                                local args = {"joinBrawl"}
+                                pcall(function()
+                                    brawlEvent:FireServer(unpack(args))
+                                end)
+                            end
+                            task.wait(math.random(0.95, 1.05))
+                        end
+                    end)
+                end
+                if savedStates.SizeEnabled then
+                    sizeEnabled = true
+                    sizeToggle.Text = "เปิด"
+                    if changeSpeedSizeRemote then
+                        local size = tonumber(savedStates.SizeValue) or 2
+                        local args = {"changeSize", size}
+                        pcall(function()
+                            changeSpeedSizeRemote:InvokeServer(unpack(args))
+                        end)
+                    end
+                end
             end
         end)
 
@@ -1253,6 +1288,32 @@ local success, err = pcall(function()
                 foundTool:Activate()
             end
         end
+        if savedStates.JoinBrawlEnabled then
+            joinBrawlEnabled = true
+            joinBrawlToggle.Text = "เปิด"
+            spawn(function()
+                while joinBrawlEnabled do
+                    if brawlEvent then
+                        local args = {"joinBrawl"}
+                        pcall(function()
+                            brawlEvent:FireServer(unpack(args))
+                        end)
+                    end
+                    task.wait(math.random(0.95, 1.05))
+                end
+            end)
+        end
+        if savedStates.SizeEnabled then
+            sizeEnabled = true
+            sizeToggle.Text = "เปิด"
+            if changeSpeedSizeRemote then
+                local size = tonumber(savedStates.SizeValue) or 2
+                local args = {"changeSize", size}
+                pcall(function()
+                    changeSpeedSizeRemote:InvokeServer(unpack(args))
+                end)
+            end
+        end
 
         showTab("ผู้เล่น")
         print("สร้าง GUI เสร็จสิ้น")
@@ -1262,14 +1323,16 @@ local success, err = pcall(function()
         humanoid = char:WaitForChild("Humanoid")
         if savedStates.Speed and humanoid then
             local speed = tonumber(savedStates.SpeedValue) or 16
-            if speed <= 200 then
+            pcall(function()
                 humanoid.WalkSpeed = speed
-            end
+            end)
         end
         if savedStates.Jump and humanoid then
             local jump = tonumber(savedStates.JumpValue) or 50
             if jump <= 150 then
-                humanoid.JumpPower = jump
+                pcall(function()
+                    humanoid.JumpPower = jump
+                end)
             end
         end
         if savedStates.WeightRunning and savedStates.WeightExercise then
@@ -1303,6 +1366,32 @@ local success, err = pcall(function()
         if savedStates.ServerInfoEnabled and not PlayerGui:FindFirstChild("PlayerInfoGUI") then
             local serverInfoGui, cleanupConnections = createPlayerInfoGui()
             serverInfoGui.Enabled = true
+        end
+        if savedStates.JoinBrawlEnabled then
+            joinBrawlEnabled = true
+            joinBrawlToggle.Text = "เปิด"
+            spawn(function()
+                while joinBrawlEnabled do
+                    if brawlEvent then
+                        local args = {"joinBrawl"}
+                        pcall(function()
+                            brawlEvent:FireServer(unpack(args))
+                        end)
+                    end
+                    task.wait(math.random(0.95, 1.05))
+                end
+            end)
+        end
+        if savedStates.SizeEnabled then
+            sizeEnabled = true
+            sizeToggle.Text = "เปิด"
+            if changeSpeedSizeRemote then
+                local size = tonumber(savedStates.SizeValue) or 2
+                local args = {"changeSize", size}
+                pcall(function()
+                    changeSpeedSizeRemote:InvokeServer(unpack(args))
+                end)
+            end
         end
         if not PlayerGui:FindFirstChild("MainGUI") or not PlayerGui:FindFirstChild("ToggleGui") then
             createGui()
