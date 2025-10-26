@@ -238,8 +238,7 @@ local success, err = pcall(function()
                 end
             end)
         end
-
-        -------------------------------------
+-------------------------------------
         -- 🎮 หน้าหลัก "ผู้เล่น"
         -------------------------------------
         local playerFrame = Instance.new("Frame")
@@ -358,7 +357,8 @@ local success, err = pcall(function()
                 end
             end
         end)
--------------------------------------
+
+        -------------------------------------
         -- ⚙️ หน้าหลัก "การตั้งค่า"
         -------------------------------------
         local settingFrame = Instance.new("Frame")
@@ -574,7 +574,7 @@ local success, err = pcall(function()
                 end
 
                 local playerFrame = Instance.new("Frame")
-                playerFrame.Size = UDim2.new(1, -10, 0, 150)
+                playerFrame.Size = UDim2.new(1, -10, 0, 180) -- ปรับความสูงเพื่อรองรับ Durability
                 playerFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
                 playerFrame.BorderSizePixel = 0
                 playerFrame.ZIndex = 10
@@ -589,13 +589,40 @@ local success, err = pcall(function()
                 thumbnail.Size = UDim2.new(0, 80, 0, 80)
                 thumbnail.Position = UDim2.new(0, 10, 0, 10)
                 thumbnail.BackgroundTransparency = 1
+                thumbnail.Image = "rbxasset://textures/ui/GuiImagePlaceholder.png"
                 thumbnail.ZIndex = 10
                 thumbnail.Parent = playerFrame
 
-                local success, content, ready = pcall(function()
-                    return Players:GetUserThumbnailAsync(player.UserId, Enum.ThumbnailType.Headshot, Enum.ThumbnailSize.Size100x100)
+                local thumbnailStatus = Instance.new("TextLabel")
+                thumbnailStatus.Size = UDim2.new(0, 80, 0, 20)
+                thumbnailStatus.Position = UDim2.new(0, 10, 0, 90)
+                thumbnailStatus.Text = "กำลังโหลด..."
+                thumbnailStatus.TextColor3 = Color3.new(1, 1, 0)
+                thumbnailStatus.BackgroundTransparency = 1
+                thumbnailStatus.TextScaled = true
+                thumbnailStatus.TextWrapped = true
+                thumbnailStatus.ZIndex = 10
+                thumbnailStatus.Parent = playerFrame
+
+                -- โหลด Thumbnail แบบ asynchronous พร้อมลองโหลดซ้ำ
+                spawn(function()
+                    local maxRetries = 3
+                    local retryCount = 0
+                    while retryCount < maxRetries do
+                        local success, content, ready = pcall(function()
+                            return Players:GetUserThumbnailAsync(player.UserId, Enum.ThumbnailType.Headshot, Enum.ThumbnailSize.Size100x100)
+                        end)
+                        if success and ready and content then
+                            thumbnail.Image = content
+                            thumbnailStatus.Text = ""
+                            break
+                        else
+                            retryCount = retryCount + 1
+                            thumbnailStatus.Text = retryCount < maxRetries and "กำลังโหลด..." or "โหลดล้มเหลว"
+                            task.wait(1)
+                        end
+                    end
                 end)
-                thumbnail.Image = success and ready and content or "rbxasset://textures/ui/GuiImagePlaceholder.png"
 
                 local nameLabel = Instance.new("TextLabel")
                 nameLabel.Text = player.Name
@@ -608,7 +635,7 @@ local success, err = pcall(function()
                 nameLabel.ZIndex = 10
                 nameLabel.Parent = playerFrame
 
-                local stats = {"Brawls", "Kills", "Rebirths", "Strength"}
+                local stats = {"Brawls", "Kills", "Rebirths", "Strength", "Durability"}
                 local statLabels = {}
                 for i, stat in ipairs(stats) do
                     local statLabel = Instance.new("TextLabel")
@@ -643,7 +670,7 @@ local success, err = pcall(function()
                         updatePlayerInfo(player)
                     end
                 end
-                scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, #Players:GetPlayers() * 155)
+                scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, #Players:GetPlayers() * 185)
             end
 
             local updateConnection
@@ -658,18 +685,18 @@ local success, err = pcall(function()
                             playerFrames[player] = nil
                         end
                     end
-                    scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, #Players:GetPlayers() * 155)
+                    scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, #Players:GetPlayers() * 185)
                 end)
                 Players.PlayerAdded:Connect(function(player)
                     updatePlayerInfo(player)
-                    scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, #Players:GetPlayers() * 155)
+                    scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, #Players:GetPlayers() * 185)
                 end)
                 Players.PlayerRemoving:Connect(function(player)
                     if playerFrames[player] then
                         playerFrames[player]:Destroy()
                         playerFrames[player] = nil
                     end
-                    scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, #Players:GetPlayers() * 155)
+                    scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, #Players:GetPlayers() * 185)
                 end)
             end
 
@@ -723,8 +750,7 @@ local success, err = pcall(function()
             serverInfoGui.Enabled = true
             startUpdating()
         end
-
-        -------------------------------------
+-------------------------------------
         -- 🏋️‍♂️ หน้าหลัก "อ้อโต้ยกน้ำหนัก"
         -------------------------------------
         local weightFrame = Instance.new("Frame")
