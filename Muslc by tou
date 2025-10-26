@@ -311,8 +311,47 @@ local success, err = pcall(function()
         jumpToggle.Position = UDim2.new(0, 190, 0, 80)
         jumpToggle.Parent = playerFrame
 
+        -- เพิ่มปุ่ม "ปรับขนาดตัว2" ในแท็บ "ผู้เล่น"
+        local sizeLabel = Instance.new("TextLabel")
+        sizeLabel.Text = "ปรับขนาดตัว2:"
+        sizeLabel.Size = UDim2.new(0, 80, 0, 25)
+        sizeLabel.Position = UDim2.new(0, 10, 0, 120)
+        sizeLabel.TextColor3 = Color3.new(1, 1, 1)
+        sizeLabel.BackgroundTransparency = 1
+        sizeLabel.TextScaled = true
+        sizeLabel.TextWrapped = true
+        sizeLabel.ZIndex = 10
+        sizeLabel.Parent = playerFrame
+
+        local sizeBox = Instance.new("TextBox")
+        sizeBox.Size = UDim2.new(0, 80, 0, 25)
+        sizeBox.Position = UDim2.new(0, 100, 0, 120)
+        sizeBox.Text = savedStates.SizeValue or "2"
+        sizeBox.TextColor3 = Color3.new(1, 1, 1)
+        sizeBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        sizeBox.TextScaled = true
+        sizeBox.TextWrapped = true
+        sizeBox.ZIndex = 10
+        sizeBox.Parent = playerFrame
+
+        local sizeToggle = Instance.new("TextButton")
+        sizeToggle.Size = UDim2.new(0, 80, 0, 25)
+        sizeToggle.Position = UDim2.new(0, 190, 0, 120)
+        sizeToggle.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+        sizeToggle.Text = savedStates.SizeEnabled and "เปิด" or "ปิด"
+        sizeToggle.TextColor3 = Color3.new(1, 1, 1)
+        sizeToggle.TextScaled = true
+        sizeToggle.TextWrapped = true
+        sizeToggle.ZIndex = 10
+        sizeToggle.Parent = playerFrame
+
+        local sizeCorner = Instance.new("UICorner")
+        sizeCorner.CornerRadius = UDim.new(0, 8)
+        sizeCorner.Parent = sizeToggle
+
         local speedEnabled = savedStates.Speed
         local jumpEnabled = savedStates.Jump
+        local sizeEnabled = savedStates.SizeEnabled or false
         local humanoid = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
 
         speedBox:GetPropertyChangedSignal("Text"):Connect(function()
@@ -322,6 +361,10 @@ local success, err = pcall(function()
         jumpBox:GetPropertyChangedSignal("Text"):Connect(function()
             savedStates.JumpValue = jumpBox.Text
             print("บันทึก JumpValue:", savedStates.JumpValue)
+        end)
+        sizeBox:GetPropertyChangedSignal("Text"):Connect(function()
+            savedStates.SizeValue = sizeBox.Text
+            print("บันทึก SizeValue:", savedStates.SizeValue)
         end)
 
         speedToggle.MouseButton1Click:Connect(function()
@@ -336,6 +379,45 @@ local success, err = pcall(function()
             savedStates.Jump = jumpEnabled
             jumpToggle.Text = jumpEnabled and "เปิด" or "ปิด"
             print("สลับ Jump:", jumpEnabled)
+        end)
+
+        sizeToggle.MouseButton1Click:Connect(function()
+            sizeEnabled = not sizeEnabled
+            savedStates.SizeEnabled = sizeEnabled
+            sizeToggle.Text = sizeEnabled and "เปิด" or "ปิด"
+            print("สลับปรับขนาดตัว:", sizeEnabled)
+
+            if sizeEnabled then
+                local size = tonumber(savedStates.SizeValue) or 2
+                if changeSpeedSizeRemote then
+                    local args = {"changeSize", size}
+                    local success, err = pcall(function()
+                        changeSpeedSizeRemote:InvokeServer(unpack(args))
+                    end)
+                    if not success then
+                        sizeToggle.Text = "ข้อผิดพลาด!"
+                        task.wait(1)
+                        sizeToggle.Text = sizeEnabled and "เปิด" or "ปิด"
+                        sizeEnabled = false
+                        savedStates.SizeEnabled = false
+                        print("ปรับขนาดตัวล้มเหลว: " .. err)
+                    end
+                else
+                    sizeToggle.Text = "ไม่พบ Remote!"
+                    task.wait(1)
+                    sizeToggle.Text = sizeEnabled and "เปิด" or "ปิด"
+                    sizeEnabled = false
+                    savedStates.SizeEnabled = false
+                    print("ปรับขนาดตัวล้มเหลว: ไม่พบ changeSpeedSizeRemote")
+                end
+            else
+                if changeSpeedSizeRemote then
+                    local args = {"changeSize", 1}
+                    pcall(function()
+                        changeSpeedSizeRemote:InvokeServer(unpack(args))
+                    end)
+                end
+            end
         end)
 
         RunService.Heartbeat:Connect(function()
@@ -875,7 +957,6 @@ local success, err = pcall(function()
         proteinToggle.ZIndex = 10
         proteinToggle.Parent = weightFrame
 
-        -- เพิ่ม "อ้อโต้จอยเวที"
         local joinBrawlLabel = Instance.new("TextLabel")
         joinBrawlLabel.Text = "อ้อโต้จอยเวที:"
         joinBrawlLabel.Size = UDim2.new(0, 150, 0, 25)
@@ -902,51 +983,12 @@ local success, err = pcall(function()
         joinBrawlCorner.CornerRadius = UDim.new(0, 8)
         joinBrawlCorner.Parent = joinBrawlToggle
 
-        -- เพิ่ม "ปรับขนาดตัว2"
-        local sizeLabel = Instance.new("TextLabel")
-        sizeLabel.Text = "ปรับขนาดตัว2:"
-        sizeLabel.Size = UDim2.new(0, 80, 0, 25)
-        sizeLabel.Position = UDim2.new(0, 10, 0, 210)
-        sizeLabel.TextColor3 = Color3.new(1, 1, 1)
-        sizeLabel.BackgroundTransparency = 1
-        sizeLabel.TextScaled = true
-        sizeLabel.TextWrapped = true
-        sizeLabel.ZIndex = 10
-        sizeLabel.Parent = weightFrame
-
-        local sizeBox = Instance.new("TextBox")
-        sizeBox.Size = UDim2.new(0, 80, 0, 25)
-        sizeBox.Position = UDim2.new(0, 100, 0, 210)
-        sizeBox.Text = savedStates.SizeValue or "2"
-        sizeBox.TextColor3 = Color3.new(1, 1, 1)
-        sizeBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-        sizeBox.TextScaled = true
-        sizeBox.TextWrapped = true
-        sizeBox.ZIndex = 10
-        sizeBox.Parent = weightFrame
-
-        local sizeToggle = Instance.new("TextButton")
-        sizeToggle.Size = UDim2.new(0, 80, 0, 25)
-        sizeToggle.Position = UDim2.new(0, 190, 0, 210)
-        sizeToggle.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-        sizeToggle.Text = savedStates.SizeEnabled and "เปิด" or "ปิด"
-        sizeToggle.TextColor3 = Color3.new(1, 1, 1)
-        sizeToggle.TextScaled = true
-        sizeToggle.TextWrapped = true
-        sizeToggle.ZIndex = 10
-        sizeToggle.Parent = weightFrame
-
-        local sizeCorner = Instance.new("UICorner")
-        sizeCorner.CornerRadius = UDim.new(0, 8)
-        sizeCorner.Parent = sizeToggle
-
         local selectedExercise = savedStates.WeightExercise
         local running = savedStates.WeightRunning
         local spinEnabled = savedStates.SpinEnabled
         local rebirthEnabled = savedStates.RebirthEnabled
         local proteinEnabled = savedStates.ProteinEnabled
         local joinBrawlEnabled = savedStates.JoinBrawlEnabled or false
-        local sizeEnabled = savedStates.SizeEnabled or false
         local muscleEvent = LocalPlayer:WaitForChild("muscleEvent", 5)
         local backpack = LocalPlayer:WaitForChild("Backpack", 5)
         local fortuneWheelRemote = ReplicatedStorage:WaitForChild("rEvents", 5) and ReplicatedStorage.rEvents:WaitForChild("openFortuneWheelRemote", 5)
@@ -1118,28 +1160,39 @@ local success, err = pcall(function()
             print("สลับออโต้กินโปรตัน:", proteinEnabled)
 
             if proteinEnabled then
-                local proteinTools = {"Protein Bar", "Protein Shake", "ULTRA Shake", "TOUGH Bar"}
-                local foundTool = nil
-                for _, toolName in ipairs(proteinTools) do
-                    local tool = backpack and backpack:FindFirstChild(toolName)
-                    if tool then
-                        foundTool = tool
-                        break
+                spawn(function()
+                    while proteinEnabled and humanoid and backpack do
+                        local proteinTools = {"Protein Bar", "Protein Shake", "ULTRA Shake", "TOUGH Bar"}
+                        local foundTool = nil
+                        for _, toolName in ipairs(proteinTools) do
+                            local tool = backpack:FindFirstChild(toolName)
+                            if tool then
+                                foundTool = tool
+                                break
+                            end
+                        end
+                        if foundTool then
+                            local success, err = pcall(function()
+                                humanoid:EquipTool(foundTool)
+                                task.wait(0.1)
+                                foundTool:Activate()
+                                print("กินโปรตัน:", foundTool.Name)
+                            end)
+                            if not success then
+                                proteinToggle.Text = "ข้อผิดพลาด!"
+                                task.wait(1)
+                                proteinToggle.Text = proteinEnabled and "เปิด" or "ปิด"
+                                print("กินโปรตันล้มเหลว: " .. err)
+                            end
+                        else
+                            proteinToggle.Text = "ไม่พบโปรตีน!"
+                            task.wait(1)
+                            proteinToggle.Text = proteinEnabled and "เปิด" or "ปิด"
+                            print("ออโต้กินโปรตัน: ไม่พบโปรตีนใน Backpack")
+                        end
+                        task.wait(1)
                     end
-                end
-
-                if foundTool and humanoid then
-                    humanoid:EquipTool(foundTool)
-                    task.wait(0.1)
-                    foundTool:Activate()
-                else
-                    proteinToggle.Text = "ไม่พบ Tool!"
-                    task.wait(1)
-                    proteinToggle.Text = proteinEnabled and "เปิด" or "ปิด"
-                    proteinEnabled = false
-                    savedStates.ProteinEnabled = false
-                    print("ออโต้กินโปรตันล้มเหลว: ไม่พบ Tool")
-                end
+                end)
             end
         end)
 
@@ -1181,50 +1234,6 @@ local success, err = pcall(function()
             end
         end)
 
-        sizeBox:GetPropertyChangedSignal("Text"):Connect(function()
-            savedStates.SizeValue = sizeBox.Text
-            print("บันทึก SizeValue:", savedStates.SizeValue)
-        end)
-
-        sizeToggle.MouseButton1Click:Connect(function()
-            sizeEnabled = not sizeEnabled
-            savedStates.SizeEnabled = sizeEnabled
-            sizeToggle.Text = sizeEnabled and "เปิด" or "ปิด"
-            print("สลับปรับขนาดตัว:", sizeEnabled)
-
-            if sizeEnabled then
-                local size = tonumber(savedStates.SizeValue) or 2
-                if changeSpeedSizeRemote then
-                    local args = {"changeSize", size}
-                    local success, err = pcall(function()
-                        changeSpeedSizeRemote:InvokeServer(unpack(args))
-                    end)
-                    if not success then
-                        sizeToggle.Text = "ข้อผิดพลาด!"
-                        task.wait(1)
-                        sizeToggle.Text = sizeEnabled and "เปิด" or "ปิด"
-                        sizeEnabled = false
-                        savedStates.SizeEnabled = false
-                        print("ปรับขนาดตัวล้มเหลว: " .. err)
-                    end
-                else
-                    sizeToggle.Text = "ไม่พบ Remote!"
-                    task.wait(1)
-                    sizeToggle.Text = sizeEnabled and "เปิด" or "ปิด"
-                    sizeEnabled = false
-                    savedStates.SizeEnabled = false
-                    print("ปรับขนาดตัวล้มเหลว: ไม่พบ changeSpeedSizeRemote")
-                end
-            else
-                if changeSpeedSizeRemote then
-                    local args = {"changeSize", 1}
-                    pcall(function()
-                        changeSpeedSizeRemote:InvokeServer(unpack(args))
-                    end)
-                end
-            end
-        end)
-
         backpack.ChildAdded:Connect(function(child)
             if running and child.Name == selectedExercise and humanoid then
                 task.wait(0.1)
@@ -1233,9 +1242,15 @@ local success, err = pcall(function()
             end
             if proteinEnabled and table.find({"Protein Bar", "Protein Shake", "ULTRA Shake", "TOUGH Bar"}, child.Name) and humanoid then
                 task.wait(0.1)
-                humanoid:EquipTool(child)
-                child:Activate()
-                print("กินโปรตันอัตโนมัติ:", child.Name)
+                local success, err = pcall(function()
+                    humanoid:EquipTool(child)
+                    task.wait(0.1)
+                    child:Activate()
+                    print("กินโปรตันอัตโนมัติ:", child.Name)
+                end)
+                if not success then
+                    print("กินโปรตันล้มเหลวใน ChildAdded: " .. err)
+                end
             end
         end)
 
@@ -1314,20 +1329,31 @@ local success, err = pcall(function()
                 if savedStates.ProteinEnabled then
                     proteinEnabled = true
                     proteinToggle.Text = "เปิด"
-                    local proteinTools = {"Protein Bar", "Protein Shake", "ULTRA Shake", "TOUGH Bar"}
-                    local foundTool = nil
-                    for _, toolName in ipairs(proteinTools) do
-                        local tool = backpack and backpack:FindFirstChild(toolName)
-                        if tool then
-                            foundTool = tool
-                            break
+                    spawn(function()
+                        while proteinEnabled and saveEnabled and humanoid and backpack do
+                            local proteinTools = {"Protein Bar", "Protein Shake", "ULTRA Shake", "TOUGH Bar"}
+                            local foundTool = nil
+                            for _, toolName in ipairs(proteinTools) do
+                                local tool = backpack:FindFirstChild(toolName)
+                                if tool then
+                                    foundTool = tool
+                                    break
+                                end
+                            end
+                            if foundTool then
+                                local success, err = pcall(function()
+                                    humanoid:EquipTool(foundTool)
+                                    task.wait(0.1)
+                                    foundTool:Activate()
+                                    print("กินโปรตันใน SaveEnabled:", foundTool.Name)
+                                end)
+                                if not success then
+                                    print("กินโปรตันล้มเหลวใน SaveEnabled: " .. err)
+                                end
+                            end
+                            task.wait(1)
                         end
-                    end
-                    if foundTool and humanoid then
-                        humanoid:EquipTool(foundTool)
-                        task.wait(0.1)
-                        foundTool:Activate()
-                    end
+                    end)
                 end
                 if savedStates.FpsPingEnabled then
                     fpsPingEnabled = true
@@ -1424,20 +1450,39 @@ local success, err = pcall(function()
         if savedStates.ProteinEnabled then
             proteinEnabled = true
             proteinToggle.Text = "เปิด"
-            local proteinTools = {"Protein Bar", "Protein Shake", "ULTRA Shake", "TOUGH Bar"}
-            local foundTool = nil
-            for _, toolName in ipairs(proteinTools) do
-                local tool = backpack and backpack:FindFirstChild(toolName)
-                if tool then
-                    foundTool = tool
-                    break
+            spawn(function()
+                while proteinEnabled and humanoid and backpack do
+                    local proteinTools = {"Protein Bar", "Protein Shake", "ULTRA Shake", "TOUGH Bar"}
+                    local foundTool = nil
+                    for _, toolName in ipairs(proteinTools) do
+                        local tool = backpack:FindFirstChild(toolName)
+                        if tool then
+                            foundTool = tool
+                            break
+                        end
+                    end
+                    if foundTool then
+                        local success, err = pcall(function()
+                            humanoid:EquipTool(foundTool)
+                            task.wait(0.1)
+                            foundTool:Activate()
+                            print("กินโปรตันใน Initial:", foundTool.Name)
+                        end)
+                        if not success then
+                            proteinToggle.Text = "ข้อผิดพลาด!"
+                            task.wait(1)
+                            proteinToggle.Text = proteinEnabled and "เปิด" or "ปิด"
+                            print("กินโปรตันล้มเหลวใน Initial: " .. err)
+                        end
+                    else
+                        proteinToggle.Text = "ไม่พบโปรตีน!"
+                        task.wait(1)
+                        proteinToggle.Text = proteinEnabled and "เปิด" or "ปิด"
+                        print("ออโต้กินโปรตันใน Initial: ไม่พบโปรตีน")
+                    end
+                    task.wait(1)
                 end
-            end
-            if foundTool and humanoid then
-                humanoid:EquipTool(foundTool)
-                task.wait(0.1)
-                foundTool:Activate()
-            end
+            end)
         end
         if savedStates.JoinBrawlEnabled then
             joinBrawlEnabled = true
@@ -1453,17 +1498,6 @@ local success, err = pcall(function()
                     task.wait(math.random(0.95, 1.05))
                 end
             end)
-        end
-        if savedStates.SizeEnabled then
-            sizeEnabled = true
-            sizeToggle.Text = "เปิด"
-            if changeSpeedSizeRemote then
-                local size = tonumber(savedStates.SizeValue) or 2
-                local args = {"changeSize", size}
-                pcall(function()
-                    changeSpeedSizeRemote:InvokeServer(unpack(args))
-                end)
-            end
         end
 
         showTab("ผู้เล่น")
@@ -1494,20 +1528,33 @@ local success, err = pcall(function()
             end
         end
         if savedStates.ProteinEnabled then
-            local proteinTools = {"Protein Bar", "Protein Shake", "ULTRA Shake", "TOUGH Bar"}
-            local foundTool = nil
-            for _, toolName in ipairs(proteinTools) do
-                local tool = backpack and backpack:FindFirstChild(toolName)
-                if tool then
-                    foundTool = tool
-                    break
+            proteinEnabled = true
+            proteinToggle.Text = "เปิด"
+            spawn(function()
+                while proteinEnabled and humanoid and backpack do
+                    local proteinTools = {"Protein Bar", "Protein Shake", "ULTRA Shake", "TOUGH Bar"}
+                    local foundTool = nil
+                    for _, toolName in ipairs(proteinTools) do
+                        local tool = backpack:FindFirstChild(toolName)
+                        if tool then
+                            foundTool = tool
+                            break
+                        end
+                    end
+                    if foundTool then
+                        local success, err = pcall(function()
+                            humanoid:EquipTool(foundTool)
+                            task.wait(0.1)
+                            foundTool:Activate()
+                            print("กินโปรตันใน CharacterAdded:", foundTool.Name)
+                        end)
+                        if not success then
+                            print("กินโปรตันล้มเหลวใน CharacterAdded: " .. err)
+                        end
+                    end
+                    task.wait(1)
                 end
-            end
-            if foundTool and humanoid then
-                humanoid:EquipTool(foundTool)
-                task.wait(0.1)
-                foundTool:Activate()
-            end
+            end)
         end
         if savedStates.FpsPingEnabled and not PlayerGui:FindFirstChild("FpsPingGui") then
             local fpsPingGui, fpsLabel, pingLabel = createFpsPingGui()
