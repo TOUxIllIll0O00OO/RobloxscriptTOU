@@ -23,14 +23,10 @@ local success, err = pcall(function()
     -- 🗑 ลบ GUI เก่าถ้ามี
     local function clearGui()
         print("กำลังลบ GUI เก่า")
-        if PlayerGui:FindFirstChild("MainGUI") then
-            PlayerGui.MainGUI:Destroy()
-        end
-        if PlayerGui:FindFirstChild("ToggleGui") then
-            PlayerGui.ToggleGui:Destroy()
-        end
-        if PlayerGui:FindFirstChild("FpsPingGui") then
-            PlayerGui.FpsPingGui:Destroy()
+        for _, guiName in ipairs({"MainGUI", "ToggleGui", "FpsPingGui", "ServerInfoGui"}) do
+            if PlayerGui:FindFirstChild(guiName) then
+                PlayerGui[guiName]:Destroy()
+            end
         end
     end
     clearGui()
@@ -46,10 +42,11 @@ local success, err = pcall(function()
         SpinEnabled = false,
         RebirthEnabled = false,
         ProteinEnabled = false,
-        FpsPingEnabled = false
+        FpsPingEnabled = false,
+        ServerInfoEnabled = false
     }
     local guiState = {
-        Enabled = true, -- เปลี่ยนเป็น true เพื่อให้ GUI แสดงทันที
+        Enabled = true,
         ToggleButtonPos = UDim2.new(0, 50, 0, 50)
     }
 
@@ -361,8 +358,7 @@ local success, err = pcall(function()
                 end
             end
         end)
-
-        -------------------------------------
+-------------------------------------
         -- ⚙️ หน้าหลัก "การตั้งค่า"
         -------------------------------------
         local settingFrame = Instance.new("Frame")
@@ -405,6 +401,17 @@ local success, err = pcall(function()
         fpsPingLabel.TextWrapped = true
         fpsPingLabel.ZIndex = 10
         fpsPingLabel.Parent = settingFrame
+
+        local serverInfoLabel = Instance.new("TextLabel")
+        serverInfoLabel.Text = "แสดงข้อมูลทั้งเซิร์ฟ:"
+        serverInfoLabel.Size = UDim2.new(0, 150, 0, 25)
+        serverInfoLabel.Position = UDim2.new(0, 10, 0, 120)
+        serverInfoLabel.TextColor3 = Color3.new(1, 1, 1)
+        serverInfoLabel.BackgroundTransparency = 1
+        serverInfoLabel.TextScaled = true
+        serverInfoLabel.TextWrapped = true
+        serverInfoLabel.ZIndex = 10
+        serverInfoLabel.Parent = settingFrame
 
         local function createFpsPingGui()
             print("สร้าง FpsPingGui")
@@ -453,22 +460,6 @@ local success, err = pcall(function()
             return fpsPingGui, fpsLabel, pingLabel
         end
 
-        local fpsPingEnabled = savedStates.FpsPingEnabled
-        local fpsPingToggle = Instance.new("TextButton")
-        fpsPingToggle.Size = UDim2.new(0, 80, 0, 25)
-        fpsPingToggle.Position = UDim2.new(0, 170, 0, 80)
-        fpsPingToggle.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-        fpsPingToggle.Text = fpsPingEnabled and "เปิด" or "ปิด"
-        fpsPingToggle.TextColor3 = Color3.new(1, 1, 1)
-        fpsPingToggle.TextScaled = true
-        fpsPingToggle.TextWrapped = true
-        fpsPingToggle.ZIndex = 10
-        fpsPingToggle.Parent = settingFrame
-
-        local buttonCorner = Instance.new("UICorner")
-        buttonCorner.CornerRadius = UDim.new(0, 8)
-        buttonCorner.Parent = fpsPingToggle
-
         local function updateFpsPing(fpsLabel, pingLabel)
             print("เริ่มอัปเดต FPS และ PING")
             local frameCount = 0
@@ -492,6 +483,22 @@ local success, err = pcall(function()
 
             return connection
         end
+
+        local fpsPingEnabled = savedStates.FpsPingEnabled
+        local fpsPingToggle = Instance.new("TextButton")
+        fpsPingToggle.Size = UDim2.new(0, 80, 0, 25)
+        fpsPingToggle.Position = UDim2.new(0, 170, 0, 80)
+        fpsPingToggle.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+        fpsPingToggle.Text = fpsPingEnabled and "เปิด" or "ปิด"
+        fpsPingToggle.TextColor3 = Color3.new(1, 1, 1)
+        fpsPingToggle.TextScaled = true
+        fpsPingToggle.TextWrapped = true
+        fpsPingToggle.ZIndex = 10
+        fpsPingToggle.Parent = settingFrame
+
+        local buttonCorner = Instance.new("UICorner")
+        buttonCorner.CornerRadius = UDim.new(0, 8)
+        buttonCorner.Parent = fpsPingToggle
 
         local fpsPingGui, fpsLabel, pingLabel = nil, nil, nil
         fpsPingToggle.MouseButton1Click:Connect(function()
@@ -520,6 +527,201 @@ local success, err = pcall(function()
             fpsPingGui, fpsLabel, pingLabel = createFpsPingGui()
             fpsPingGui.Enabled = true
             updateFpsPing(fpsLabel, pingLabel)
+        end
+
+        -- 📊 ฟีเจอร์ "แสดงข้อมูลทั้งเซิร์ฟ"
+        local function createServerInfoGui()
+            print("สร้าง ServerInfoGui")
+            local serverInfoGui = Instance.new("ScreenGui")
+            serverInfoGui.Name = "ServerInfoGui"
+            serverInfoGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+            serverInfoGui.IgnoreGuiInset = true
+            serverInfoGui.Parent = PlayerGui
+
+            local serverInfoFrame = Instance.new("Frame")
+            serverInfoFrame.Size = UDim2.new(0, 300, 0, 400)
+            serverInfoFrame.Position = UDim2.new(0.5, -150, 0.5, -200)
+            serverInfoFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+            serverInfoFrame.BorderSizePixel = 0
+            serverInfoFrame.Active = true
+            serverInfoFrame.Draggable = true
+            serverInfoFrame.ZIndex = 10
+            serverInfoFrame.Parent = serverInfoGui
+
+            local corner = Instance.new("UICorner")
+            corner.CornerRadius = UDim.new(0, 8)
+            corner.Parent = serverInfoFrame
+
+            local scrollingFrame = Instance.new("ScrollingFrame")
+            scrollingFrame.Size = UDim2.new(1, -10, 1, -10)
+            scrollingFrame.Position = UDim2.new(0, 5, 0, 5)
+            scrollingFrame.BackgroundTransparency = 1
+            scrollingFrame.ScrollBarThickness = 5
+            scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+            scrollingFrame.ZIndex = 10
+            scrollingFrame.Parent = serverInfoFrame
+
+            local listLayout = Instance.new("UIListLayout")
+            listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+            listLayout.Padding = UDim.new(0, 5)
+            listLayout.Parent = scrollingFrame
+
+            local playerFrames = {}
+
+            local function updatePlayerInfo(player)
+                if playerFrames[player] then
+                    playerFrames[player]:Destroy()
+                end
+
+                local playerFrame = Instance.new("Frame")
+                playerFrame.Size = UDim2.new(1, -10, 0, 150)
+                playerFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+                playerFrame.BorderSizePixel = 0
+                playerFrame.ZIndex = 10
+                playerFrame.Parent = scrollingFrame
+                playerFrames[player] = playerFrame
+
+                local corner = Instance.new("UICorner")
+                corner.CornerRadius = UDim.new(0, 8)
+                corner.Parent = playerFrame
+
+                local thumbnail = Instance.new("ImageLabel")
+                thumbnail.Size = UDim2.new(0, 80, 0, 80)
+                thumbnail.Position = UDim2.new(0, 10, 0, 10)
+                thumbnail.BackgroundTransparency = 1
+                thumbnail.ZIndex = 10
+                thumbnail.Parent = playerFrame
+
+                local success, content, ready = pcall(function()
+                    return Players:GetUserThumbnailAsync(player.UserId, Enum.ThumbnailType.Headshot, Enum.ThumbnailSize.Size100x100)
+                end)
+                thumbnail.Image = success and ready and content or "rbxasset://textures/ui/GuiImagePlaceholder.png"
+
+                local nameLabel = Instance.new("TextLabel")
+                nameLabel.Text = player.Name
+                nameLabel.Size = UDim2.new(0, 180, 0, 30)
+                nameLabel.Position = UDim2.new(0, 100, 0, 10)
+                nameLabel.TextColor3 = Color3.new(1, 1, 1)
+                nameLabel.BackgroundTransparency = 1
+                nameLabel.TextScaled = true
+                nameLabel.TextWrapped = true
+                nameLabel.ZIndex = 10
+                nameLabel.Parent = playerFrame
+
+                local stats = {"Brawls", "Kills", "Rebirths", "Strength"}
+                local statLabels = {}
+                for i, stat in ipairs(stats) do
+                    local statLabel = Instance.new("TextLabel")
+                    statLabel.Size = UDim2.new(0, 180, 0, 25)
+                    statLabel.Position = UDim2.new(0, 100, 0, 30 + (i * 25))
+                    statLabel.TextColor3 = Color3.new(1, 1, 1)
+                    statLabel.BackgroundTransparency = 1
+                    statLabel.TextScaled = true
+                    statLabel.TextWrapped = true
+                    statLabel.ZIndex = 10
+                    statLabel.Parent = playerFrame
+                    statLabels[stat] = statLabel
+                end
+
+                local function updateStats()
+                    if not playerFrames[player] then return end
+                    for stat, label in pairs(statLabels) do
+                        local success, value = pcall(function()
+                            return player.leaderstats and player.leaderstats[stat] and player.leaderstats[stat].Value or "N/A"
+                        end)
+                        label.Text = stat .. ": " .. (success and value or "N/A")
+                    end
+                end
+                updateStats()
+
+                return updateStats
+            end
+
+            local function updateAllPlayers()
+                for _, player in ipairs(Players:GetPlayers()) do
+                    if not playerFrames[player] then
+                        updatePlayerInfo(player)
+                    end
+                end
+                scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, #Players:GetPlayers() * 155)
+            end
+
+            local updateConnection
+            local function startUpdating()
+                updateAllPlayers()
+                updateConnection = RunService.Heartbeat:Connect(function()
+                    for player, _ in pairs(playerFrames) do
+                        if player.Parent then
+                            updatePlayerInfo(player)()
+                        else
+                            playerFrames[player]:Destroy()
+                            playerFrames[player] = nil
+                        end
+                    end
+                    scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, #Players:GetPlayers() * 155)
+                end)
+                Players.PlayerAdded:Connect(function(player)
+                    updatePlayerInfo(player)
+                    scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, #Players:GetPlayers() * 155)
+                end)
+                Players.PlayerRemoving:Connect(function(player)
+                    if playerFrames[player] then
+                        playerFrames[player]:Destroy()
+                        playerFrames[player] = nil
+                    end
+                    scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, #Players:GetPlayers() * 155)
+                end)
+            end
+
+            return serverInfoGui, startUpdating, updateConnection
+        end
+
+        local serverInfoEnabled = savedStates.ServerInfoEnabled
+        local serverInfoToggle = Instance.new("TextButton")
+        serverInfoToggle.Size = UDim2.new(0, 80, 0, 25)
+        serverInfoToggle.Position = UDim2.new(0, 170, 0, 120)
+        serverInfoToggle.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+        serverInfoToggle.Text = serverInfoEnabled and "เปิด" or "ปิด"
+        serverInfoToggle.TextColor3 = Color3.new(1, 1, 1)
+        serverInfoToggle.TextScaled = true
+        serverInfoToggle.TextWrapped = true
+        serverInfoToggle.ZIndex = 10
+        serverInfoToggle.Parent = settingFrame
+
+        local buttonCorner = Instance.new("UICorner")
+        buttonCorner.CornerRadius = UDim.new(0, 8)
+        buttonCorner.Parent = serverInfoToggle
+
+        local serverInfoGui, startUpdating, updateConnection = nil, nil, nil
+        serverInfoToggle.MouseButton1Click:Connect(function()
+            serverInfoEnabled = not serverInfoEnabled
+            savedStates.ServerInfoEnabled = serverInfoEnabled
+            serverInfoToggle.Text = serverInfoEnabled and "เปิด" or "ปิด"
+            print("สลับ ServerInfo:", serverInfoEnabled)
+
+            if serverInfoEnabled then
+                if not PlayerGui:FindFirstChild("ServerInfoGui") then
+                    serverInfoGui, startUpdating, updateConnection = createServerInfoGui()
+                    serverInfoGui.Enabled = true
+                    startUpdating()
+                end
+            else
+                if PlayerGui:FindFirstChild("ServerInfoGui") then
+                    if updateConnection then
+                        updateConnection:Disconnect()
+                    end
+                    PlayerGui.ServerInfoGui:Destroy()
+                    serverInfoGui, startUpdating, updateConnection = nil, nil, nil
+                end
+            end
+        end)
+
+        if savedStates.ServerInfoEnabled then
+            serverInfoEnabled = true
+            serverInfoToggle.Text = "เปิด"
+            serverInfoGui, startUpdating, updateConnection = createServerInfoGui()
+            serverInfoGui.Enabled = true
+            startUpdating()
         end
 
         -------------------------------------
@@ -938,6 +1140,13 @@ local success, err = pcall(function()
                     fpsPingGui.Enabled = true
                     updateFpsPing(fpsLabel, pingLabel)
                 end
+                if savedStates.ServerInfoEnabled then
+                    serverInfoEnabled = true
+                    serverInfoToggle.Text = "เปิด"
+                    serverInfoGui, startUpdating, updateConnection = createServerInfoGui()
+                    serverInfoGui.Enabled = true
+                    startUpdating()
+                end
             end
         end)
 
@@ -1055,6 +1264,11 @@ local success, err = pcall(function()
             local fpsPingGui, fpsLabel, pingLabel = createFpsPingGui()
             fpsPingGui.Enabled = true
             updateFpsPing(fpsLabel, pingLabel)
+        end
+        if savedStates.ServerInfoEnabled and not PlayerGui:FindFirstChild("ServerInfoGui") then
+            local serverInfoGui, startUpdating, updateConnection = createServerInfoGui()
+            serverInfoGui.Enabled = true
+            startUpdating()
         end
         if not PlayerGui:FindFirstChild("MainGUI") or not PlayerGui:FindFirstChild("ToggleGui") then
             createGui()
