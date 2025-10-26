@@ -23,7 +23,7 @@ local success, err = pcall(function()
     -- 🗑 ลบ GUI เก่าถ้ามี
     local function clearGui()
         print("กำลังลบ GUI เก่า")
-        for _, guiName in ipairs({"MainGUI", "ToggleGui", "FpsPingGui", "ServerInfoGui"}) do
+        for _, guiName in ipairs({"MainGUI", "ToggleGui", "FpsPingGui", "PlayerInfoGUI"}) do
             if PlayerGui:FindFirstChild(guiName) then
                 PlayerGui[guiName]:Destroy()
             end
@@ -529,178 +529,190 @@ local success, err = pcall(function()
             updateFpsPing(fpsLabel, pingLabel)
         end
 
-        -- 📊 ฟีเจอร์ "แสดงข้อมูลทั้งเซิร์ฟ"
-        local function createServerInfoGui()
-            print("สร้าง ServerInfoGui")
-            local serverInfoGui = Instance.new("ScreenGui")
-            serverInfoGui.Name = "ServerInfoGui"
-            serverInfoGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-            serverInfoGui.IgnoreGuiInset = true
-            serverInfoGui.Parent = PlayerGui
+        -- 📊 ฟีเจอร์ "แสดงข้อมูลทั้งเซิร์ฟ" (ใช้ PlayerInfoGUI)
+        local function createPlayerInfoGui()
+            print("สร้าง PlayerInfoGUI")
+            local ScreenGui = Instance.new("ScreenGui")
+            ScreenGui.Name = "PlayerInfoGUI"
+            ScreenGui.ResetOnSpawn = false
+            ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+            ScreenGui.IgnoreGuiInset = true
+            ScreenGui.Parent = PlayerGui
 
-            local serverInfoFrame = Instance.new("Frame")
-            serverInfoFrame.Size = UDim2.new(0, 300, 0, 400)
-            serverInfoFrame.Position = UDim2.new(0.5, -150, 0.5, -200)
-            serverInfoFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-            serverInfoFrame.BorderSizePixel = 0
-            serverInfoFrame.Active = true
-            serverInfoFrame.Draggable = true
-            serverInfoFrame.ZIndex = 10
-            serverInfoFrame.Parent = serverInfoGui
+            local MainFrame = Instance.new("Frame")
+            MainFrame.Size = UDim2.new(0, 400, 0, 350)
+            MainFrame.Position = UDim2.new(0.5, -200, 0.5, -175)
+            MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+            MainFrame.BackgroundTransparency = 0.2
+            MainFrame.BorderSizePixel = 0
+            MainFrame.Active = true
+            MainFrame.Draggable = true
+            MainFrame.Parent = ScreenGui
+            Instance.new("UICorner", MainFrame)
 
-            local corner = Instance.new("UICorner")
-            corner.CornerRadius = UDim.new(0, 8)
-            corner.Parent = serverInfoFrame
+            local Title = Instance.new("TextLabel")
+            Title.Text = "📋 Player Stats"
+            Title.Size = UDim2.new(1, 0, 0, 30)
+            Title.BackgroundTransparency = 1
+            Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+            Title.Font = Enum.Font.GothamBold
+            Title.TextScaled = true
+            Title.Parent = MainFrame
 
-            local scrollingFrame = Instance.new("ScrollingFrame")
-            scrollingFrame.Size = UDim2.new(1, -10, 1, -10)
-            scrollingFrame.Position = UDim2.new(0, 5, 0, 5)
-            scrollingFrame.BackgroundTransparency = 1
-            scrollingFrame.ScrollBarThickness = 5
-            scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
-            scrollingFrame.ZIndex = 10
-            scrollingFrame.Parent = serverInfoFrame
+            local Scroll = Instance.new("ScrollingFrame")
+            Scroll.Size = UDim2.new(1, -10, 1, -40)
+            Scroll.Position = UDim2.new(0, 5, 0, 35)
+            Scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+            Scroll.ScrollBarThickness = 8
+            Scroll.BackgroundTransparency = 1
+            Scroll.Parent = MainFrame
 
-            local listLayout = Instance.new("UIListLayout")
-            listLayout.SortOrder = Enum.SortOrder.LayoutOrder
-            listLayout.Padding = UDim.new(0, 5)
-            listLayout.Parent = scrollingFrame
+            local UIList = Instance.new("UIListLayout")
+            UIList.Padding = UDim.new(0, 5)
+            UIList.SortOrder = Enum.SortOrder.LayoutOrder
+            UIList.Parent = Scroll
 
-            local playerFrames = {}
+            local function UpdateCanvasSize()
+                task.wait(0.05)
+                local contentSize = UIList.AbsoluteContentSize
+                Scroll.CanvasSize = UDim2.new(0, 0, 0, contentSize.Y + 10)
+            end
+            UIList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(UpdateCanvasSize)
 
-            local function updatePlayerInfo(player)
-                if playerFrames[player] then
-                    playerFrames[player]:Destroy()
+            local playerBlocks = {}
+            local connections = {}
+
+            local function CreatePlayerBlock(player)
+                if playerBlocks[player] then
+                    playerBlocks[player]:Destroy()
                 end
 
-                local playerFrame = Instance.new("Frame")
-                playerFrame.Size = UDim2.new(1, -10, 0, 180) -- ปรับความสูงเพื่อรองรับ Durability
-                playerFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-                playerFrame.BorderSizePixel = 0
-                playerFrame.ZIndex = 10
-                playerFrame.Parent = scrollingFrame
-                playerFrames[player] = playerFrame
+                local PlayerFrame = Instance.new("Frame")
+                PlayerFrame.Size = UDim2.new(1, -10, 0, 80)
+                PlayerFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+                PlayerFrame.BorderSizePixel = 0
+                PlayerFrame.Parent = Scroll
+                Instance.new("UICorner", PlayerFrame)
+                playerBlocks[player] = PlayerFrame
 
-                local corner = Instance.new("UICorner")
-                corner.CornerRadius = UDim.new(0, 8)
-                corner.Parent = playerFrame
+                local Thumb = Instance.new("ImageLabel")
+                Thumb.Size = UDim2.new(0, 60, 0, 60)
+                Thumb.Position = UDim2.new(0, 10, 0.5, -30)
+                Thumb.BackgroundTransparency = 1
+                Thumb.Image = "rbxasset://textures/ui/GuiImagePlaceholder.png"
+                Thumb.Parent = PlayerFrame
 
-                local thumbnail = Instance.new("ImageLabel")
-                thumbnail.Size = UDim2.new(0, 80, 0, 80)
-                thumbnail.Position = UDim2.new(0, 10, 0, 10)
-                thumbnail.BackgroundTransparency = 1
-                thumbnail.Image = "rbxasset://textures/ui/GuiImagePlaceholder.png"
-                thumbnail.ZIndex = 10
-                thumbnail.Parent = playerFrame
-
-                local thumbnailStatus = Instance.new("TextLabel")
-                thumbnailStatus.Size = UDim2.new(0, 80, 0, 20)
-                thumbnailStatus.Position = UDim2.new(0, 10, 0, 90)
-                thumbnailStatus.Text = "กำลังโหลด..."
-                thumbnailStatus.TextColor3 = Color3.new(1, 1, 0)
-                thumbnailStatus.BackgroundTransparency = 1
-                thumbnailStatus.TextScaled = true
-                thumbnailStatus.TextWrapped = true
-                thumbnailStatus.ZIndex = 10
-                thumbnailStatus.Parent = playerFrame
+                local ThumbStatus = Instance.new("TextLabel")
+                ThumbStatus.Size = UDim2.new(0, 60, 0, 20)
+                ThumbStatus.Position = UDim2.new(0, 10, 0.5, 30)
+                ThumbStatus.Text = "กำลังโหลด..."
+                ThumbStatus.TextColor3 = Color3.new(1, 1, 0)
+                ThumbStatus.BackgroundTransparency = 1
+                ThumbStatus.TextScaled = true
+                ThumbStatus.TextWrapped = true
+                ThumbStatus.Parent = PlayerFrame
 
                 -- โหลด Thumbnail แบบ asynchronous พร้อมลองโหลดซ้ำ
                 spawn(function()
                     local maxRetries = 3
                     local retryCount = 0
                     while retryCount < maxRetries do
-                        local success, content, ready = pcall(function()
-                            return Players:GetUserThumbnailAsync(player.UserId, Enum.ThumbnailType.Headshot, Enum.ThumbnailSize.Size100x100)
+                        local success, content = pcall(function()
+                            return "rbxthumb://type=AvatarHeadShot&id=" .. player.UserId .. "&w=100&h=100"
                         end)
-                        if success and ready and content then
-                            thumbnail.Image = content
-                            thumbnailStatus.Text = ""
+                        if success and content then
+                            Thumb.Image = content
+                            ThumbStatus.Text = ""
                             break
                         else
                             retryCount = retryCount + 1
-                            thumbnailStatus.Text = retryCount < maxRetries and "กำลังโหลด..." or "โหลดล้มเหลว"
+                            ThumbStatus.Text = retryCount < maxRetries and "กำลังโหลด..." or "โหลดล้มเหลว"
                             task.wait(1)
                         end
                     end
                 end)
 
-                local nameLabel = Instance.new("TextLabel")
-                nameLabel.Text = player.Name
-                nameLabel.Size = UDim2.new(0, 180, 0, 30)
-                nameLabel.Position = UDim2.new(0, 100, 0, 10)
-                nameLabel.TextColor3 = Color3.new(1, 1, 1)
-                nameLabel.BackgroundTransparency = 1
-                nameLabel.TextScaled = true
-                nameLabel.TextWrapped = true
-                nameLabel.ZIndex = 10
-                nameLabel.Parent = playerFrame
+                local Name = Instance.new("TextLabel")
+                Name.Size = UDim2.new(0, 200, 0, 20)
+                Name.Position = UDim2.new(0, 80, 0, 10)
+                Name.Text = player.Name
+                Name.Font = Enum.Font.GothamBold
+                Name.TextColor3 = Color3.fromRGB(255, 255, 255)
+                Name.TextScaled = true
+                Name.BackgroundTransparency = 1
+                Name.Parent = PlayerFrame
 
-                local stats = {"Brawls", "Kills", "Rebirths", "Strength", "Durability"}
-                local statLabels = {}
-                for i, stat in ipairs(stats) do
-                    local statLabel = Instance.new("TextLabel")
-                    statLabel.Size = UDim2.new(0, 180, 0, 25)
-                    statLabel.Position = UDim2.new(0, 100, 0, 30 + (i * 25))
-                    statLabel.TextColor3 = Color3.new(1, 1, 1)
-                    statLabel.BackgroundTransparency = 1
-                    statLabel.TextScaled = true
-                    statLabel.TextWrapped = true
-                    statLabel.ZIndex = 10
-                    statLabel.Parent = playerFrame
-                    statLabels[stat] = statLabel
-                end
+                local Info = Instance.new("TextLabel")
+                Info.Size = UDim2.new(1, -90, 0, 40)
+                Info.Position = UDim2.new(0, 80, 0, 35)
+                Info.Text = "Loading..."
+                Info.Font = Enum.Font.Gotham
+                Info.TextColor3 = Color3.fromRGB(200, 200, 200)
+                Info.TextScaled = true
+                Info.BackgroundTransparency = 1
+                Info.TextXAlignment = Enum.TextXAlignment.Left
+                Info.Parent = PlayerFrame
 
-                local function updateStats()
-                    if not playerFrames[player] then return end
-                    for stat, label in pairs(statLabels) do
-                        local success, value = pcall(function()
-                            return player.leaderstats and player.leaderstats[stat] and player.leaderstats[stat].Value or "N/A"
-                        end)
-                        label.Text = stat .. ": " .. (success and value or "N/A")
-                    end
-                end
-                updateStats()
-
-                return updateStats
-            end
-
-            local function updateAllPlayers()
-                for _, player in ipairs(Players:GetPlayers()) do
-                    if not playerFrames[player] then
-                        updatePlayerInfo(player)
-                    end
-                end
-                scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, #Players:GetPlayers() * 185)
-            end
-
-            local updateConnection
-            local function startUpdating()
-                updateAllPlayers()
-                updateConnection = RunService.Heartbeat:Connect(function()
-                    for player, _ in pairs(playerFrames) do
-                        if player.Parent then
-                            updatePlayerInfo(player)()
+                local function UpdateStats()
+                    local success, err = pcall(function()
+                        local stats = player:FindFirstChild("leaderstats")
+                        local durability = "N/A"
+                        if stats then
+                            local brawls = stats:FindFirstChild("Brawls") and stats.Brawls.Value or "N/A"
+                            local kills = stats:FindFirstChild("Kills") and stats.Kills.Value or "N/A"
+                            local rebirths = stats:FindFirstChild("Rebirths") and stats.Rebirths.Value or "N/A"
+                            local strength = stats:FindFirstChild("Strength") and stats.Strength.Value or "N/A"
+                            durability = stats:FindFirstChild("Durability") and stats.Durability.Value or player:FindFirstChild("Durability") and player.Durability.Value or "N/A"
+                            Info.Text = string.format("Brawls: %s  |  Kills: %s\nRebirths: %s  |  STR: %s  |  DUR: %s", brawls, kills, rebirths, strength, durability)
                         else
-                            playerFrames[player]:Destroy()
-                            playerFrames[player] = nil
+                            Info.Text = "No leaderstats"
                         end
+                    end)
+                    if not success then
+                        Info.Text = "Error: " .. err
                     end
-                    scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, #Players:GetPlayers() * 185)
-                end)
-                Players.PlayerAdded:Connect(function(player)
-                    updatePlayerInfo(player)
-                    scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, #Players:GetPlayers() * 185)
-                end)
-                Players.PlayerRemoving:Connect(function(player)
-                    if playerFrames[player] then
-                        playerFrames[player]:Destroy()
-                        playerFrames[player] = nil
+                end
+
+                UpdateStats()
+
+                if player:FindFirstChild("leaderstats") then
+                    for _, stat in ipairs(player.leaderstats:GetChildren()) do
+                        local conn = stat.Changed:Connect(UpdateStats)
+                        table.insert(connections, conn)
                     end
-                    scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, #Players:GetPlayers() * 185)
-                end)
+                end
+                if player:FindFirstChild("Durability") then
+                    local conn = player.Durability.Changed:Connect(UpdateStats)
+                    table.insert(connections, conn)
+                end
+
+                UpdateCanvasSize()
+                return UpdateStats
             end
 
-            return serverInfoGui, startUpdating, updateConnection
+            local playerAddedConn = Players.PlayerAdded:Connect(function(player)
+                CreatePlayerBlock(player)
+            end)
+
+            local playerRemovingConn = Players.PlayerRemoving:Connect(function(player)
+                if playerBlocks[player] then
+                    playerBlocks[player]:Destroy()
+                    playerBlocks[player] = nil
+                end
+                UpdateCanvasSize()
+            end)
+
+            for _, p in pairs(Players:GetPlayers()) do
+                CreatePlayerBlock(p)
+            end
+
+            return ScreenGui, function()
+                for _, conn in ipairs(connections) do
+                    conn:Disconnect()
+                end
+                playerAddedConn:Disconnect()
+                playerRemovingConn:Disconnect()
+            end
         end
 
         local serverInfoEnabled = savedStates.ServerInfoEnabled
@@ -719,26 +731,25 @@ local success, err = pcall(function()
         buttonCorner.CornerRadius = UDim.new(0, 8)
         buttonCorner.Parent = serverInfoToggle
 
-        local serverInfoGui, startUpdating, updateConnection = nil, nil, nil
+        local serverInfoGui, cleanupConnections = nil, nil
         serverInfoToggle.MouseButton1Click:Connect(function()
             serverInfoEnabled = not serverInfoEnabled
             savedStates.ServerInfoEnabled = serverInfoEnabled
             serverInfoToggle.Text = serverInfoEnabled and "เปิด" or "ปิด"
-            print("สลับ ServerInfo:", serverInfoEnabled)
+            print("สลับ PlayerInfoGUI:", serverInfoEnabled)
 
             if serverInfoEnabled then
-                if not PlayerGui:FindFirstChild("ServerInfoGui") then
-                    serverInfoGui, startUpdating, updateConnection = createServerInfoGui()
+                if not PlayerGui:FindFirstChild("PlayerInfoGUI") then
+                    serverInfoGui, cleanupConnections = createPlayerInfoGui()
                     serverInfoGui.Enabled = true
-                    startUpdating()
                 end
             else
-                if PlayerGui:FindFirstChild("ServerInfoGui") then
-                    if updateConnection then
-                        updateConnection:Disconnect()
+                if PlayerGui:FindFirstChild("PlayerInfoGUI") then
+                    if cleanupConnections then
+                        cleanupConnections()
                     end
-                    PlayerGui.ServerInfoGui:Destroy()
-                    serverInfoGui, startUpdating, updateConnection = nil, nil, nil
+                    PlayerGui.PlayerInfoGUI:Destroy()
+                    serverInfoGui, cleanupConnections = nil, nil
                 end
             end
         end)
@@ -746,9 +757,8 @@ local success, err = pcall(function()
         if savedStates.ServerInfoEnabled then
             serverInfoEnabled = true
             serverInfoToggle.Text = "เปิด"
-            serverInfoGui, startUpdating, updateConnection = createServerInfoGui()
+            serverInfoGui, cleanupConnections = createPlayerInfoGui()
             serverInfoGui.Enabled = true
-            startUpdating()
         end
 -------------------------------------
         -- 🏋️‍♂️ หน้าหลัก "อ้อโต้ยกน้ำหนัก"
@@ -1169,9 +1179,8 @@ local success, err = pcall(function()
                 if savedStates.ServerInfoEnabled then
                     serverInfoEnabled = true
                     serverInfoToggle.Text = "เปิด"
-                    serverInfoGui, startUpdating, updateConnection = createServerInfoGui()
+                    serverInfoGui, cleanupConnections = createPlayerInfoGui()
                     serverInfoGui.Enabled = true
-                    startUpdating()
                 end
             end
         end)
@@ -1291,10 +1300,9 @@ local success, err = pcall(function()
             fpsPingGui.Enabled = true
             updateFpsPing(fpsLabel, pingLabel)
         end
-        if savedStates.ServerInfoEnabled and not PlayerGui:FindFirstChild("ServerInfoGui") then
-            local serverInfoGui, startUpdating, updateConnection = createServerInfoGui()
+        if savedStates.ServerInfoEnabled and not PlayerGui:FindFirstChild("PlayerInfoGUI") then
+            local serverInfoGui, cleanupConnections = createPlayerInfoGui()
             serverInfoGui.Enabled = true
-            startUpdating()
         end
         if not PlayerGui:FindFirstChild("MainGUI") or not PlayerGui:FindFirstChild("ToggleGui") then
             createGui()
