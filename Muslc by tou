@@ -1,866 +1,1070 @@
 -- 🌟 สร้าง GUI Exploit สุดเทพสำหรับ Roblox! 🌟
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
-local RunService = game:GetService("RunService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Workspace = game:GetService("Workspace")
-local Stats = game:GetService("Stats")
-
--- 🗑 ลบ GUI เก่าถ้ามี
-local function clearGui()
-	if PlayerGui:FindFirstChild("MainGUI") then
-		PlayerGui.MainGUI:Destroy()
-	end
-	if PlayerGui:FindFirstChild("ToggleGui") then
-		PlayerGui.ToggleGui:Destroy()
-	end
-	if PlayerGui:FindFirstChild("FpsPingGui") then
-		PlayerGui.FpsPingGui:Destroy()
-	end
-end
-clearGui()
-
--- ⚙️ ตัวแปรสำหรับบันทึกสถานะ GUI และการทำงาน
-local savedStates = {
-	Speed = false,
-	Jump = false,
-	SpeedValue = "16", -- บันทึกค่า speedBox.Text
-	JumpValue = "50", -- บันทึกค่า jumpBox.Text
-	WeightRunning = false,
-	WeightExercise = nil,
-	SpinEnabled = false,
-	RebirthEnabled = false,
-	ProteinEnabled = false,
-	FpsPingEnabled = false -- เพิ่มสถานะสำหรับ FPS+PING
-}
-local guiState = {
-	Enabled = false, -- สถานะการเปิด/ปิด MainGUI
-	ToggleButtonPos = UDim2.new(0, 50, 0, 50) -- ตำแหน่งปุ่ม "อ้ายโดม😇"
-}
-
--- 🛠 ฟังก์ชันสร้าง GUI และคืนค่าสถานะ
-local function createGui()
-	clearGui() -- ลบ GUI เก่าก่อนสร้างใหม่
-
-	-- 🖥 สร้าง ScreenGui สำหรับ GUI หลัก
-	local gui = Instance.new("ScreenGui")
-	gui.Name = "MainGUI"
-	gui.ResetOnSpawn = false
-	gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-	gui.IgnoreGuiInset = true
-	gui.Enabled = guiState.Enabled
-	gui.Parent = PlayerGui
-
-	-- 🖥 สร้าง ScreenGui สำหรับปุ่ม "อ้ายโดม😇"
-	local toggleGui = Instance.new("ScreenGui")
-	toggleGui.Name = "ToggleGui"
-	toggleGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-	toggleGui.IgnoreGuiInset = true
-	toggleGui.Parent = PlayerGui
-
-	-- 😇 สร้างปุ่ม "อ้ายโดม😇"
-	local toggleButton = Instance.new("TextButton")
-	toggleButton.Size = UDim2.new(0, 100, 0, 40)
-	toggleButton.Position = guiState.ToggleButtonPos
-	toggleButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-	toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-	toggleButton.Text = "อ้ายโดม😇"
-	toggleButton.Font = Enum.Font.GothamBold
-	toggleButton.TextSize = 14
-	toggleButton.TextScaled = true
-	toggleButton.TextWrapped = true
-	toggleButton.Active = true
-	toggleButton.Draggable = true
-	toggleButton.ZIndex = 11
-	toggleButton.Parent = toggleGui
-
-	local toggleCorner = Instance.new("UICorner")
-	toggleCorner.CornerRadius = UDim.new(0, 8)
-	toggleCorner.Parent = toggleButton
-
-	-- 🖱 อัปเดตตำแหน่งปุ่มเมื่อลาก
-	toggleButton:GetPropertyChangedSignal("Position"):Connect(function()
-		guiState.ToggleButtonPos = toggleButton.Position
-	end)
-
-	-- 🖱 ฟังก์ชันเปิด/ปิด GUI
-	toggleButton.MouseButton1Click:Connect(function()
-		guiState.Enabled = not guiState.Enabled
-		gui.Enabled = guiState.Enabled
-	end)
-
-	-- 🖼 สร้างกรอบหลัก
-	local mainFrame = Instance.new("Frame")
-	mainFrame.Size = UDim2.new(0, 520, 0, 360)
-	mainFrame.Position = UDim2.new(0.5, -260, 0.5, -180)
-	mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-	mainFrame.BorderSizePixel = 0
-	mainFrame.Active = true
-	mainFrame.Draggable = true
-	mainFrame.ZIndex = 10
-	mainFrame.Parent = gui
-
-	local corner = Instance.new("UICorner")
-	corner.CornerRadius = UDim.new(0, 10)
-	corner.Parent = mainFrame
-
-	-- 📑 สร้างปุ่มแท็บด้านบน
-	local tabNames = {"วาปไปจุดต่างๆ", "ผู้เล่น", "การตั้งค่า", "อ้อโต้ยกน้ำหนัก"}
-	local tabs = {}
-	local currentTab = nil
-
-	for i, name in ipairs(tabNames) do
-		local tab = Instance.new("TextButton")
-		tab.Size = UDim2.new(0, 120, 0, 35)
-		tab.Position = UDim2.new(0, (i - 1) * 130 + 10, 0, 5)
-		tab.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-		tab.TextColor3 = Color3.fromRGB(255, 255, 255)
-		tab.Text = name
-		tab.Font = Enum.Font.GothamBold
-		tab.TextSize = 14
-		tab.TextScaled = true
-		tab.TextWrapped = true
-		tab.ZIndex = 10
-		tab.Parent = mainFrame
-
-		local corner2 = Instance.new("UICorner")
-		corner2.CornerRadius = UDim.new(0, 8)
-		corner2.Parent = tab
-		tabs[name] = tab
-	end
-
-	-- 📄 พื้นที่แสดงเนื้อหา
-	local contentFrame = Instance.new("Frame")
-	contentFrame.Size = UDim2.new(1, -20, 1, -50)
-	contentFrame.Position = UDim2.new(0, 10, 0, 45)
-	contentFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-	contentFrame.BorderSizePixel = 0
-	contentFrame.ZIndex = 10
-	contentFrame.Parent = mainFrame
-
-	local contentCorner = Instance.new("UICorner")
-	contentCorner.CornerRadius = UDim.new(0, 8)
-	contentCorner.Parent = contentFrame
-
-	-- 🔄 ฟังก์ชันเปลี่ยนแท็บ
-	local function showTab(tabName)
-		for _, frame in pairs(contentFrame:GetChildren()) do
-			if frame:IsA("Frame") then
-				frame.Visible = false
-			end
-		end
-		for _, btn in pairs(tabs) do
-			btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-		end
-		tabs[tabName].BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-		if contentFrame:FindFirstChild(tabName) then
-			contentFrame[tabName].Visible = true
-		end
-		currentTab = tabName
-	end
-
-	-------------------------------------
-	-- 🌌 หน้าหลัก "วาปไปจุดต่างๆ"
-	-------------------------------------
-	local warpFrame = Instance.new("Frame")
-	warpFrame.Name = "วาปไปจุดต่างๆ"
-	warpFrame.Size = UDim2.new(1, 0, 1, 0)
-	warpFrame.Visible = false
-	warpFrame.BackgroundTransparency = 1
-	warpFrame.ZIndex = 10
-	warpFrame.Parent = contentFrame
-
-	local warpPoints = {
-		{Label = "วาปไปประตู 1 รีเบิร์ด", Position = Vector3.new(-2623.02, 7.27, -409.07), Y = 40},
-		{Label = "วาปไปประตู 5 รีเบิร์ด", Position = Vector3.new(2250.78, 7.27, 1073.23), Y = 70},
-		{Label = "วาปไปประตู 15 รีเบิร์ด", Position = Vector3.new(-6758.96, 7.27, -1284.92), Y = 100},
-		{Label = "วาปไปประตู 30 รีเบิร์ด", Position = Vector3.new(4603.28, 991.45, -3897.87), Y = 130},
-		{Label = "วาปไปประตู 60 รีเบิร์ด", Position = Vector3.new(-8685.62, 6.70, 2392.33), Y = 160},
-		{Label = "วาปไปประตูคิง", Position = Vector3.new(-8625.93, 17.12, -5730.47), Y = 190},
-		{Label = "วาปตรงกลางแมพ", Position = Vector3.new(10.00, 7.27, 179.95), Y = 220}
-	}
-
-	for i, point in ipairs(warpPoints) do
-		local warpLabel = Instance.new("TextLabel")
-		warpLabel.Text = point.Label
-		warpLabel.Size = UDim2.new(0, 150, 0, 25)
-		warpLabel.Position = UDim2.new(0, 10, 0, point.Y)
-		warpLabel.TextColor3 = Color3.new(1, 1, 1)
-		warpLabel.BackgroundTransparency = 1
-		warpLabel.TextScaled = true
-		warpLabel.TextWrapped = true
-		warpLabel.ZIndex = 10
-		warpLabel.Parent = warpFrame
-
-		local warpButton = Instance.new("TextButton")
-		warpButton.Size = UDim2.new(0, 80, 0, 25)
-		warpButton.Position = UDim2.new(0, 170, 0, point.Y)
-		warpButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-		warpButton.Text = "วาป"
-		warpButton.TextColor3 = Color3.new(1, 1, 1)
-		warpButton.TextScaled = true
-		warpButton.TextWrapped = true
-		warpButton.ZIndex = 10
-		warpButton.Parent = warpFrame
-
-		local buttonCorner = Instance.new("UICorner")
-		buttonCorner.CornerRadius = UDim.new(0, 8)
-		buttonCorner.Parent = warpButton
-
-		warpButton.MouseButton1Click:Connect(function()
-			local character = LocalPlayer.Character
-			if character and character:FindFirstChild("HumanoidRootPart") then
-				character.HumanoidRootPart.CFrame = CFrame.new(point.Position)
-				warpButton.Text = "วาร์ปแล้ว!"
-				task.wait(1)
-				warpButton.Text = "วาป"
-			else
-				warpButton.Text = "ไม่พบตัวละคร!"
-				task.wait(1)
-				warpButton.Text = "วาป"
-			end
-		end)
-	end
-
-	-------------------------------------
-	-- 🎮 หน้าหลัก "ผู้เล่น"
-	-------------------------------------
-	local playerFrame = Instance.new("Frame")
-	playerFrame.Name = "ผู้เล่น"
-	playerFrame.Size = UDim2.new(1, 0, 1, 0)
-	playerFrame.Visible = false
-	playerFrame.BackgroundTransparency = 1
-	playerFrame.ZIndex = 10
-	playerFrame.Parent = contentFrame
-
-	local title = Instance.new("TextLabel")
-	title.Text = "การปรับค่าผู้เล่น"
-	title.Font = Enum.Font.GothamBold
-	title.TextSize = 18
-	title.TextColor3 = Color3.new(1, 1, 1)
-	title.BackgroundTransparency = 1
-	title.Position = UDim2.new(0, 10, 0, 5)
-	title.Size = UDim2.new(0, 200, 0, 30)
-	title.TextScaled = true
-	title.TextWrapped = true
-	title.ZIndex = 10
-	title.Parent = playerFrame
-
-	-- 🏃‍♂️ ช่องปรับความเร็ว
-	local speedLabel = Instance.new("TextLabel")
-	speedLabel.Text = "ความ
-
-เร็ว:"
-	speedLabel.Size = UDim2.new(0, 80, 0, 25)
-	speedLabel.Position = UDim2.new(0, 10, 0, 40)
-	speedLabel.TextColor3 = Color3.new(1, 1, 1)
-	speedLabel.BackgroundTransparency = 1
-	speedLabel.TextScaled = true
-	speedLabel.TextWrapped = true
-	speedLabel.ZIndex = 10
-	speedLabel.Parent = playerFrame
-
-	local speedBox = Instance.new("TextBox")
-	speedBox.Size = UDim2.new(0, 80, 0, 25)
-	speedBox.Position = UDim2.new(0, 100, 0, 40)
-	speedBox.Text = savedStates.SpeedValue
-	speedBox.TextColor3 = Color3.new(1, 1, 1)
-	speedBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-	speedBox.TextScaled = true
-	speedBox.TextWrapped = true
-	speedBox.ZIndex = 10
-	speedBox.Parent = playerFrame
-
-	local speedToggle = Instance.new("TextButton")
-	speedToggle.Size = UDim2.new(0, 80, 0, 25)
-	speedToggle.Position = UDim2.new(0, 190, 0, 40)
-	speedToggle.Text = savedStates.Speed and "เปิด" or "ปิด"
-	speedToggle.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-	speedToggle.TextColor3 = Color3.new(1, 1, 1)
-	speedToggle.TextScaled = true
-	speedToggle.TextWrapped = true
-	speedToggle.ZIndex = 10
-	speedToggle.Parent = playerFrame
-
-	-- 🦘 ช่องปรับกระโดด
-	local jumpLabel = speedLabel:Clone()
-	jumpLabel.Text = "กระโดด:"
-	jumpLabel.Position = UDim2.new(0, 10, 0, 80)
-	jumpLabel.Parent = playerFrame
-
-	local jumpBox = speedBox:Clone()
-	jumpBox.Text = savedStates.JumpValue
-	jumpBox.Position = UDim2.new(0, 100, 0, 80)
-	jumpBox.Parent = playerFrame
-
-	local jumpToggle = speedToggle:Clone()
-	jumpToggle.Text = savedStates.Jump and "เปิด" or "ปิด"
-	jumpToggle.Position = UDim2.new(0, 190, 0, 80)
-	jumpToggle.Parent = playerFrame
-
-	-- ⚙️ ตัวแปรควบคุมสถานะ
-	local speedEnabled = savedStates.Speed
-	local jumpEnabled = savedStates.Jump
-	local humanoid = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-
-	-- 🎮 อัปเดตค่า TextBox เมื่อเปลี่ยน
-	speedBox:GetPropertyChangedSignal("Text"):Connect(function()
-		savedStates.SpeedValue = speedBox.Text
-	end)
-	jumpBox:GetPropertyChangedSignal("Text"):Connect(function()
-		savedStates.JumpValue = jumpBox.Text
-	end)
-
-	-- 🎮 ฟังก์ชันควบคุมความเร็วและกระโดด
-	speedToggle.MouseButton1Click:Connect(function()
-		speedEnabled = not speedEnabled
-		savedStates.Speed = speedEnabled
-		speedToggle.Text = speedEnabled and "เปิด" or "ปิด"
-	end)
-
-	jumpToggle.MouseButton1Click:Connect(function()
-		jumpEnabled = not jumpEnabled
-		savedStates.Jump = jumpEnabled
-		jumpToggle.Text = jumpEnabled and "เปิด" or "ปิด"
-	end)
-
-	-- 🔄 อัปเดตความเร็วและกระโดดอย่างต่อเนื่อง
-	RunService.Heartbeat:Connect(function()
-		if humanoid then
-			if speedEnabled then
-				local speed = tonumber(savedStates.SpeedValue) or 16
-				if speed <= 200 then
-					humanoid.WalkSpeed = speed
-				end
-			else
-				humanoid.WalkSpeed = 16
-			end
-			if jumpEnabled then
-				local jump = tonumber(savedStates.JumpValue) or 50
-				if jump <= 150 then
-					humanoid.JumpPower = jump
-				end
-			else
-				humanoid.JumpPower = 50
-			end
-		end
-	end)
-
-	-------------------------------------
-	-- ⚙️ หน้าหลัก "การตั้งค่า"
-	-------------------------------------
-	local settingFrame = Instance.new("Frame")
-	settingFrame.Name = "การตั้งค่า"
-	settingFrame.Size = UDim2.new(1, 0, 1, 0)
-	settingFrame.Visible = false
-	settingFrame.BackgroundTransparency = 1
-	settingFrame.ZIndex = 10
-	settingFrame.Parent = contentFrame
-
-	local saveLabel = Instance.new("TextLabel")
-	saveLabel.Text = "บันทึกสถานะปุ่ม:"
-	saveLabel.Size = UDim2.new(0, 150, 0, 25)
-	saveLabel.Position = UDim2.new(0, 10, 0, 40)
-	saveLabel.TextColor3 = Color3.new(1, 1, 1)
-	saveLabel.BackgroundTransparency = 1
-	saveLabel.TextScaled = true
-	saveLabel.TextWrapped = true
-	saveLabel.ZIndex = 10
-	saveLabel.Parent = settingFrame
-
-	local saveToggle = Instance.new("TextButton")
-	saveToggle.Size = UDim2.new(0, 80, 0, 25)
-	saveToggle.Position = UDim2.new(0, 170, 0, 40)
-	saveToggle.Text = "ปิด"
-	saveToggle.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-	saveToggle.TextColor3 = Color3.new(1, 1, 1)
-	saveToggle.TextScaled = true
-	saveToggle.TextWrapped = true
-	saveToggle.ZIndex = 10
-	saveToggle.Parent = settingFrame
-
-	-- 📊 ข้อความและปุ่ม "ขึ้น FPS+PING"
-	local fpsPingLabel = Instance.new("TextLabel")
-	fpsPingLabel.Text = "ขึ้น FPS+PING:"
-	fpsPingLabel.Size = UDim2.new(0, 150, 0, 25)
-	fpsPingLabel.Position = UDim2.new(0, 10, 0, 80)
-	fpsPingLabel.TextColor3 = Color3.new(1, 1, 1)
-	f使命
-
-ฟังก์ชันสร้าง GUI แสดง FPS และ PING
-	local function createFpsPingGui()
-		local fpsPingGui = Instance.new("ScreenGui")
-		fpsPingGui.Name = "FpsPingGui"
-		fpsPingGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-		fpsPingGui.IgnoreGuiInset = true
-		fpsPingGui.Parent = PlayerGui
-
-		local fpsPingFrame = Instance.new("Frame")
-		fpsPingFrame.Size = UDim2.new(0, 150, 0, 100)
-		fpsPingFrame.Position = UDim2.new(0.5, -75, 0.5, -50)
-		fpsPingFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-		fpsPingFrame.BorderSizePixel = 0
-		fpsPingFrame.Active = true
-		fpsPingFrame.Draggable = true
-		fpsPingFrame.ZIndex = 10
-		fpsPingFrame.Parent = fpsPingGui
-
-		local corner = Instance.new("UICorner")
-		corner.CornerRadius = UDim.new(0, 8)
-		corner.Parent = fpsPingFrame
-
-		local fpsLabel = Instance.new("TextLabel")
-		fpsLabel.Text = "FPS: 0.00"
-		fpsLabel.Size = UDim2.new(1, -10, 0, 40)
-		fpsLabel.Position = UDim2.new(0, 5, 0, 10)
-		fpsLabel.TextColor3 = Color3.new(1, 1, 1)
-		fpsLabel.BackgroundTransparency = 1
-		fpsLabel.TextScaled = true
-		fpsLabel.TextWrapped = true
-		fpsLabel.ZIndex = 10
-		fpsLabel.Parent = fpsPingFrame
-
-		local pingLabel = Instance.new("TextLabel")
-		pingLabel.Text = "PING: N/A"
-		pingLabel.Size = UDim2.new(1, -10, 0, 40)
-		pingLabel.Position = UDim2.new(0, 5, 0, 50)
-		pingLabel.TextColor3 = Color3.new(1, 1, 1)
-		pingLabel.BackgroundTransparency = 1
-		pingLabel.TextScaled = true
-		pingLabel.TextWrapped = true
-		pingLabel.ZIndex = 10
-		pingLabel.Parent = fpsPingFrame
-
-		return fpsPingGui, fpsLabel, pingLabel
-	end
-
-	local fpsPingEnabled = savedStates.FpsPingEnabled
-	local fpsPingToggle = Instance.new("TextButton")
-	fpsPingToggle.Size = UDim2.new(0, 80, 0, 25)
-	fpsPingToggle.Position = UDim2.new(0, 170, 0, 80)
-	fpsPingToggle.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-	fpsPingToggle.Text = fpsPingEnabled and "เปิด" or "ปิด"
-	fpsPingToggle.TextColor3 = Color3.new(1, 1, 1)
-	fpsPingToggle.TextScaled = true
-	fpsPingToggle.TextWrapped = true
-	fpsPingToggle.ZIndex = 10
-	fpsPingToggle.Parent = settingFrame
-
-	local buttonCorner = Instance.new("UICorner")
-	buttonCorner.CornerRadius = UDim.new(0, 8)
-	buttonCorner.Parent = fpsPingToggle
-
-	-- 📊 ฟังก์ชันอัปเดต FPS และ PING
-	local function updateFpsPing(fpsLabel, pingLabel)
-		local frameCount = 0
-		local lastTime = tick()
-		local connection
-
-		connection = RunService.Heartbeat:Connect(function(deltaTime)
-			frameCount = frameCount + 1
-			if tick() - lastTime >= 0.5 then
-				local fps = math.round(frameCount / (tick() - lastTime) * 100) / 100
-				fpsLabel.Text = string.format("FPS: %.2f", fps)
-				local success, ping = pcall(function()
-					return Stats.Network.ServerStatsItem["Data Ping"].Value
-				end)
-				pingLabel.Text = success and string.format("PING: %.0f ms", ping) or "PING: N/A"
-				frameCount = 0
-				lastTime = tick()
-			end
-		end)
-
-		return connection
-	end
-
-	-- 🖱 ฟังก์ชันควบคุม FPS+PING
-	local fpsPingGui, fpsLabel, pingLabel = nil, nil, nil
-	fpsPingToggle.MouseButton1Click:Connect(function()
-		fpsPingEnabled = not fpsPingEnabled
-		savedStates.FpsPingEnabled = fpsPingEnabled
-		fpsPingToggle.Text = fpsPingEnabled and "เปิด" or "ปิด"
-
-		if fpsPingEnabled then
-			if not PlayerGui:FindFirstChild("FpsPingGui") then
-				fpsPingGui, fpsLabel, pingLabel = createFpsPingGui()
-				fpsPingGui.Enabled = true
-				updateFpsPing(fpsLabel, pingLabel)
-			end
-		else
-			if PlayerGui:FindFirstChild("FpsPingGui") then
-				PlayerGui.FpsPingGui:Destroy()
-				fpsPingGui, fpsLabel, pingLabel = nil, nil, nil
-			end
-		end
-	end)
-
-	-- คืนค่าสถานะ FPS+PING ถ้าเปิดอยู่
-	if savedStates.FpsPingEnabled then
-		fpsPingEnabled = true
-		fpsPingToggle.Text = "เปิด"
-		fpsPingGui, fpsLabel, pingLabel = createFpsPingGui()
-		fpsPingGui.Enabled = true
-		updateFpsPing(fpsLabel, pingLabel)
-	end
-
-	-------------------------------------
-	-- 🏋️‍♂️ หน้าหลัก "อ้อโต้ยกน้ำหนัก"
-	-------------------------------------
-	local weightFrame = Instance.new("Frame")
-	weightFrame.Name = "อ้อโต้ยกน้ำหนัก"
-	weightFrame.Size = UDim2.new(1, 0, 1, 0)
-	weightFrame.Visible = false
-	weightFrame.BackgroundTransparency = 1
-	weightFrame.ZIndex = 10
-	weightFrame.Parent = contentFrame
-
-	local weightTitle = Instance.new("TextLabel")
-	weightTitle.Text = "เลือกสิ่งที่จะออกกำลังกาย"
-	weightTitle.Size = UDim2.new(0, 300, 0, 30)
-	weightTitle.Position = UDim2.new(0, 10, 0, 10)
-	weightTitle.TextColor3 = Color3.new(1, 1, 1)
-	weightTitle.BackgroundTransparency = 1
-	weightTitle.TextScaled = true
-	weightTitle.TextWrapped = true
-	weightTitle.ZIndex = 10
-	weightTitle.Parent = weightFrame
-
-	local chooseButton = Instance.new("TextButton")
-	chooseButton.Size = UDim2.new(0, 150, 0, 35)
-	chooseButton.Position = UDim2.new(0, 10, 0, 50)
-	chooseButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-	chooseButton.Text = savedStates.WeightExercise and "เลือก: " .. savedStates.WeightExercise or "เลือก"
-	chooseButton.TextColor3 = Color3.new(1, 1, 1)
-	chooseButton.TextScaled = true
-	chooseButton.TextWrapped = true
-	chooseButton.ZIndex = 10
-	chooseButton.Parent = weightFrame
-
-	local startButton = Instance.new("TextButton")
-	startButton.Size = UDim2.new(0, 100, 0, 35)
-	startButton.Position = UDim2.new(0, 170, 0, 50)
-	startButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-	startButton.Text = savedStates.WeightRunning and "หยุด" or "เริ่ม"
-	startButton.TextColor3 = Color3.new(1, 1, 1)
-	startButton.TextScaled = true
-	startButton.TextWrapped = true
-	startButton.ZIndex = 10
-	startButton.Parent = weightFrame
-
-	-- 🎰 ข้อความและปุ่ม "อ้อโต้สปิน"
-	local spinLabel = Instance.new("TextLabel")
-	spinLabel.Text = "อ้อโต้สปิน:"
-	spinLabel.Size = UDim2.new(0, 150, 0, 25)
-	spinLabel.Position = UDim2.new(0, 10, 0, 90)
-	spinLabel.TextColor3 = Color3.new(1, 1, 1)
-	spinLabel.BackgroundTransparency = 1
-	spinLabel.TextScaled = true
-	spinLabel.TextWrapped = true
-	spinLabel.ZIndex = 10
-	spinLabel.Parent = weightFrame
-
-	local spinToggle = Instance.new("TextButton")
-	spinToggle.Size = UDim2.new(0, 100, 0, 25)
-	spinToggle.Position = UDim2.new(0, 170, 0, 90)
-	spinToggle.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-	spinToggle.Text = savedStates.SpinEnabled and "เปิด" or "ปิด"
-	spinToggle.TextColor3 = Color3.new(1, 1, 1)
-	spinToggle.TextScaled = true
-	spinToggle.TextWrapped = true
-	spinToggle.ZIndex = 10
-	spinToggle.Parent = weightFrame
-
-	-- 🔄 ข้อความและปุ่ม "อ้อโต้รีเบิร์ด"
-	local rebirthLabel = Instance.new("TextLabel")
-	rebirthLabel.Text = "อ้อโต้รีเบิร์ด:"
-	rebirthLabel.Size = UDim2.new(0, 150, 0, 25)
-	rebirthLabel.Position = UDim2.new(0, 10, 0, 120)
-	rebirthLabel.TextColor3 = Color3.new(1, 1, 1)
-	rebirthLabel.BackgroundTransparency = 1
-	rebirthLabel.TextScaled = true
-	rebirthLabel.TextWrapped = true
-	rebirthLabel.ZIndex = 10
-	rebirthLabel.Parent = weightFrame
-
-	local rebirthToggle = Instance.new("TextButton")
-	rebirthToggle.Size = UDim2.new(0, 100, 0, 25)
-	rebirthToggle.Position = UDim2.new(0, 170, 0, 120)
-	rebirthToggle.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-	rebirthToggle.Text = savedStates.RebirthEnabled and "เปิด" or "ปิด"
-	rebirthToggle.TextColor3 = Color3.new(1, 1, 1)
-	rebirthToggle.TextScaled = true
-	rebirthToggle.TextWrapped = true
-	rebirthToggle.ZIndex = 10
-	rebirthToggle.Parent = weightFrame
-
-	-- 🍫 ฟังก์ชันปุ่มอ้อโต้กินโปรตัน
-	proteinToggle.MouseButton1Click:Connect(function()
-		proteinEnabled = not proteinEnabled
-		savedStates.ProteinEnabled = proteinEnabled
-		proteinToggle.Text = proteinEnabled and "เปิด" or "ปิด"
-
-		if proteinEnabled then
-			local proteinTools = {"Protein Bar", "Protein Shake", "ULTRA Shake", "TOUGH Bar"}
-			local foundTool = nil
-			for _, toolName in ipairs(proteinTools) do
-				local tool = backpack:FindFirstChild(toolName)
-				if tool then
-					foundTool = tool
-					break
-				end
-			end
-
-			if foundTool and humanoid then
-				humanoid:EquipTool(foundTool)
-				task.wait(0.1) -- หน่วงเล็กน้อยเพื่อให้แน่ใจว่า Tool ถือแล้ว
-				foundTool:Activate()
-			else
-				proteinToggle.Text = "ไม่พบ Tool!"
-				task.wait(1)
-				proteinToggle.Text = proteinEnabled and "เปิด" or "ปิด"
-				proteinEnabled = false
-				savedStates.ProteinEnabled = false
-			end
-		end
-	end)
-
-	-- 🛠 ตรวจสอบเมื่อ Tool ถูกเก็บลง Backpack
-	backpack.ChildAdded:Connect(function(child)
-		if running and child.Name == selectedExercise and humanoid then
-			task.wait(0.1)
-			humanoid:EquipTool(child)
-		end
-		if proteinEnabled and table.find({"Protein Bar", "Protein Shake", "ULTRA Shake", "TOUGH Bar"}, child.Name) and humanoid then
-			task.wait(0.1)
-			humanoid:EquipTool(child)
-			child:Activate()
-		end
-	end)
-
-	-- 💾 ระบบบันทึกสถานะปุ่ม
-	local saveEnabled = false
-	saveToggle.MouseButton1Click:Connect(function()
-		saveEnabled = not saveEnabled
-		saveToggle.Text = saveEnabled and "เปิด" or "ปิด"
-		if saveEnabled then
-			if savedStates.Speed then
-				speedEnabled = true
-				speedToggle.Text = "เปิด"
-				if humanoid then
-					local speed = tonumber(savedStates.SpeedValue) or 16
-					if speed <= 200 then
-						humanoid.WalkSpeed = speed
-					end
-				end
-			end
-			if savedStates.Jump then
-				jumpEnabled = true
-				jumpToggle.Text = "เปิด"
-				if humanoid then
-					local jump = tonumber(savedStates.JumpValue) or 50
-					if jump <= 150 then
-						humanoid.JumpPower = jump
-					end
-				end
-			end
-			if savedStates.WeightRunning and savedStates.WeightExercise then
-				running = true
-				startButton.Text = "หยุด"
-				chooseButton.Text = "เลือก: " .. savedStates.WeightExercise
-				selectedExercise = savedStates.WeightExercise
-				local tool = backpack:FindFirstChild(savedStates.WeightExercise)
-				if tool and humanoid then
-					humanoid:EquipTool(tool)
-				end
-				spawn(function()
-					while running and saveEnabled do
-						if muscleEvent then
-							muscleEvent:FireServer("rep")
-						end
-						task.wait(math.random(0.08, 0.12))
-					end
-				end)
-			end
-			if savedStates.SpinEnabled then
-				spinEnabled = true
-				spinToggle.Text = "เปิด"
-				spawn(function()
-					while spinEnabled and saveEnabled do
-						if fortuneWheelRemote and fortuneWheel then
-							local args = {"openFortuneWheel", fortuneWheel}
-							fortuneWheelRemote:InvokeServer(unpack(args))
-						end
-						task.wait(1)
-					end
-				end)
-			end
-			if savedStates.RebirthEnabled then
-				rebirthEnabled = true
-				rebirthToggle.Text = "เปิด"
-				spawn(function()
-					while rebirthEnabled and saveEnabled do
-						if rebirthRemote then
-							local args = {"rebirthRequest"}
-							rebirthRemote:InvokeServer(unpack(args))
-						end
-						task.wait(1)
-					end
-				end)
-			end
-			if savedStates.ProteinEnabled then
-				proteinEnabled = true
-				proteinToggle.Text = "เปิด"
-				local proteinTools = {"Protein Bar", "Protein Shake", "ULTRA Shake", "TOUGH Bar"}
-				local foundTool = nil
-				for _, toolName in ipairs(proteinTools) do
-					local tool = backpack:FindFirstChild(toolName)
-					if tool then
-						foundTool = tool
-						break
-					end
-				end
-				if foundTool and humanoid then
-					humanoid:EquipTool(foundTool)
-					task.wait(0.1)
-					foundTool:Activate()
-				end
-			end
-			if savedStates.FpsPingEnabled then
-				fpsPingEnabled = true
-				fpsPingToggle.Text = "เปิด"
-				fpsPingGui, fpsLabel, pingLabel = createFpsPingGui()
-				fpsPingGui.Enabled = true
-				updateFpsPing(fpsLabel, pingLabel)
-			end
-		end
-	end)
-
-	-- 🔗 สลับแท็บ
-	for name, button in pairs(tabs) do
-		button.MouseButton1Click:Connect(function()
-			showTab(name)
-		end)
-	end
-
-	-- คืนค่าสถานะและรันลูปถ้ามี
-	if savedStates.WeightRunning and savedStates.WeightExercise then
-		running = true
-		startButton.Text = "หยุด"
-		chooseButton.Text = "เลือก: " .. savedStates.WeightExercise
-		selectedExercise = savedStates.WeightExercise
-		local tool = backpack:FindFirstChild(savedStates.WeightExercise)
-		if tool and humanoid then
-			humanoid:EquipTool(tool)
-		end
-		spawn(function()
-			while running do
-				if muscleEvent then
-					muscleEvent:FireServer("rep")
-				end
-				task.wait(math.random(0.08, 0.12))
-			end
-		end)
-	end
-	if savedStates.SpinEnabled then
-		spinEnabled = true
-		spinToggle.Text = "เปิด"
-		spawn(function()
-			while spinEnabled do
-				if fortuneWheelRemote and fortuneWheel then
-					local args = {"openFortuneWheel", fortuneWheel}
-					fortuneWheelRemote:InvokeServer(unpack(args))
-				end
-				task.wait(1)
-			end
-		end)
-	end
-	if savedStates.RebirthEnabled then
-		rebirthEnabled = true
-		rebirthToggle.Text = "เปิด"
-		spawn(function()
-			while rebirthEnabled do
-				if rebirthRemote then
-					local args = {"rebirthRequest"}
-					rebirthRemote:InvokeServer(unpack(args))
-				end
-				task.wait(1)
-			end
-		end)
-	end
-	if savedStates.ProteinEnabled then
-		proteinEnabled = true
-		proteinToggle.Text = "เปิด"
-		local proteinTools = {"Protein Bar", "Protein Shake", "ULTRA Shake", "TOUGH Bar"}
-		local foundTool = nil
-		for _, toolName in ipairs(proteinTools) do
-			local tool = backpack:FindFirstChild(toolName)
-			if tool then
-				foundTool = tool
-				break
-			end
-		end
-		if foundTool and humanoid then
-			humanoid:EquipTool(foundTool)
-			task.wait(0.1)
-			foundTool:Activate()
-		end
-	end
-
-	showTab("ผู้เล่น") -- เปิดเริ่มต้นที่แท็บผู้เล่น
-end
-
--- 🔄 อัปเดต Humanoid และ GUI เมื่อตัวละครโหลดใหม่
-LocalPlayer.CharacterAdded:Connect(function(char)
-	humanoid = char:WaitForChild("Humanoid")
-	-- คืนค่า WalkSpeed และ JumpPower
-	if savedStates.Speed and humanoid then
-		local speed = tonumber(savedStates.SpeedValue) or 16
-		if speed <= 200 then
-			humanoid.WalkSpeed = speed
-		end
-	end
-	if savedStates.Jump and humanoid then
-		local jump = tonumber(savedStates.JumpValue) or 50
-		if jump <= 150 then
-			humanoid.JumpPower = jump
-		end
-	end
-	-- ถือ Tool อัตโนมัติเมื่อเกิดใหม่
-	if savedStates.WeightRunning and savedStates.WeightExercise then
-		local backpack = LocalPlayer:WaitForChild("Backpack")
-		local tool = backpack:FindFirstChild(savedStates.WeightExercise)
-		if tool and humanoid then
-			humanoid:EquipTool(tool)
-		end
-	end
-	if savedStates.ProteinEnabled then
-		local proteinTools = {"Protein Bar", "Protein Shake", "ULTRA Shake", "TOUGH Bar"}
-		local foundTool = nil
-		for _, toolName in ipairs(proteinTools) do
-			local tool = backpack:FindFirstChild(toolName)
-			if tool then
-				foundTool = tool
-				break
-			end
-		end
-		if foundTool and humanoid then
-			humanoid:EquipTool(foundTool)
-			task.wait(0.1)
-			foundTool:Activate()
-		end
-	end
-	-- คืนค่า FPS+PING GUI
-	if savedStates.FpsPingEnabled and not PlayerGui:FindFirstChild("FpsPingGui") then
-		local fpsPingGui, fpsLabel, pingLabel = createFpsPingGui()
-		fpsPingGui.Enabled = true
-		updateFpsPing(fpsLabel, pingLabel)
-	end
-	-- ตรวจสอบและสร้าง GUI ใหม่ถ้าหายไป
-	if not PlayerGui:FindFirstChild("MainGUI") or not PlayerGui:FindFirstChild("ToggleGui") then
-		createGui()
-	end
+local success, err = pcall(function()
+    if not game then
+        error("สคริปต์ต้องรันใน Roblox!")
+        return
+    end
+
+    local Players = game:GetService("Players")
+    local LocalPlayer = Players.LocalPlayer
+    if not LocalPlayer then
+        error("ไม่พบ LocalPlayer!")
+        return
+    end
+    local PlayerGui = LocalPlayer:WaitForChild("PlayerGui", 5)
+    if not PlayerGui then
+        error("ไม่พบ PlayerGui!")
+        return
+    end
+    local RunService = game:GetService("RunService")
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    local Stats = game:GetService("Stats")
+
+    -- 🗑 ลบ GUI เก่าถ้ามี
+    local function clearGui()
+        print("กำลังลบ GUI เก่า")
+        if PlayerGui:FindFirstChild("MainGUI") then
+            PlayerGui.MainGUI:Destroy()
+        end
+        if PlayerGui:FindFirstChild("ToggleGui") then
+            PlayerGui.ToggleGui:Destroy()
+        end
+        if PlayerGui:FindFirstChild("FpsPingGui") then
+            PlayerGui.FpsPingGui:Destroy()
+        end
+    end
+    clearGui()
+
+    -- ⚙️ ตัวแปรสำหรับบันทึกสถานะ GUI และการทำงาน
+    local savedStates = {
+        Speed = false,
+        Jump = false,
+        SpeedValue = "16",
+        JumpValue = "50",
+        WeightRunning = false,
+        WeightExercise = nil,
+        SpinEnabled = false,
+        RebirthEnabled = false,
+        ProteinEnabled = false,
+        FpsPingEnabled = false
+    }
+    local guiState = {
+        Enabled = true, -- เปลี่ยนเป็น true เพื่อให้ GUI แสดงทันที
+        ToggleButtonPos = UDim2.new(0, 50, 0, 50)
+    }
+
+    -- 🛠 ฟังก์ชันสร้าง GUI และคืนค่าสถานะ
+    local function createGui()
+        print("เริ่มสร้าง GUI")
+        clearGui()
+
+        -- 🖥 สร้าง ScreenGui สำหรับ GUI หลัก
+        local gui = Instance.new("ScreenGui")
+        gui.Name = "MainGUI"
+        gui.ResetOnSpawn = false
+        gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+        gui.IgnoreGuiInset = true
+        gui.Enabled = guiState.Enabled
+        gui.Parent = PlayerGui
+        print("สร้าง MainGUI, Enabled =", gui.Enabled)
+
+        -- 🖥 สร้าง ScreenGui สำหรับปุ่ม "อ้ายโดม😇"
+        local toggleGui = Instance.new("ScreenGui")
+        toggleGui.Name = "ToggleGui"
+        toggleGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+        toggleGui.IgnoreGuiInset = true
+        toggleGui.Parent = PlayerGui
+        print("สร้าง ToggleGui")
+
+        -- 😇 สร้างปุ่ม "อ้ายโดม😇"
+        local toggleButton = Instance.new("TextButton")
+        toggleButton.Size = UDim2.new(0, 100, 0, 40)
+        toggleButton.Position = guiState.ToggleButtonPos
+        toggleButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+        toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+        toggleButton.Text = "อ้ายโดม😇"
+        toggleButton.Font = Enum.Font.GothamBold
+        toggleButton.TextSize = 14
+        toggleButton.TextScaled = true
+        toggleButton.TextWrapped = true
+        toggleButton.Active = true
+        toggleButton.Draggable = true
+        toggleButton.ZIndex = 11
+        toggleButton.Parent = toggleGui
+
+        local toggleCorner = Instance.new("UICorner")
+        toggleCorner.CornerRadius = UDim.new(0, 8)
+        toggleCorner.Parent = toggleButton
+
+        toggleButton:GetPropertyChangedSignal("Position"):Connect(function()
+            guiState.ToggleButtonPos = toggleButton.Position
+        end)
+
+        toggleButton.MouseButton1Click:Connect(function()
+            guiState.Enabled = not guiState.Enabled
+            gui.Enabled = guiState.Enabled
+            print("สลับ GUI: Enabled =", guiState.Enabled)
+        end)
+
+        -- 🖼 สร้างกรอบหลัก
+        local mainFrame = Instance.new("Frame")
+        mainFrame.Size = UDim2.new(0, 520, 0, 360)
+        mainFrame.Position = UDim2.new(0.5, -260, 0.5, -180)
+        mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+        mainFrame.BorderSizePixel = 0
+        mainFrame.Active = true
+        mainFrame.Draggable = true
+        mainFrame.ZIndex = 10
+        mainFrame.Parent = gui
+
+        local corner = Instance.new("UICorner")
+        corner.CornerRadius = UDim.new(0, 10)
+        corner.Parent = mainFrame
+
+        -- 📑 สร้างปุ่มแท็บด้านบน
+        local tabNames = {"วาปไปจุดต่างๆ", "ผู้เล่น", "การตั้งค่า", "อ้อโต้ยกน้ำหนัก"}
+        local tabs = {}
+        local currentTab = nil
+
+        for i, name in ipairs(tabNames) do
+            local tab = Instance.new("TextButton")
+            tab.Size = UDim2.new(0, 120, 0, 35)
+            tab.Position = UDim2.new(0, (i - 1) * 130 + 10, 0, 5)
+            tab.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+            tab.TextColor3 = Color3.fromRGB(255, 255, 255)
+            tab.Text = name
+            tab.Font = Enum.Font.GothamBold
+            tab.TextSize = 14
+            tab.TextScaled = true
+            tab.TextWrapped = true
+            tab.ZIndex = 10
+            tab.Parent = mainFrame
+
+            local corner2 = Instance.new("UICorner")
+            corner2.CornerRadius = UDim.new(0, 8)
+            corner2.Parent = tab
+            tabs[name] = tab
+        end
+
+        -- 📄 พื้นที่แสดงเนื้อหา
+        local contentFrame = Instance.new("Frame")
+        contentFrame.Size = UDim2.new(1, -20, 1, -50)
+        contentFrame.Position = UDim2.new(0, 10, 0, 45)
+        contentFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+        contentFrame.BorderSizePixel = 0
+        contentFrame.ZIndex = 10
+        contentFrame.Parent = mainFrame
+
+        local contentCorner = Instance.new("UICorner")
+        contentCorner.CornerRadius = UDim.new(0, 8)
+        contentCorner.Parent = contentFrame
+
+        -- 🔄 ฟังก์ชันเปลี่ยนแท็บ
+        local function showTab(tabName)
+            for _, frame in pairs(contentFrame:GetChildren()) do
+                if frame:IsA("Frame") then
+                    frame.Visible = false
+                end
+            end
+            for _, btn in pairs(tabs) do
+                btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+            end
+            tabs[tabName].BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+            if contentFrame:FindFirstChild(tabName) then
+                contentFrame[tabName].Visible = true
+            end
+            currentTab = tabName
+            print("เปลี่ยนไปแท็บ:", tabName)
+        end
+
+        -------------------------------------
+        -- 🌌 หน้าหลัก "วาปไปจุดต่างๆ"
+        -------------------------------------
+        local warpFrame = Instance.new("Frame")
+        warpFrame.Name = "วาปไปจุดต่างๆ"
+        warpFrame.Size = UDim2.new(1, 0, 1, 0)
+        warpFrame.Visible = false
+        warpFrame.BackgroundTransparency = 1
+        warpFrame.ZIndex = 10
+        warpFrame.Parent = contentFrame
+
+        local warpPoints = {
+            {Label = "วาปไปประตู 1 รีเบิร์ด", Position = Vector3.new(-2623.02, 7.27, -409.07), Y = 40},
+            {Label = "วาปไปประตู 5 รีเบิร์ด", Position = Vector3.new(2250.78, 7.27, 1073.23), Y = 70},
+            {Label = "วาปไปประตู 15 รีเบิร์ด", Position = Vector3.new(-6758.96, 7.27, -1284.92), Y = 100},
+            {Label = "วาปไปประตู 30 รีเบิร์ด", Position = Vector3.new(4603.28, 991.45, -3897.87), Y = 130},
+            {Label = "วาปไปประตู 60 รีเบิร์ด", Position = Vector3.new(-8685.62, 6.70, 2392.33), Y = 160},
+            {Label = "วาปไปประตูคิง", Position = Vector3.new(-8625.93, 17.12, -5730.47), Y = 190},
+            {Label = "วาปตรงกลางแมพ", Position = Vector3.new(10.00, 7.27, 179.95), Y = 220}
+        }
+
+        for i, point in ipairs(warpPoints) do
+            local warpLabel = Instance.new("TextLabel")
+            warpLabel.Text = point.Label
+            warpLabel.Size = UDim2.new(0, 150, 0, 25)
+            warpLabel.Position = UDim2.new(0, 10, 0, point.Y)
+            warpLabel.TextColor3 = Color3.new(1, 1, 1)
+            warpLabel.BackgroundTransparency = 1
+            warpLabel.TextScaled = true
+            warpLabel.TextWrapped = true
+            warpLabel.ZIndex = 10
+            warpLabel.Parent = warpFrame
+
+            local warpButton = Instance.new("TextButton")
+            warpButton.Size = UDim2.new(0, 80, 0, 25)
+            warpButton.Position = UDim2.new(0, 170, 0, point.Y)
+            warpButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+            warpButton.Text = "วาป"
+            warpButton.TextColor3 = Color3.new(1, 1, 1)
+            warpButton.TextScaled = true
+            warpButton.TextWrapped = true
+            warpButton.ZIndex = 10
+            warpButton.Parent = warpFrame
+
+            local buttonCorner = Instance.new("UICorner")
+            buttonCorner.CornerRadius = UDim.new(0, 8)
+            buttonCorner.Parent = warpButton
+
+            warpButton.MouseButton1Click:Connect(function()
+                local character = LocalPlayer.Character
+                if character and character:FindFirstChild("HumanoidRootPart") then
+                    character.HumanoidRootPart.CFrame = CFrame.new(point.Position)
+                    warpButton.Text = "วาร์ปแล้ว!"
+                    task.wait(1)
+                    warpButton.Text = "วาป"
+                    print("วาร์ปไป:", point.Label)
+                else
+                    warpButton.Text = "ไม่พบตัวละคร!"
+                    task.wait(1)
+                    warpButton.Text = "วาป"
+                    print("วาร์ปล้มเหลว: ไม่พบตัวละคร")
+                end
+            end)
+        end
+
+        -------------------------------------
+        -- 🎮 หน้าหลัก "ผู้เล่น"
+        -------------------------------------
+        local playerFrame = Instance.new("Frame")
+        playerFrame.Name = "ผู้เล่น"
+        playerFrame.Size = UDim2.new(1, 0, 1, 0)
+        playerFrame.Visible = false
+        playerFrame.BackgroundTransparency = 1
+        playerFrame.ZIndex = 10
+        playerFrame.Parent = contentFrame
+
+        local title = Instance.new("TextLabel")
+        title.Text = "การปรับค่าผู้เล่น"
+        title.Font = Enum.Font.GothamBold
+        title.TextSize = 18
+        title.TextColor3 = Color3.new(1, 1, 1)
+        title.BackgroundTransparency = 1
+        title.Position = UDim2.new(0, 10, 0, 5)
+        title.Size = UDim2.new(0, 200, 0, 30)
+        title.TextScaled = true
+        title.TextWrapped = true
+        title.ZIndex = 10
+        title.Parent = playerFrame
+
+        local speedLabel = Instance.new("TextLabel")
+        speedLabel.Text = "ความเร็ว:"
+        speedLabel.Size = UDim2.new(0, 80, 0, 25)
+        speedLabel.Position = UDim2.new(0, 10, 0, 40)
+        speedLabel.TextColor3 = Color3.new(1, 1, 1)
+        speedLabel.BackgroundTransparency = 1
+        speedLabel.TextScaled = true
+        speedLabel.TextWrapped = true
+        speedLabel.ZIndex = 10
+        speedLabel.Parent = playerFrame
+
+        local speedBox = Instance.new("TextBox")
+        speedBox.Size = UDim2.new(0, 80, 0, 25)
+        speedBox.Position = UDim2.new(0, 100, 0, 40)
+        speedBox.Text = savedStates.SpeedValue
+        speedBox.TextColor3 = Color3.new(1, 1, 1)
+        speedBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        speedBox.TextScaled = true
+        speedBox.TextWrapped = true
+        speedBox.ZIndex = 10
+        speedBox.Parent = playerFrame
+
+        local speedToggle = Instance.new("TextButton")
+        speedToggle.Size = UDim2.new(0, 80, 0, 25)
+        speedToggle.Position = UDim2.new(0, 190, 0, 40)
+        speedToggle.Text = savedStates.Speed and "เปิด" or "ปิด"
+        speedToggle.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+        speedToggle.TextColor3 = Color3.new(1, 1, 1)
+        speedToggle.TextScaled = true
+        speedToggle.TextWrapped = true
+        speedToggle.ZIndex = 10
+        speedToggle.Parent = playerFrame
+
+        local jumpLabel = speedLabel:Clone()
+        jumpLabel.Text = "กระโดด:"
+        jumpLabel.Position = UDim2.new(0, 10, 0, 80)
+        jumpLabel.Parent = playerFrame
+
+        local jumpBox = speedBox:Clone()
+        jumpBox.Text = savedStates.JumpValue
+        jumpBox.Position = UDim2.new(0, 100, 0, 80)
+        jumpBox.Parent = playerFrame
+
+        local jumpToggle = speedToggle:Clone()
+        jumpToggle.Text = savedStates.Jump and "เปิด" or "ปิด"
+        jumpToggle.Position = UDim2.new(0, 190, 0, 80)
+        jumpToggle.Parent = playerFrame
+
+        local speedEnabled = savedStates.Speed
+        local jumpEnabled = savedStates.Jump
+        local humanoid = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+
+        speedBox:GetPropertyChangedSignal("Text"):Connect(function()
+            savedStates.SpeedValue = speedBox.Text
+            print("บันทึก SpeedValue:", savedStates.SpeedValue)
+        end)
+        jumpBox:GetPropertyChangedSignal("Text"):Connect(function()
+            savedStates.JumpValue = jumpBox.Text
+            print("บันทึก JumpValue:", savedStates.JumpValue)
+        end)
+
+        speedToggle.MouseButton1Click:Connect(function()
+            speedEnabled = not speedEnabled
+            savedStates.Speed = speedEnabled
+            speedToggle.Text = speedEnabled and "เปิด" or "ปิด"
+            print("สลับ Speed:", speedEnabled)
+        end)
+
+        jumpToggle.MouseButton1Click:Connect(function()
+            jumpEnabled = not jumpEnabled
+            savedStates.Jump = jumpEnabled
+            jumpToggle.Text = jumpEnabled and "เปิด" or "ปิด"
+            print("สลับ Jump:", jumpEnabled)
+        end)
+
+        RunService.Heartbeat:Connect(function()
+            if humanoid then
+                if speedEnabled then
+                    local speed = tonumber(savedStates.SpeedValue) or 16
+                    if speed <= 200 then
+                        humanoid.WalkSpeed = speed
+                    end
+                else
+                    humanoid.WalkSpeed = 16
+                end
+                if jumpEnabled then
+                    local jump = tonumber(savedStates.JumpValue) or 50
+                    if jump <= 150 then
+                        humanoid.JumpPower = jump
+                    end
+                else
+                    humanoid.JumpPower = 50
+                end
+            end
+        end)
+
+        -------------------------------------
+        -- ⚙️ หน้าหลัก "การตั้งค่า"
+        -------------------------------------
+        local settingFrame = Instance.new("Frame")
+        settingFrame.Name = "การตั้งค่า"
+        settingFrame.Size = UDim2.new(1, 0, 1, 0)
+        settingFrame.Visible = false
+        settingFrame.BackgroundTransparency = 1
+        settingFrame.ZIndex = 10
+        settingFrame.Parent = contentFrame
+
+        local saveLabel = Instance.new("TextLabel")
+        saveLabel.Text = "บันทึกสถานะปุ่ม:"
+        saveLabel.Size = UDim2.new(0, 150, 0, 25)
+        saveLabel.Position = UDim2.new(0, 10, 0, 40)
+        saveLabel.TextColor3 = Color3.new(1, 1, 1)
+        saveLabel.BackgroundTransparency = 1
+        saveLabel.TextScaled = true
+        saveLabel.TextWrapped = true
+        saveLabel.ZIndex = 10
+        saveLabel.Parent = settingFrame
+
+        local saveToggle = Instance.new("TextButton")
+        saveToggle.Size = UDim2.new(0, 80, 0, 25)
+        saveToggle.Position = UDim2.new(0, 170, 0, 40)
+        saveToggle.Text = "ปิด"
+        saveToggle.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+        saveToggle.TextColor3 = Color3.new(1, 1, 1)
+        saveToggle.TextScaled = true
+        saveToggle.TextWrapped = true
+        saveToggle.ZIndex = 10
+        saveToggle.Parent = settingFrame
+
+        local fpsPingLabel = Instance.new("TextLabel")
+        fpsPingLabel.Text = "ขึ้น FPS+PING:"
+        fpsPingLabel.Size = UDim2.new(0, 150, 0, 25)
+        fpsPingLabel.Position = UDim2.new(0, 10, 0, 80)
+        fpsPingLabel.TextColor3 = Color3.new(1, 1, 1)
+        fpsPingLabel.BackgroundTransparency = 1
+        fpsPingLabel.TextScaled = true
+        fpsPingLabel.TextWrapped = true
+        fpsPingLabel.ZIndex = 10
+        fpsPingLabel.Parent = settingFrame
+
+        local function createFpsPingGui()
+            print("สร้าง FpsPingGui")
+            local fpsPingGui = Instance.new("ScreenGui")
+            fpsPingGui.Name = "FpsPingGui"
+            fpsPingGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+            fpsPingGui.IgnoreGuiInset = true
+            fpsPingGui.Parent = PlayerGui
+
+            local fpsPingFrame = Instance.new("Frame")
+            fpsPingFrame.Size = UDim2.new(0, 150, 0, 100)
+            fpsPingFrame.Position = UDim2.new(0.5, -75, 0.5, -50)
+            fpsPingFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+            fpsPingFrame.BorderSizePixel = 0
+            fpsPingFrame.Active = true
+            fpsPingFrame.Draggable = true
+            fpsPingFrame.ZIndex = 10
+            fpsPingFrame.Parent = fpsPingGui
+
+            local corner = Instance.new("UICorner")
+            corner.CornerRadius = UDim.new(0, 8)
+            corner.Parent = fpsPingFrame
+
+            local fpsLabel = Instance.new("TextLabel")
+            fpsLabel.Text = "FPS: 0.00"
+            fpsLabel.Size = UDim2.new(1, -10, 0, 40)
+            fpsLabel.Position = UDim2.new(0, 5, 0, 10)
+            fpsLabel.TextColor3 = Color3.new(1, 1, 1)
+            fpsLabel.BackgroundTransparency = 1
+            fpsLabel.TextScaled = true
+            fpsLabel.TextWrapped = true
+            fpsLabel.ZIndex = 10
+            fpsLabel.Parent = fpsPingFrame
+
+            local pingLabel = Instance.new("TextLabel")
+            pingLabel.Text = "PING: N/A"
+            pingLabel.Size = UDim2.new(1, -10, 0, 40)
+            pingLabel.Position = UDim2.new(0, 5, 0, 50)
+            pingLabel.TextColor3 = Color3.new(1, 1, 1)
+            pingLabel.BackgroundTransparency = 1
+            pingLabel.TextScaled = true
+            pingLabel.TextWrapped = true
+            pingLabel.ZIndex = 10
+            pingLabel.Parent = fpsPingFrame
+
+            return fpsPingGui, fpsLabel, pingLabel
+        end
+
+        local fpsPingEnabled = savedStates.FpsPingEnabled
+        local fpsPingToggle = Instance.new("TextButton")
+        fpsPingToggle.Size = UDim2.new(0, 80, 0, 25)
+        fpsPingToggle.Position = UDim2.new(0, 170, 0, 80)
+        fpsPingToggle.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+        fpsPingToggle.Text = fpsPingEnabled and "เปิด" or "ปิด"
+        fpsPingToggle.TextColor3 = Color3.new(1, 1, 1)
+        fpsPingToggle.TextScaled = true
+        fpsPingToggle.TextWrapped = true
+        fpsPingToggle.ZIndex = 10
+        fpsPingToggle.Parent = settingFrame
+
+        local buttonCorner = Instance.new("UICorner")
+        buttonCorner.CornerRadius = UDim.new(0, 8)
+        buttonCorner.Parent = fpsPingToggle
+
+        local function updateFpsPing(fpsLabel, pingLabel)
+            print("เริ่มอัปเดต FPS และ PING")
+            local frameCount = 0
+            local lastTime = tick()
+            local connection
+
+            connection = RunService.Heartbeat:Connect(function(deltaTime)
+                frameCount = frameCount + 1
+                if tick() - lastTime >= 0.5 then
+                    local fps = math.round(frameCount / (tick() - lastTime) * 100) / 100
+                    fpsLabel.Text = string.format("FPS: %.2f", fps)
+                    local success, ping = pcall(function()
+                        local statsItem = Stats.Network.ServerStatsItem["Data Ping"]
+                        return statsItem and statsItem.Value or nil
+                    end)
+                    pingLabel.Text = success and ping and string.format("PING: %.0f ms", ping) or "PING: N/A"
+                    frameCount = 0
+                    lastTime = tick()
+                end
+            end)
+
+            return connection
+        end
+
+        local fpsPingGui, fpsLabel, pingLabel = nil, nil, nil
+        fpsPingToggle.MouseButton1Click:Connect(function()
+            fpsPingEnabled = not fpsPingEnabled
+            savedStates.FpsPingEnabled = fpsPingEnabled
+            fpsPingToggle.Text = fpsPingEnabled and "เปิด" or "ปิด"
+            print("สลับ FPS+PING:", fpsPingEnabled)
+
+            if fpsPingEnabled then
+                if not PlayerGui:FindFirstChild("FpsPingGui") then
+                    fpsPingGui, fpsLabel, pingLabel = createFpsPingGui()
+                    fpsPingGui.Enabled = true
+                    updateFpsPing(fpsLabel, pingLabel)
+                end
+            else
+                if PlayerGui:FindFirstChild("FpsPingGui") then
+                    PlayerGui.FpsPingGui:Destroy()
+                    fpsPingGui, fpsLabel, pingLabel = nil, nil, nil
+                end
+            end
+        end)
+
+        if savedStates.FpsPingEnabled then
+            fpsPingEnabled = true
+            fpsPingToggle.Text = "เปิด"
+            fpsPingGui, fpsLabel, pingLabel = createFpsPingGui()
+            fpsPingGui.Enabled = true
+            updateFpsPing(fpsLabel, pingLabel)
+        end
+
+        -------------------------------------
+        -- 🏋️‍♂️ หน้าหลัก "อ้อโต้ยกน้ำหนัก"
+        -------------------------------------
+        local weightFrame = Instance.new("Frame")
+        weightFrame.Name = "อ้อโต้ยกน้ำหนัก"
+        weightFrame.Size = UDim2.new(1, 0, 1, 0)
+        weightFrame.Visible = false
+        weightFrame.BackgroundTransparency = 1
+        weightFrame.ZIndex = 10
+        weightFrame.Parent = contentFrame
+
+        local weightTitle = Instance.new("TextLabel")
+        weightTitle.Text = "เลือกสิ่งที่จะออกกำลังกาย"
+        weightTitle.Size = UDim2.new(0, 300, 0, 30)
+        weightTitle.Position = UDim2.new(0, 10, 0, 10)
+        weightTitle.TextColor3 = Color3.new(1, 1, 1)
+        weightTitle.BackgroundTransparency = 1
+        weightTitle.TextScaled = true
+        weightTitle.TextWrapped = true
+        weightTitle.ZIndex = 10
+        weightTitle.Parent = weightFrame
+
+        local chooseButton = Instance.new("TextButton")
+        chooseButton.Size = UDim2.new(0, 150, 0, 35)
+        chooseButton.Position = UDim2.new(0, 10, 0, 50)
+        chooseButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+        chooseButton.Text = savedStates.WeightExercise and "เลือก: " .. savedStates.WeightExercise or "เลือก"
+        chooseButton.TextColor3 = Color3.new(1, 1, 1)
+        chooseButton.TextScaled = true
+        chooseButton.TextWrapped = true
+        chooseButton.ZIndex = 10
+        chooseButton.Parent = weightFrame
+
+        local startButton = Instance.new("TextButton")
+        startButton.Size = UDim2.new(0, 100, 0, 35)
+        startButton.Position = UDim2.new(0, 170, 0, 50)
+        startButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+        startButton.Text = savedStates.WeightRunning and "หยุด" or "เริ่ม"
+        startButton.TextColor3 = Color3.new(1, 1, 1)
+        startButton.TextScaled = true
+        startButton.TextWrapped = true
+        startButton.ZIndex = 10
+        startButton.Parent = weightFrame
+
+        local spinLabel = Instance.new("TextLabel")
+        spinLabel.Text = "อ้อโต้สปิน:"
+        spinLabel.Size = UDim2.new(0, 150, 0, 25)
+        spinLabel.Position = UDim2.new(0, 10, 0, 90)
+        spinLabel.TextColor3 = Color3.new(1, 1, 1)
+        spinLabel.BackgroundTransparency = 1
+        spinLabel.TextScaled = true
+        spinLabel.TextWrapped = true
+        spinLabel.ZIndex = 10
+        spinLabel.Parent = weightFrame
+
+        local spinToggle = Instance.new("TextButton")
+        spinToggle.Size = UDim2.new(0, 100, 0, 25)
+        spinToggle.Position = UDim2.new(0, 170, 0, 90)
+        spinToggle.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+        spinToggle.Text = savedStates.SpinEnabled and "เปิด" or "ปิด"
+        spinToggle.TextColor3 = Color3.new(1, 1, 1)
+        spinToggle.TextScaled = true
+        spinToggle.TextWrapped = true
+        spinToggle.ZIndex = 10
+        spinToggle.Parent = weightFrame
+
+        local rebirthLabel = Instance.new("TextLabel")
+        rebirthLabel.Text = "อ้อโต้รีเบิร์ด:"
+        rebirthLabel.Size = UDim2.new(0, 150, 0, 25)
+        rebirthLabel.Position = UDim2.new(0, 10, 0, 120)
+        rebirthLabel.TextColor3 = Color3.new(1, 1, 1)
+        rebirthLabel.BackgroundTransparency = 1
+        rebirthLabel.TextScaled = true
+        rebirthLabel.TextWrapped = true
+        rebirthLabel.ZIndex = 10
+        rebirthLabel.Parent = weightFrame
+
+        local rebirthToggle = Instance.new("TextButton")
+        rebirthToggle.Size = UDim2.new(0, 100, 0, 25)
+        rebirthToggle.Position = UDim2.new(0, 170, 0, 120)
+        rebirthToggle.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+        rebirthToggle.Text = savedStates.RebirthEnabled and "เปิด" or "ปิด"
+        rebirthToggle.TextColor3 = Color3.new(1, 1, 1)
+        rebirthToggle.TextScaled = true
+        rebirthToggle.TextWrapped = true
+        rebirthToggle.ZIndex = 10
+        rebirthToggle.Parent = weightFrame
+
+        local proteinLabel = Instance.new("TextLabel")
+        proteinLabel.Text = "อ้อโต้กินโปรตัน:"
+        proteinLabel.Size = UDim2.new(0, 150, 0, 25)
+        proteinLabel.Position = UDim2.new(0, 10, 0, 150)
+        proteinLabel.TextColor3 = Color3.new(1, 1, 1)
+        proteinLabel.BackgroundTransparency = 1
+        proteinLabel.TextScaled = true
+        proteinLabel.TextWrapped = true
+        proteinLabel.ZIndex = 10
+        proteinLabel.Parent = weightFrame
+
+        local proteinToggle = Instance.new("TextButton")
+        proteinToggle.Size = UDim2.new(0, 100, 0, 25)
+        proteinToggle.Position = UDim2.new(0, 170, 0, 150)
+        proteinToggle.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+        proteinToggle.Text = savedStates.ProteinEnabled and "เปิด" or "ปิด"
+        proteinToggle.TextColor3 = Color3.new(1, 1, 1)
+        proteinToggle.TextScaled = true
+        proteinToggle.TextWrapped = true
+        proteinToggle.ZIndex = 10
+        proteinToggle.Parent = weightFrame
+
+        local selectedExercise = savedStates.WeightExercise
+        local running = savedStates.WeightRunning
+        local spinEnabled = savedStates.SpinEnabled
+        local rebirthEnabled = savedStates.RebirthEnabled
+        local proteinEnabled = savedStates.ProteinEnabled
+        local muscleEvent = LocalPlayer:WaitForChild("muscleEvent", 5)
+        local backpack = LocalPlayer:WaitForChild("Backpack", 5)
+        local fortuneWheelRemote = ReplicatedStorage:WaitForChild("rEvents", 5) and ReplicatedStorage.rEvents:WaitForChild("openFortuneWheelRemote", 5)
+        local fortuneWheel = ReplicatedStorage:WaitForChild("fortuneWheelChances", 5) and ReplicatedStorage.fortuneWheelChances:WaitForChild("Fortune Wheel", 5)
+        local rebirthRemote = ReplicatedStorage:WaitForChild("rEvents", 5) and ReplicatedStorage.rEvents:WaitForChild("rebirthRemote", 5)
+
+        if not muscleEvent then warn("ไม่พบ muscleEvent!") end
+        if not backpack then warn("ไม่พบ Backpack!") end
+        if not fortuneWheelRemote then warn("ไม่พบ openFortuneWheelRemote!") end
+        if not fortuneWheel then warn("ไม่พบ Fortune Wheel!") end
+        if not rebirthRemote then warn("ไม่พบ rebirthRemote!") end
+
+        chooseButton.MouseButton1Click:Connect(function()
+            if PlayerGui:FindFirstChild("SelectionGui") then
+                PlayerGui.SelectionGui:Destroy()
+            end
+
+            local choices = {"Weight", "Handstands", "Pushups", "Situps"}
+            local selectionGui = Instance.new("Frame")
+            selectionGui.Name = "SelectionGui"
+            selectionGui.Size = UDim2.new(0, 200, 0, 180)
+            selectionGui.Position = UDim2.new(0.5, -100, 0.5, -90)
+            selectionGui.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+            selectionGui.BorderSizePixel = 0
+            selectionGui.Active = true
+            selectionGui.Draggable = true
+            selectionGui.ZIndex = 10
+            selectionGui.Parent = gui
+
+            local corner = Instance.new("UICorner")
+            corner.CornerRadius = UDim.new(0, 8)
+            corner.Parent = selectionGui
+
+            for i, choice in ipairs(choices) do
+                local btn = Instance.new("TextButton")
+                btn.Size = UDim2.new(1, -10, 0, 35)
+                btn.Position = UDim2.new(0, 5, 0, (i - 1) * 40 + 5)
+                btn.Text = choice
+                btn.TextScaled = true
+                btn.TextWrapped = true
+                btn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+                btn.TextColor3 = Color3.new(1, 1, 1)
+                btn.ZIndex = 10
+                btn.Parent = selectionGui
+
+                local btnCorner = Instance.new("UICorner")
+                btnCorner.CornerRadius = UDim.new(0, 8)
+                btnCorner.Parent = btn
+
+                btn.MouseButton1Click:Connect(function()
+                    selectedExercise = choice
+                    savedStates.WeightExercise = choice
+                    chooseButton.Text = "เลือก: " .. choice
+                    selectionGui:Destroy()
+                    print("เลือก Exercise:", choice)
+                end)
+            end
+        end)
+
+        startButton.MouseButton1Click:Connect(function()
+            if not selectedExercise then
+                startButton.Text = "เลือกก่อน!"
+                task.wait(1)
+                startButton.Text = running and "หยุด" or "เริ่ม"
+                print("ออโต้ยกน้ำหนัก: ต้องเลือก Exercise ก่อน")
+                return
+            end
+
+            running = not running
+            savedStates.WeightRunning = running
+            startButton.Text = running and "หยุด" or "เริ่ม"
+            print("สลับออโต้ยกน้ำหนัก:", running)
+
+            if running then
+                local tool = backpack and backpack:FindFirstChild(selectedExercise)
+                if tool and humanoid then
+                    humanoid:EquipTool(tool)
+                else
+                    startButton.Text = "ไม่พบไอเทม!"
+                    task.wait(1)
+                    startButton.Text = running and "หยุด" or "เริ่ม"
+                    running = false
+                    savedStates.WeightRunning = false
+                    print("ออโต้ยกน้ำหนักล้มเหลว: ไม่พบไอเทม")
+                    return
+                end
+
+                spawn(function()
+                    while running do
+                        if muscleEvent then
+                            muscleEvent:FireServer("rep")
+                        else
+                            startButton.Text = "ไม่พบ muscleEvent!"
+                            task.wait(1)
+                            startButton.Text = running and "หยุด" or "เริ่ม"
+                            running = false
+                            savedStates.WeightRunning = false
+                            print("ออโต้ยกน้ำหนักล้มเหลว: ไม่พบ muscleEvent")
+                            break
+                        end
+                        task.wait(math.random(0.08, 0.12))
+                    end
+                end)
+            end
+        end)
+
+        spinToggle.MouseButton1Click:Connect(function()
+            spinEnabled = not spinEnabled
+            savedStates.SpinEnabled = spinEnabled
+            spinToggle.Text = spinEnabled and "เปิด" or "ปิด"
+            print("สลับออโต้สปิน:", spinEnabled)
+
+            if spinEnabled then
+                spawn(function()
+                    while spinEnabled do
+                        if fortuneWheelRemote and fortuneWheel then
+                            local args = {"openFortuneWheel", fortuneWheel}
+                            fortuneWheelRemote:InvokeServer(unpack(args))
+                        else
+                            spinToggle.Text = "ไม่พบ Remote!"
+                            task.wait(1)
+                            spinToggle.Text = spinEnabled and "เปิด" or "ปิด"
+                            spinEnabled = false
+                            savedStates.SpinEnabled = false
+                            print("ออโต้สปินล้มเหลว: ไม่พบ Remote")
+                            break
+                        end
+                        task.wait(1)
+                    end
+                end)
+            end
+        end)
+
+        rebirthToggle.MouseButton1Click:Connect(function()
+            rebirthEnabled = not rebirthEnabled
+            savedStates.RebirthEnabled = rebirthEnabled
+            rebirthToggle.Text = rebirthEnabled and "เปิด" or "ปิด"
+            print("สลับออโต้รีเบิร์ด:", rebirthEnabled)
+
+            if rebirthEnabled then
+                spawn(function()
+                    while rebirthEnabled do
+                        if rebirthRemote then
+                            local args = {"rebirthRequest"}
+                            rebirthRemote:InvokeServer(unpack(args))
+                        else
+                            rebirthToggle.Text = "ไม่พบ Remote!"
+                            task.wait(1)
+                            rebirthToggle.Text = rebirthEnabled and "เปิด" or "ปิด"
+                            rebirthEnabled = false
+                            savedStates.RebirthEnabled = false
+                            print("ออโต้รีเบิร์ดล้มเหลว: ไม่พบ Remote")
+                            break
+                        end
+                        task.wait(1)
+                    end
+                end)
+            end
+        end)
+
+        proteinToggle.MouseButton1Click:Connect(function()
+            proteinEnabled = not proteinEnabled
+            savedStates.ProteinEnabled = proteinEnabled
+            proteinToggle.Text = proteinEnabled and "เปิด" or "ปิด"
+            print("สลับออโต้กินโปรตัน:", proteinEnabled)
+
+            if proteinEnabled then
+                local proteinTools = {"Protein Bar", "Protein Shake", "ULTRA Shake", "TOUGH Bar"}
+                local foundTool = nil
+                for _, toolName in ipairs(proteinTools) do
+                    local tool = backpack and backpack:FindFirstChild(toolName)
+                    if tool then
+                        foundTool = tool
+                        break
+                    end
+                end
+
+                if foundTool and humanoid then
+                    humanoid:EquipTool(foundTool)
+                    task.wait(0.1)
+                    foundTool:Activate()
+                else
+                    proteinToggle.Text = "ไม่พบ Tool!"
+                    task.wait(1)
+                    proteinToggle.Text = proteinEnabled and "เปิด" or "ปิด"
+                    proteinEnabled = false
+                    savedStates.ProteinEnabled = false
+                    print("ออโต้กินโปรตันล้มเหลว: ไม่พบ Tool")
+                end
+            end
+        end)
+
+        backpack.ChildAdded:Connect(function(child)
+            if running and child.Name == selectedExercise and humanoid then
+                task.wait(0.1)
+                humanoid:EquipTool(child)
+                print("ถือ Tool อัตโนมัติ:", child.Name)
+            end
+            if proteinEnabled and table.find({"Protein Bar", "Protein Shake", "ULTRA Shake", "TOUGH Bar"}, child.Name) and humanoid then
+                task.wait(0.1)
+                humanoid:EquipTool(child)
+                child:Activate()
+                print("กินโปรตันอัตโนมัติ:", child.Name)
+            end
+        end)
+
+        local saveEnabled = false
+        saveToggle.MouseButton1Click:Connect(function()
+            saveEnabled = not saveEnabled
+            saveToggle.Text = saveEnabled and "เปิด" or "ปิด"
+            print("สลับบันทึกสถานะ:", saveEnabled)
+            if saveEnabled then
+                if savedStates.Speed then
+                    speedEnabled = true
+                    speedToggle.Text = "เปิด"
+                    if humanoid then
+                        local speed = tonumber(savedStates.SpeedValue) or 16
+                        if speed <= 200 then
+                            humanoid.WalkSpeed = speed
+                        end
+                    end
+                end
+                if savedStates.Jump then
+                    jumpEnabled = true
+                    jumpToggle.Text = "เปิด"
+                    if humanoid then
+                        local jump = tonumber(savedStates.JumpValue) or 50
+                        if jump <= 150 then
+                            humanoid.JumpPower = jump
+                        end
+                    end
+                end
+                if savedStates.WeightRunning and savedStates.WeightExercise then
+                    running = true
+                    startButton.Text = "หยุด"
+                    chooseButton.Text = "เลือก: " .. savedStates.WeightExercise
+                    selectedExercise = savedStates.WeightExercise
+                    local tool = backpack and backpack:FindFirstChild(savedStates.WeightExercise)
+                    if tool and humanoid then
+                        humanoid:EquipTool(tool)
+                    end
+                    spawn(function()
+                        while running and saveEnabled do
+                            if muscleEvent then
+                                muscleEvent:FireServer("rep")
+                            end
+                            task.wait(math.random(0.08, 0.12))
+                        end
+                    end)
+                end
+                if savedStates.SpinEnabled then
+                    spinEnabled = true
+                    spinToggle.Text = "เปิด"
+                    spawn(function()
+                        while spinEnabled and saveEnabled do
+                            if fortuneWheelRemote and fortuneWheel then
+                                local args = {"openFortuneWheel", fortuneWheel}
+                                fortuneWheelRemote:InvokeServer(unpack(args))
+                            end
+                            task.wait(1)
+                        end
+                    end)
+                end
+                if savedStates.RebirthEnabled then
+                    rebirthEnabled = true
+                    rebirthToggle.Text = "เปิด"
+                    spawn(function()
+                        while rebirthEnabled and saveEnabled do
+                            if rebirthRemote then
+                                local args = {"rebirthRequest"}
+                                rebirthRemote:InvokeServer(unpack(args))
+                            end
+                            task.wait(1)
+                        end
+                    end)
+                end
+                if savedStates.ProteinEnabled then
+                    proteinEnabled = true
+                    proteinToggle.Text = "เปิด"
+                    local proteinTools = {"Protein Bar", "Protein Shake", "ULTRA Shake", "TOUGH Bar"}
+                    local foundTool = nil
+                    for _, toolName in ipairs(proteinTools) do
+                        local tool = backpack and backpack:FindFirstChild(toolName)
+                        if tool then
+                            foundTool = tool
+                            break
+                        end
+                    end
+                    if foundTool and humanoid then
+                        humanoid:EquipTool(foundTool)
+                        task.wait(0.1)
+                        foundTool:Activate()
+                    end
+                end
+                if savedStates.FpsPingEnabled then
+                    fpsPingEnabled = true
+                    fpsPingToggle.Text = "เปิด"
+                    fpsPingGui, fpsLabel, pingLabel = createFpsPingGui()
+                    fpsPingGui.Enabled = true
+                    updateFpsPing(fpsLabel, pingLabel)
+                end
+            end
+        end)
+
+        for name, button in pairs(tabs) do
+            button.MouseButton1Click:Connect(function()
+                showTab(name)
+            end)
+        end
+
+        if savedStates.WeightRunning and savedStates.WeightExercise then
+            running = true
+            startButton.Text = "หยุด"
+            chooseButton.Text = "เลือก: " .. savedStates.WeightExercise
+            selectedExercise = savedStates.WeightExercise
+            local tool = backpack and backpack:FindFirstChild(savedStates.WeightExercise)
+            if tool and humanoid then
+                humanoid:EquipTool(tool)
+            end
+            spawn(function()
+                while running do
+                    if muscleEvent then
+                        muscleEvent:FireServer("rep")
+                    end
+                    task.wait(math.random(0.08, 0.12))
+                end
+            end)
+        end
+        if savedStates.SpinEnabled then
+            spinEnabled = true
+            spinToggle.Text = "เปิด"
+            spawn(function()
+                while spinEnabled do
+                    if fortuneWheelRemote and fortuneWheel then
+                        local args = {"openFortuneWheel", fortuneWheel}
+                        fortuneWheelRemote:InvokeServer(unpack(args))
+                    end
+                    task.wait(1)
+                end
+            end)
+        end
+        if savedStates.RebirthEnabled then
+            rebirthEnabled = true
+            rebirthToggle.Text = "เปิด"
+            spawn(function()
+                while rebirthEnabled do
+                    if rebirthRemote then
+                        local args = {"rebirthRequest"}
+                        rebirthRemote:InvokeServer(unpack(args))
+                    end
+                    task.wait(1)
+                end
+            end)
+        end
+        if savedStates.ProteinEnabled then
+            proteinEnabled = true
+            proteinToggle.Text = "เปิด"
+            local proteinTools = {"Protein Bar", "Protein Shake", "ULTRA Shake", "TOUGH Bar"}
+            local foundTool = nil
+            for _, toolName in ipairs(proteinTools) do
+                local tool = backpack and backpack:FindFirstChild(toolName)
+                if tool then
+                    foundTool = tool
+                    break
+                end
+            end
+            if foundTool and humanoid then
+                humanoid:EquipTool(foundTool)
+                task.wait(0.1)
+                foundTool:Activate()
+            end
+        end
+
+        showTab("ผู้เล่น")
+        print("สร้าง GUI เสร็จสิ้น")
+    end
+
+    LocalPlayer.CharacterAdded:Connect(function(char)
+        humanoid = char:WaitForChild("Humanoid")
+        if savedStates.Speed and humanoid then
+            local speed = tonumber(savedStates.SpeedValue) or 16
+            if speed <= 200 then
+                humanoid.WalkSpeed = speed
+            end
+        end
+        if savedStates.Jump and humanoid then
+            local jump = tonumber(savedStates.JumpValue) or 50
+            if jump <= 150 then
+                humanoid.JumpPower = jump
+            end
+        end
+        if savedStates.WeightRunning and savedStates.WeightExercise then
+            local backpack = LocalPlayer:WaitForChild("Backpack", 5)
+            local tool = backpack and backpack:FindFirstChild(savedStates.WeightExercise)
+            if tool and humanoid then
+                humanoid:EquipTool(tool)
+            end
+        end
+        if savedStates.ProteinEnabled then
+            local proteinTools = {"Protein Bar", "Protein Shake", "ULTRA Shake", "TOUGH Bar"}
+            local foundTool = nil
+            for _, toolName in ipairs(proteinTools) do
+                local tool = backpack and backpack:FindFirstChild(toolName)
+                if tool then
+                    foundTool = tool
+                    break
+                end
+            end
+            if foundTool and humanoid then
+                humanoid:EquipTool(foundTool)
+                task.wait(0.1)
+                foundTool:Activate()
+            end
+        end
+        if savedStates.FpsPingEnabled and not PlayerGui:FindFirstChild("FpsPingGui") then
+            local fpsPingGui, fpsLabel, pingLabel = createFpsPingGui()
+            fpsPingGui.Enabled = true
+            updateFpsPing(fpsLabel, pingLabel)
+        end
+        if not PlayerGui:FindFirstChild("MainGUI") or not PlayerGui:FindFirstChild("ToggleGui") then
+            createGui()
+        end
+        print("ตัวละครเกิดใหม่: คืนค่าสถานะ")
+    end)
+
+    createGui()
 end)
 
--- สร้าง GUI ครั้งแรก
-createGui()
+if not success then
+    warn("เกิดข้อผิดพลาดในสคริปต์: " .. err)
+end
