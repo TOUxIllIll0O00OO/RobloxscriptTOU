@@ -1433,4 +1433,83 @@ local success, err = pcall(function()
             proteinToggle.Text = "เปิด"
             spawn(function()
                 while proteinEnabled and humanoid and backpack do
-                    local proteinTools
+                    local proteinTools = {"Protein Bar", "Protein Shake", "ULTRA Shake", "TOUGH Bar", "Energy Bar"}
+                    local foundTool = nil
+                    for _, toolName in ipairs(proteinTools) do
+                        local tool = backpack:FindFirstChild(toolName)
+                        if tool then
+                            foundTool = tool
+                            break
+                        end
+                    end
+                    if foundTool then
+                        local success, err = pcall(function()
+                            humanoid:EquipTool(foundTool)
+                            task.wait(0.1)
+                            foundTool:Activate()
+                            print("กินโปรตันใน CharacterAdded:", foundTool.Name)
+                        end)
+                        if not success then
+                            print("กินโปรตันล้มเหลวใน CharacterAdded: " .. err)
+                        end
+                    end
+                    task.wait(1)
+                end
+            end)
+        end
+        if savedStates.FpsPingEnabled and not PlayerGui:FindFirstChild("FpsPingGui") then
+            local fpsPingGui, fpsLabel, pingLabel = createFpsPingGui()
+            fpsPingGui.Enabled = true
+            updateFpsPing(fpsLabel, pingLabel)
+        end
+        if savedStates.ServerInfoEnabled and not PlayerGui:FindFirstChild("PlayerInfoGUI") then
+            local serverInfoGui, cleanupConnections = createPlayerInfoGui()
+            serverInfoGui.Enabled = true
+        end
+        if savedStates.JoinBrawlEnabled then
+            joinBrawlEnabled = true
+            joinBrawlToggle.Text = "เปิด"
+            spawn(function()
+                while joinBrawlEnabled do
+                    if brawlEvent then
+                        local args = {"joinBrawl"}
+                        pcall(function()
+                            brawlEvent:FireServer(unpack(args))
+                        end)
+                    end
+                    task.wait(math.random(0.95, 1.05))
+                end
+            end)
+        end
+        if savedStates.SizeEnabled then
+            sizeEnabled = true
+            sizeToggle.Text = "เปิด"
+            local success, err = pcall(function()
+                local remote = ReplicatedStorage:FindFirstChild("rEvents") and ReplicatedStorage.rEvents:FindFirstChild("changeSpeedSizeRemote") or ReplicatedStorage:FindFirstChild("changeSpeedSizeRemote")
+                if remote then
+                    local size = tonumber(savedStates.SizeValue) or 2
+                    local args = {"changeSize", size}
+                    remote:InvokeServer(unpack(args))
+                elseif humanoid then
+                    local bodyScale = humanoid:FindFirstChildOfClass("BodyWidthScale") or humanoid:FindFirstChildOfClass("BodyDepthScale") or humanoid:FindFirstChildOfClass("BodyHeightScale")
+                    if bodyScale then
+                        bodyScale.Value = tonumber(savedStates.SizeValue) or 2
+                    end
+                end
+            end)
+            if not success then
+                print("คืนค่าสถานะขนาดตัวล้มเหลวใน CharacterAdded: " .. err)
+            end
+        end
+        if not PlayerGui:FindFirstChild("MainGUI") or not PlayerGui:FindFirstChild("ToggleGui") then
+            createGui()
+        end
+        print("ตัวละครเกิดใหม่: คืนค่าสถานะ")
+    end)
+
+    createGui()
+end)
+
+if not success then
+    warn("เกิดข้อผิดพลาดในสคริปต์: " .. err)
+end
