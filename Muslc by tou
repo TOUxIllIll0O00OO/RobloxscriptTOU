@@ -4,6 +4,7 @@ local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Workspace = game:GetService("Workspace")
 
 -- 🗑 ลบ GUI เก่าถ้ามี
 local function clearGui()
@@ -152,6 +153,89 @@ local function createGui()
 			contentFrame[tabName].Visible = true
 		end
 		currentTab = tabName
+	end
+
+	-------------------------------------
+	-- 🌌 หน้าหลัก "วาปไปจุดต่างๆ"
+	-------------------------------------
+	local warpFrame = Instance.new("Frame")
+	warpFrame.Name = "วาปไปจุดต่างๆ"
+	warpFrame.Size = UDim2.new(1, 0, 1, 0)
+	warpFrame.Visible = false
+	warpFrame.BackgroundTransparency = 1
+	warpFrame.ZIndex = 10
+	warpFrame.Parent = contentFrame
+
+	local warpPoints = {
+		{Label = "วาปไปประตู 1 รีเบิร์ด", Y = 40},
+		{Label = "วาปไปประตู 5 รีเบิร์ด", Y = 70},
+		{Label = "วาปไปประตู 15 รีเบิร์ด", Y = 100},
+		{Label = "วาปไปประตู 30 รีเบิร์ด", Y = 130},
+		{Label = "วาปไปประตู 60 รีเบิร์ด", Y = 160},
+		{Label = "วาปไปประตูคิง", Y = 190},
+		{Label = "วาปตรงกลางแมพ", Y = 220}
+	}
+
+	for i, point in ipairs(warpPoints) do
+		local warpLabel = Instance.new("TextLabel")
+		warpLabel.Text = point.Label
+		warpLabel.Size = UDim2.new(0, 150, 0, 25)
+		warpLabel.Position = UDim2.new(0, 10, 0, point.Y)
+		warpLabel.TextColor3 = Color3.new(1, 1, 1)
+		warpLabel.BackgroundTransparency = 1
+		warpLabel.TextScaled = true
+		warpLabel.TextWrapped = true
+		warpLabel.ZIndex = 10
+		warpLabel.Parent = warpFrame
+
+		local warpButton = Instance.new("TextButton")
+		warpButton.Size = UDim2.new(0, 80, 0, 25)
+		warpButton.Position = UDim2.new(0, 170, 0, point.Y)
+		warpButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+		warpButton.Text = "วาป"
+		warpButton.TextColor3 = Color3.new(1, 1, 1)
+		warpButton.TextScaled = true
+		warpButton.TextWrapped = true
+		warpButton.ZIndex = 10
+		warpButton.Parent = warpFrame
+
+		local buttonCorner = Instance.new("UICorner")
+		buttonCorner.CornerRadius = UDim.new(0, 8)
+		buttonCorner.Parent = warpButton
+
+		warpButton.MouseButton1Click:Connect(function()
+			if point.Label == "วาปตรงกลางแมพ" then
+				local character = LocalPlayer.Character
+				if character and character:FindFirstChild("HumanoidRootPart") then
+					character.HumanoidRootPart.CFrame = CFrame.new(Vector3.new(10.00, 7.27, 179.95))
+					warpButton.Text = "วาร์ปแล้ว!"
+					task.wait(1)
+					warpButton.Text = "วาป"
+				else
+					warpButton.Text = "ไม่พบตัวละคร!"
+					task.wait(1)
+					warpButton.Text = "วาป"
+				end
+			else
+				local success, result = pcall(function()
+					local args = {
+						"travelToArea",
+						Workspace:WaitForChild("areaCircles"):WaitForChild("areaCircle")
+					}
+					local areaTravelRemote = ReplicatedStorage:WaitForChild("rEvents"):WaitForChild("areaTravelRemote")
+					areaTravelRemote:InvokeServer(unpack(args))
+				end)
+				if success then
+					warpButton.Text = "วาร์ปแล้ว!"
+					task.wait(1)
+					warpButton.Text = "วาป"
+				else
+					warpButton.Text = "ไม่พบ Remote!"
+					task.wait(1)
+					warpButton.Text = "วาป"
+				end
+			end
+		end)
 	end
 
 	-------------------------------------
@@ -308,28 +392,6 @@ local function createGui()
 	saveToggle.TextWrapped = true
 	saveToggle.ZIndex = 10
 	saveToggle.Parent = settingFrame
-
-	-------------------------------------
-	-- 🌌 หน้าหลัก "วาปไปจุดต่างๆ"
-	-------------------------------------
-	local warpFrame = Instance.new("Frame")
-	warpFrame.Name = "วาปไปจุดต่างๆ"
-	warpFrame.Size = UDim2.new(1, 0, 1, 0)
-	warpFrame.Visible = false
-	warpFrame.BackgroundTransparency = 1
-	warpFrame.ZIndex = 10
-	warpFrame.Parent = contentFrame
-
-	local warpLabel = Instance.new("TextLabel")
-	warpLabel.Text = "เลือกจุดวาร์ป:"
-	warpLabel.Size = UDim2.new(0, 150, 0, 25)
-	warpLabel.Position = UDim2.new(0, 10, 0, 40)
-	warpLabel.TextColor3 = Color3.new(1, 1, 1)
-	warpLabel.BackgroundTransparency = 1
-	warpLabel.TextScaled = true
-	warpLabel.TextWrapped = true
-	warpLabel.ZIndex = 10
-	warpLabel.Parent = warpFrame
 
 	-------------------------------------
 	-- 🏋️‍♂️ หน้าหลัก "อ้อโต้ยกน้ำหนัก"
