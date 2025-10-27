@@ -2,6 +2,7 @@ local success, err = pcall(function()
     -- รอให้เกมโหลดสมบูรณ์
     if not game:IsLoaded() then
         game.Loaded:Wait()
+        task.wait(1) -- เพิ่มการหน่วงเพื่อให้แน่ใจว่าเกมพร้อม
     end
 
     -- ตัวแปรหลัก
@@ -10,11 +11,11 @@ local success, err = pcall(function()
     local RunService = game:GetService("RunService")
     local UserInputService = game:GetService("UserInputService")
     local Stats = game:GetService("Stats")
-    local PlayerGui = Players.LocalPlayer:WaitForChild("PlayerGui", 10)
     local LocalPlayer = Players.LocalPlayer
+    local PlayerGui = LocalPlayer:WaitForChild("PlayerGui", 10)
 
     if not PlayerGui then
-        error("ไม่พบ PlayerGui!")
+        error("ไม่พบ PlayerGui! กรุณารันสคริปต์ในเกมที่โหลดสมบูรณ์")
     end
 
     -- ตารางเก็บสถานะ
@@ -34,7 +35,7 @@ local success, err = pcall(function()
         ServerInfoEnabled = false,
         JoinBrawlEnabled = false
     }
--- ฟังก์ชันยูทิลิตี้
+-- ฟังก์ชันสร้าง GUI
     local function createGui()
         if PlayerGui:FindFirstChild("MainGUI") then
             PlayerGui.MainGUI:Destroy()
@@ -328,45 +329,33 @@ local success, err = pcall(function()
             if sizeEnabled then
                 local size = tonumber(savedStates.SizeValue) or 2
                 local success, err = pcall(function()
-                    -- ลองค้นหา Remote ในตำแหน่งที่เป็นไปได้
                     local remote = ReplicatedStorage:FindFirstChild("rEvents") and ReplicatedStorage.rEvents:FindFirstChild("changeSpeedSizeRemote")
-                    if not remote then
-                        remote = ReplicatedStorage:FindFirstChild("changeSpeedSizeRemote")
-                    end
-                    if not remote then
-                        remote = ReplicatedStorage:FindFirstChild("ChangeSizeRemote") or ReplicatedStorage:FindFirstChild("SizeRemote")
-                    end
+                        or ReplicatedStorage:FindFirstChild("changeSpeedSizeRemote")
+                        or ReplicatedStorage:FindFirstChild("ChangeSizeRemote")
+                        or ReplicatedStorage:FindFirstChild("SizeRemote")
                     if remote then
                         local args = {"changeSize", size}
                         remote:InvokeServer(unpack(args))
                         print("เรียก Remote ปรับขนาดตัว: Size =", size)
-                    else
-                        -- วิธีสำรอง: ปรับ BodyScale
-                        if humanoid then
-                            local scales = {
-                                humanoid:FindFirstChildOfClass("BodyWidthScale"),
-                                humanoid:FindFirstChildOfClass("BodyDepthScale"),
-                                humanoid:FindFirstChildOfClass("BodyHeightScale")
-                            }
-                            local scaleAdjusted = false
-                            for _, scale in ipairs(scales) do
-                                if scale then
-                                    scale.Value = size
-                                    scaleAdjusted = true
-                                    print("ปรับ", scale.Name, ": Size =", size)
-                                end
+                    elseif humanoid then
+                        local scales = {
+                            humanoid:FindFirstChildOfClass("BodyWidthScale"),
+                            humanoid:FindFirstChildOfClass("BodyDepthScale"),
+                            humanoid:FindFirstChildOfClass("BodyHeightScale")
+                        }
+                        for _, scale in ipairs(scales) do
+                            if scale then
+                                scale.Value = size
+                                print("ปรับ", scale.Name, ": Size =", size)
                             end
-                            if not scaleAdjusted then
-                                error("ไม่พบ BodyScale!")
-                            end
-                        else
-                            error("ไม่พบ Humanoid!")
                         end
+                    else
+                        error("ไม่พบ Humanoid หรือ Remote!")
                     end
                 end)
                 if not success then
                     sizeToggle.Text = "ข้อผิดพลาด: " .. tostring(err)
-                    task.wait(3)
+                    task.wait(2)
                     sizeToggle.Text = sizeEnabled and "เปิด" or "ปิด"
                     sizeEnabled = false
                     savedStates.SizeEnabled = false
@@ -512,8 +501,7 @@ local success, err = pcall(function()
         rebirthToggle.TextWrapped = true
         rebirthToggle.ZIndex = 10
         rebirthToggle.Parent = weightFrame
-
-        local proteinLabel = Instance.new("TextLabel")
+local proteinLabel = Instance.new("TextLabel")
         proteinLabel.Text = "อ้อโต้กินโปรตัน:"
         proteinLabel.Size = UDim2.new(0, 150, 0, 25)
         proteinLabel.Position = UDim2.new(0, 10, 0, 150)
@@ -573,10 +561,6 @@ local success, err = pcall(function()
         local fortuneWheel = ReplicatedStorage:WaitForChild("fortuneWheelChances", 5) and ReplicatedStorage.fortuneWheelChances:WaitForChild("Fortune Wheel", 5)
         local rebirthRemote = ReplicatedStorage:WaitForChild("rEvents", 5) and ReplicatedStorage.rEvents:WaitForChild("rebirthRemote", 5)
         local brawlEvent = ReplicatedStorage:WaitForChild("rEvents", 5) and ReplicatedStorage.rEvents:WaitForChild("brawlEvent", 5)
-        local changeSpeedSizeRemote = ReplicatedStorage:FindFirstChild("rEvents") and ReplicatedStorage.rEvents:FindFirstChild("changeSpeedSizeRemote")
-            or ReplicatedStorage:FindFirstChild("changeSpeedSizeRemote")
-            or ReplicatedStorage:FindFirstChild("ChangeSizeRemote")
-            or ReplicatedStorage:FindFirstChild("SizeRemote")
 
         if not muscleEvent then warn("ไม่พบ muscleEvent!") end
         if not backpack then warn("ไม่พบ Backpack!") end
@@ -584,7 +568,6 @@ local success, err = pcall(function()
         if not fortuneWheel then warn("ไม่พบ Fortune Wheel!") end
         if not rebirthRemote then warn("ไม่พบ rebirthRemote!") end
         if not brawlEvent then warn("ไม่พบ brawlEvent!") end
-        if not changeSpeedSizeRemote then warn("ไม่พบ changeSpeedSizeRemote!") end
 
         chooseButton.MouseButton1Click:Connect(function()
             if PlayerGui:FindFirstChild("SelectionGui") then
@@ -755,8 +738,7 @@ local success, err = pcall(function()
                 end)
             end
         end)
-
-        proteinToggle.MouseButton1Click:Connect(function()
+proteinToggle.MouseButton1Click:Connect(function()
             proteinEnabled = not proteinEnabled
             savedStates.ProteinEnabled = proteinEnabled
             proteinToggle.Text = proteinEnabled and "เปิด" or "ปิด"
@@ -854,9 +836,6 @@ local success, err = pcall(function()
                 local success, err = pcall(function()
                     humanoid:EquipTool(child)
                     task.wait(0.1)
-                local success, err = pcall(function()
-                    humanoid:EquipTool(child)
-                    task.wait(0.1)
                     child:Activate()
                     print("กินโปรตันอัตโนมัติ:", child.Name)
                 end)
@@ -865,7 +844,8 @@ local success, err = pcall(function()
                 end
             end
         end)
--------------------------------------
+
+        -------------------------------------
         -- ⚙️ หน้าหลัก "การตั้งค่า"
         -------------------------------------
         local settingFrame = Instance.new("Frame")
@@ -1313,6 +1293,153 @@ local success, err = pcall(function()
                                 if fortuneWheelRemote and fortuneWheel then
                                     local args = {"openFortuneWheel", fortuneWheel}
                                     fortuneWheelRemote:InvokeServer(unpack(args))
+                                end
+                                task.wait(1)
+                            end
+                        end)
+                    end
+                    if savedStates.RebirthEnabled then
+                        rebirthEnabled = true
+                        rebirthToggle.Text = "เปิด"
+                        spawn(function()
+                            while rebirthEnabled and saveEnabled do
+                                if rebirthRemote then
+                                    local args = {"rebirthRequest"}
+                                    rebirthRemote:InvokeServer(unpack(args))
+                                end
+                                task.wait(1)
+                            end
+                        end)
+                    end
+                    if savedStates.ProteinEnabled then
+                        proteinEnabled = true
+                        proteinToggle.Text = "เปิด"
+                        spawn(function()
+                            while proteinEnabled and saveEnabled and humanoid and backpack do
+                                local proteinTools = {"Protein Bar", "Protein Shake", "ULTRA Shake", "TOUGH Bar", "Energy Bar"}
+                                local foundTool = nil
+                                for _, toolName in ipairs(proteinTools) do
+                                    local tool = backpack:FindFirstChild(toolName)
+                                    if tool then
+                                        foundTool = tool
+                                        break
+                                    end
+                                end
+                                if foundTool then
+                                    local success, err = pcall(function()
+                                        humanoid:EquipTool(foundTool)
+                                        task.wait(0.1)
+                                        foundTool:Activate()
+                                        print("กินโปรตันใน SaveEnabled:", foundTool.Name)
+                                    end)
+                                    if not success then
+                                        print("กินโปรตันล้มเหลวใน SaveEnabled: " .. err)
+                                    end
+                                end
+                                task.wait(1)
+                            end
+                        end)
+                    end
+                    if savedStates.FpsPingEnabled then
+                        fpsPingEnabled = true
+                        fpsPingToggle.Text = "เปิด"
+                        fpsPingGui, fpsLabel, pingLabel = createFpsPingGui()
+                        fpsPingGui.Enabled = true
+                        updateFpsPing(fpsLabel, pingLabel)
+                    end
+                    if savedStates.ServerInfoEnabled then
+                        serverInfoEnabled = true
+                        serverInfoToggle.Text = "เปิด"
+                        serverInfoGui, cleanupConnections = createPlayerInfoGui()
+                        serverInfoGui.Enabled = true
+                    end
+                    if savedStates.JoinBrawlEnabled then
+                        joinBrawlEnabled = true
+                        joinBrawlToggle.Text = "เปิด"
+                        spawn(function()
+                            while joinBrawlEnabled and saveEnabled do
+                                if brawlEvent then
+                                    local args = {"joinBrawl"}
+                                    pcall(function()
+                                        brawlEvent:FireServer(unpack(args))
+                                    end)
+                                end
+                                task.wait(math.random(0.95, 1.05))
+                            end
+                        end)
+                    end
+                    if savedStates.SizeEnabled then
+                        sizeEnabled = true
+                        sizeToggle.Text = "เปิด"
+                        local success, err = pcall(function()
+                            local remote = ReplicatedStorage:FindFirstChild("rEvents") and ReplicatedStorage.rEvents:FindFirstChild("changeSpeedSizeRemote")
+                                or ReplicatedStorage:FindFirstChild("changeSpeedSizeRemote")
+                                or ReplicatedStorage:FindFirstChild("ChangeSizeRemote")
+                                or ReplicatedStorage:FindFirstChild("SizeRemote")
+                            if remote then
+                                local size = tonumber(savedStates.SizeValue) or 2
+                                local args = {"changeSize", size}
+                                remote:InvokeServer(unpack(args))
+                            elseif humanoid then
+                                local scales = {
+                                    humanoid:FindFirstChildOfClass("BodyWidthScale"),
+                                    humanoid:FindFirstChildOfClass("BodyDepthScale"),
+                                    humanoid:FindFirstChildOfClass("BodyHeightScale")
+                                }
+                                for _, scale in ipairs(scales) do
+                                    if scale then
+                                        scale.Value = tonumber(savedStates.SizeValue) or 2
+                                    end
+                                end
+                            end
+                        end)
+                        if not success then
+                            print("คืนค่าสถานะขนาดตัวล้มเหลว: " .. err)
+                        end
+                    end
+                end)
+                if not success then
+                    saveToggle.Text = "ข้อผิดพลาด!"
+                    task.wait(1)
+                    saveToggle.Text = saveEnabled and "เปิด" or "ปิด"
+                    print("บันทึกสถานะล้มเหลว: " .. err)
+                end
+            end
+        end)
+
+        for name, button in pairs(tabs) do
+            button.MouseButton1Click:Connect(function()
+                showTab(name)
+            end)
+        end
+
+        if savedStates.WeightRunning and savedStates.WeightExercise then
+            running = true
+            startButton.Text = "หยุด"
+            chooseButton.Text = "เลือก: " .. savedStates.WeightExercise
+            selectedExercise = savedStates.WeightExercise
+            local tool = backpack and backpack:FindFirstChild(savedStates.WeightExercise)
+            if tool and humanoid then
+                humanoid:EquipTool(tool)
+            end
+            spawn(function()
+                while running do
+                    if muscleEvent then
+                        muscleEvent:FireServer("rep")
+                    end
+                    task.wait(math.random(0.08, 0.12))
+                end
+            end)
+        end
+        if savedStates.SpinEnabled then
+            spinEnabled = true
+            spinToggle.Text = "เปิด"
+            spawn(function()
+                while spinEnabled do
+                    if fortuneWheelRemote and fortuneWheel then
+                        local args = {"openFortuneWheel", fortuneWheel}
+                        pcall(function()
+                            fortuneWheelRemote:InvokeServer(unpack(args))
                         end)
                     end
                     task.wait(1)
@@ -1387,94 +1514,94 @@ local success, err = pcall(function()
             end)
         end
 
+        LocalPlayer.CharacterAdded:Connect(function(char)
+            humanoid = char:WaitForChild("Humanoid", 5)
+            local backpack = LocalPlayer:WaitForChild("Backpack", 5)
+            if savedStates.Speed and humanoid then
+                local speed = tonumber(savedStates.SpeedValue) or 16
+                pcall(function()
+                    humanoid.WalkSpeed = speed
+                end)
+            end
+            if savedStates.Jump and humanoid then
+                local jump = tonumber(savedStates.JumpValue) or 50
+                if jump <= 150 then
+                    pcall(function()
+                        humanoid.JumpPower = jump
+                    end)
+                end
+            end
+            if savedStates.WeightRunning and savedStates.WeightExercise then
+                local tool = backpack and backpack:FindFirstChild(savedStates.WeightExercise)
+                if tool and humanoid then
+                    pcall(function()
+                        humanoid:EquipTool(tool)
+                    end)
+                end
+            end
+            if savedStates.ProteinEnabled then
+                proteinEnabled = true
+                proteinToggle.Text = "เปิด"
+                spawn(function()
+                    while proteinEnabled and humanoid and backpack do
+                        local proteinTools = {"Protein Bar", "Protein Shake", "ULTRA Shake", "TOUGH Bar", "Energy Bar"}
+                        local foundTool = nil
+                        for _, toolName in ipairs(proteinTools) do
+                            local tool = backpack:FindFirstChild(toolName)
+                            if tool then
+                                foundTool = tool
+                                break
+                            end
+                        end
+                        if foundTool then
+                            local success, err = pcall(function()
+                                humanoid:EquipTool(foundTool)
+                                task.wait(0.1)
+                                foundTool:Activate()
+                                print("กินโปรตันใน CharacterAdded:", foundTool.Name)
+                            end)
+                            if not success then
+                                print("กินโปรตันล้มเหลวใน CharacterAdded: " .. err)
+                            end
+                        end
+                        task.wait(1)
+                    end
+                end)
+            end
+            if savedStates.SizeEnabled then
+                sizeEnabled = true
+                sizeToggle.Text = "เปิด"
+                local success, err = pcall(function()
+                    local remote = ReplicatedStorage:FindFirstChild("rEvents") and ReplicatedStorage.rEvents:FindFirstChild("changeSpeedSizeRemote")
+                        or ReplicatedStorage:FindFirstChild("changeSpeedSizeRemote")
+                        or ReplicatedStorage:FindFirstChild("ChangeSizeRemote")
+                        or ReplicatedStorage:FindFirstChild("SizeRemote")
+                    if remote then
+                        local size = tonumber(savedStates.SizeValue) or 2
+                        local args = {"changeSize", size}
+                        remote:InvokeServer(unpack(args))
+                    elseif humanoid then
+                        local scales = {
+                            humanoid:FindFirstChildOfClass("BodyWidthScale"),
+                            humanoid:FindFirstChildOfClass("BodyDepthScale"),
+                            humanoid:FindFirstChildOfClass("BodyHeightScale")
+                        }
+                        for _, scale in ipairs(scales) do
+                            if scale then
+                                scale.Value = tonumber(savedStates.SizeValue) or 2
+                            end
+                        end
+                    end
+                end)
+                if not success then
+                    print("คืนค่าสถานะขนาดตัวใน CharacterAdded ล้มเหลว: " .. err)
+                end
+            end
+        end)
+
         showTab("ผู้เล่น")
         print("สร้าง GUI เสร็จสิ้น")
     end
-
-    LocalPlayer.CharacterAdded:Connect(function(char)
-        humanoid = char:WaitForChild("Humanoid")
-        local backpack = LocalPlayer:WaitForChild("Backpack", 5)
-        if savedStates.Speed and humanoid then
-            local speed = tonumber(savedStates.SpeedValue) or 16
-            pcall(function()
-                humanoid.WalkSpeed = speed
-            end)
-        end
-        if savedStates.Jump and humanoid then
-            local jump = tonumber(savedStates.JumpValue) or 50
-            if jump <= 150 then
-                pcall(function()
-                    humanoid.JumpPower = jump
-                end)
-            end
-        end
-        if savedStates.WeightRunning and savedStates.WeightExercise then
-            local tool = backpack and backpack:FindFirstChild(savedStates.WeightExercise)
-            if tool and humanoid then
-                pcall(function()
-                    humanoid:EquipTool(tool)
-                end)
-            end
-        end
-        if savedStates.ProteinEnabled then
-            proteinEnabled = true
-            proteinToggle.Text = "เปิด"
-            spawn(function()
-                while proteinEnabled and humanoid and backpack do
-                    local proteinTools = {"Protein Bar", "Protein Shake", "ULTRA Shake", "TOUGH Bar", "Energy Bar"}
-                    local foundTool = nil
-                    for _, toolName in ipairs(proteinTools) do
-                        local tool = backpack:FindFirstChild(toolName)
-                        if tool then
-                            foundTool = tool
-                            break
-                        end
-                    end
-                    if foundTool then
-                        local success, err = pcall(function()
-                            humanoid:EquipTool(foundTool)
-                            task.wait(0.1)
-                            foundTool:Activate()
-                            print("กินโปรตันใน CharacterAdded:", foundTool.Name)
-                        end)
-                        if not success then
-                            print("กินโปรตันล้มเหลวใน CharacterAdded: " .. err)
-                        end
-                    end
-                    task.wait(1)
-                end
-            end)
-        end
-        if savedStates.SizeEnabled then
-            sizeEnabled = true
-            sizeToggle.Text = "เปิด"
-            local success, err = pcall(function()
-                local remote = ReplicatedStorage:FindFirstChild("rEvents") and ReplicatedStorage.rEvents:FindFirstChild("changeSpeedSizeRemote")
-                    or ReplicatedStorage:FindFirstChild("changeSpeedSizeRemote")
-                    or ReplicatedStorage:FindFirstChild("ChangeSizeRemote")
-                    or ReplicatedStorage:FindFirstChild("SizeRemote")
-                if remote then
-                    local size = tonumber(savedStates.SizeValue) or 2
-                    local args = {"changeSize", size}
-                    remote:InvokeServer(unpack(args))
-                elseif humanoid then
-                    local scales = {
-                        humanoid:FindFirstChildOfClass("BodyWidthScale"),
-                        humanoid:FindFirstChildOfClass("BodyDepthScale"),
-                        humanoid:FindFirstChildOfClass("BodyHeightScale")
-                    }
-                    for _, scale in ipairs(scales) do
-                        if scale then
-                            scale.Value = tonumber(savedStates.SizeValue) or 2
-                        end
-                    end
-                end
-            end)
-            if not success then
-                print("คืนค่าสถานะขนาดตัวใน CharacterAdded ล้มเหลว: " .. err)
-            end
-        end
-    end)
 
     -- เริ่มต้น GUI
     local success, err = pcall(createGui)
