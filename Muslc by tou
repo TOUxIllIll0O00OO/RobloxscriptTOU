@@ -1,41 +1,30 @@
--- 🌟 สร้าง GUI Exploit สุดเทพสำหรับ Roblox! 🌟
-print("เริ่มต้นสคริปต์")
-if not game:IsLoaded() then
-    game.Loaded:Wait()
-end
 local success, err = pcall(function()
-    local Players = game:GetService("Players")
-    local LocalPlayer = Players.LocalPlayer
-    if not LocalPlayer then
-        error("ไม่พบ LocalPlayer!")
-        return
+    -- รอให้เกมโหลดสมบูรณ์
+    if not game:IsLoaded() then
+        game.Loaded:Wait()
     end
-    local PlayerGui = LocalPlayer:WaitForChild("PlayerGui", 5)
+
+    -- ตัวแปรหลัก
+    local Players = game:GetService("Players")
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    local RunService = game:GetService("RunService")
+    local UserInputService = game:GetService("UserInputService")
+    local Stats = game:GetService("Stats")
+    local PlayerGui = Players.LocalPlayer:WaitForChild("PlayerGui", 10)
+    local LocalPlayer = Players.LocalPlayer
+
     if not PlayerGui then
         error("ไม่พบ PlayerGui!")
-        return
     end
-    local RunService = game:GetService("RunService")
-    local ReplicatedStorage = game:GetService("ReplicatedStorage")
-    local Stats = game:GetService("Stats")
 
-    -- 🗑 ลบ GUI เก่าถ้ามี
-    local function clearGui()
-        print("กำลังลบ GUI เก่า")
-        for _, guiName in ipairs({"MainGUI", "ToggleGui", "FpsPingGui", "PlayerInfoGUI"}) do
-            if PlayerGui:FindFirstChild(guiName) then
-                PlayerGui[guiName]:Destroy()
-            end
-        end
-    end
-    clearGui()
-
-    -- ⚙️ ตัวแปรสำหรับบันทึกสถานะ GUI และการทำงาน
+    -- ตารางเก็บสถานะ
     local savedStates = {
         Speed = false,
-        Jump = false,
         SpeedValue = "16",
+        Jump = false,
         JumpValue = "50",
+        SizeEnabled = false,
+        SizeValue = "2",
         WeightRunning = false,
         WeightExercise = nil,
         SpinEnabled = false,
@@ -43,202 +32,152 @@ local success, err = pcall(function()
         ProteinEnabled = false,
         FpsPingEnabled = false,
         ServerInfoEnabled = false,
-        JoinBrawlEnabled = false,
-        SizeEnabled = false,
-        SizeValue = "2"
+        JoinBrawlEnabled = false
     }
-    local guiState = {
-        Enabled = true,
-        ToggleButtonPos = UDim2.new(0, 50, 0, 50)
-    }
-
-    -- 🛠 ฟังก์ชันสร้าง GUI และคืนค่าสถานะ
+-- ฟังก์ชันยูทิลิตี้
     local function createGui()
-        print("เริ่มสร้าง GUI")
-        clearGui()
+        if PlayerGui:FindFirstChild("MainGUI") then
+            PlayerGui.MainGUI:Destroy()
+        end
+        if PlayerGui:FindFirstChild("ToggleGui") then
+            PlayerGui.ToggleGui:Destroy()
+        end
 
-        -- 🖥 สร้าง ScreenGui สำหรับ GUI หลัก
         local gui = Instance.new("ScreenGui")
         gui.Name = "MainGUI"
         gui.ResetOnSpawn = false
         gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
         gui.IgnoreGuiInset = true
-        gui.Enabled = guiState.Enabled
         gui.Parent = PlayerGui
-        print("สร้าง MainGUI, Enabled =", gui.Enabled)
 
-        -- 🖥 สร้าง ScreenGui สำหรับปุ่ม "อ้ายโดม😇"
+        local mainFrame = Instance.new("Frame")
+        mainFrame.Size = UDim2.new(0, 300, 0, 400)
+        mainFrame.Position = UDim2.new(0.5, -150, 0.5, -200)
+        mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+        mainFrame.BackgroundTransparency = 0.2
+        mainFrame.BorderSizePixel = 0
+        mainFrame.Active = true
+        mainFrame.Draggable = true
+        mainFrame.Visible = false
+        mainFrame.ZIndex = 10
+        mainFrame.Parent = gui
+
+        local corner = Instance.new("UICorner")
+        corner.CornerRadius = UDim.new(0, 8)
+        corner.Parent = mainFrame
+
+        local title = Instance.new("TextLabel")
+        title.Text = "สคริปต์ออโต้ By นาย"
+        title.Size = UDim2.new(1, 0, 0, 30)
+        title.BackgroundTransparency = 1
+        title.TextColor3 = Color3.new(1, 1, 1)
+        title.Font = Enum.Font.GothamBold
+        title.TextScaled = true
+        title.TextWrapped = true
+        title.ZIndex = 10
+        title.Parent = mainFrame
+
+        local closeButton = Instance.new("TextButton")
+        closeButton.Size = UDim2.new(0, 30, 0, 30)
+        closeButton.Position = UDim2.new(1, -40, 0, 5)
+        closeButton.Text = "X"
+        closeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+        closeButton.TextColor3 = Color3.new(1, 1, 1)
+        closeButton.TextScaled = true
+        closeButton.ZIndex = 10
+        closeButton.Parent = mainFrame
+
+        local closeCorner = Instance.new("UICorner")
+        closeCorner.CornerRadius = UDim.new(0, 8)
+        closeCorner.Parent = closeButton
+
         local toggleGui = Instance.new("ScreenGui")
         toggleGui.Name = "ToggleGui"
+        toggleGui.ResetOnSpawn = false
         toggleGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
         toggleGui.IgnoreGuiInset = true
         toggleGui.Parent = PlayerGui
-        print("สร้าง ToggleGui")
 
-        -- 😇 สร้างปุ่ม "อ้ายโดม😇"
         local toggleButton = Instance.new("TextButton")
-        toggleButton.Size = UDim2.new(0, 100, 0, 40)
-        toggleButton.Position = guiState.ToggleButtonPos
-        toggleButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-        toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-        toggleButton.Text = "อ้ายโดม😇"
-        toggleButton.Font = Enum.Font.GothamBold
-        toggleButton.TextSize = 14
+        toggleButton.Size = UDim2.new(0, 50, 0, 50)
+        toggleButton.Position = UDim2.new(0, 10, 0.5, -25)
+        toggleButton.Text = "☰"
+        toggleButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+        toggleButton.TextColor3 = Color3.new(1, 1, 1)
         toggleButton.TextScaled = true
-        toggleButton.TextWrapped = true
-        toggleButton.Active = true
-        toggleButton.Draggable = true
-        toggleButton.ZIndex = 11
+        toggleButton.ZIndex = 10
         toggleButton.Parent = toggleGui
 
         local toggleCorner = Instance.new("UICorner")
         toggleCorner.CornerRadius = UDim.new(0, 8)
         toggleCorner.Parent = toggleButton
 
-        toggleButton:GetPropertyChangedSignal("Position"):Connect(function()
-            guiState.ToggleButtonPos = toggleButton.Position
-        end)
+        local tabFrame = Instance.new("Frame")
+        tabFrame.Size = UDim2.new(1, 0, 0, 30)
+        tabFrame.Position = UDim2.new(0, 0, 0, 30)
+        tabFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+        tabFrame.BackgroundTransparency = 0.2
+        tabFrame.ZIndex = 10
+        tabFrame.Parent = mainFrame
 
-        toggleButton.MouseButton1Click:Connect(function()
-            guiState.Enabled = not guiState.Enabled
-            gui.Enabled = guiState.Enabled
-            print("สลับ GUI: Enabled =", guiState.Enabled)
-        end)
-
-        -- 🖼 สร้างกรอบหลัก
-        local mainFrame = Instance.new("Frame")
-        mainFrame.Size = UDim2.new(0, 520, 0, 360)
-        mainFrame.Position = UDim2.new(0.5, -260, 0.5, -180)
-        mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-        mainFrame.BorderSizePixel = 0
-        mainFrame.Active = true
-        mainFrame.Draggable = true
-        mainFrame.ZIndex = 10
-        mainFrame.Parent = gui
-
-        local corner = Instance.new("UICorner")
-        corner.CornerRadius = UDim.new(0, 10)
-        corner.Parent = mainFrame
-
-        -- 📑 สร้างปุ่มแท็บด้านบน
-        local tabNames = {"วาปไปจุดต่างๆ", "ผู้เล่น", "การตั้งค่า", "อ้อโต้ยกน้ำหนัก"}
-        local tabs = {}
-        local currentTab = nil
-
-        for i, name in ipairs(tabNames) do
-            local tab = Instance.new("TextButton")
-            tab.Size = UDim2.new(0, 120, 0, 35)
-            tab.Position = UDim2.new(0, (i - 1) * 130 + 10, 0, 5)
-            tab.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-            tab.TextColor3 = Color3.fromRGB(255, 255, 255)
-            tab.Text = name
-            tab.Font = Enum.Font.GothamBold
-            tab.TextSize = 14
-            tab.TextScaled = true
-            tab.TextWrapped = true
-            tab.ZIndex = 10
-            tab.Parent = mainFrame
-
-            local corner2 = Instance.new("UICorner")
-            corner2.CornerRadius = UDim.new(0, 8)
-            corner2.Parent = tab
-            tabs[name] = tab
-        end
-
-        -- 📄 พื้นที่แสดงเนื้อหา
         local contentFrame = Instance.new("Frame")
-        contentFrame.Size = UDim2.new(1, -20, 1, -50)
-        contentFrame.Position = UDim2.new(0, 10, 0, 45)
-        contentFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-        contentFrame.BorderSizePixel = 0
+        contentFrame.Size = UDim2.new(1, 0, 1, -60)
+        contentFrame.Position = UDim2.new(0, 0, 0, 60)
+        contentFrame.BackgroundTransparency = 1
         contentFrame.ZIndex = 10
         contentFrame.Parent = mainFrame
 
-        local contentCorner = Instance.new("UICorner")
-        contentCorner.CornerRadius = UDim.new(0, 8)
-        contentCorner.Parent = contentFrame
+        local tabs = {}
+        local tabNames = {"ผู้เล่น", "อ้อโต้ยกน้ำหนัก", "การตั้งค่า"}
+        local currentTab = nil
 
-        -- 🔄 ฟังก์ชันเปลี่ยนแท็บ
-        local function showTab(tabName)
+        for i, name in ipairs(tabNames) do
+            local button = Instance.new("TextButton")
+            button.Size = UDim2.new(0, 100, 0, 30)
+            button.Position = UDim2.new((i - 1) / #tabNames, 0, 0, 0)
+            button.Text = name
+            button.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+            button.TextColor3 = Color3.new(1, 1, 1)
+            button.TextScaled = true
+            button.TextWrapped = true
+            button.ZIndex = 10
+            button.Parent = tabFrame
+            tabs[name] = button
+
+            local tabCorner = Instance.new("UICorner")
+            tabCorner.CornerRadius = UDim.new(0, 8)
+            tabCorner.Parent = button
+        end
+
+        function showTab(name)
             for _, frame in pairs(contentFrame:GetChildren()) do
                 if frame:IsA("Frame") then
-                    frame.Visible = false
+                    frame.Visible = (frame.Name == name)
                 end
             end
-            for _, btn in pairs(tabs) do
-                btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+            for tabName, button in pairs(tabs) do
+                button.BackgroundColor3 = (tabName == name) and Color3.fromRGB(100, 100, 100) or Color3.fromRGB(70, 70, 70)
             end
-            tabs[tabName].BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-            if contentFrame:FindFirstChild(tabName) then
-                contentFrame[tabName].Visible = true
+            currentTab = name
+            print("สลับไปแท็บ:", name)
+        end
+
+        toggleButton.MouseButton1Click:Connect(function()
+            mainFrame.Visible = not mainFrame.Visible
+            print("สลับ GUI:", mainFrame.Visible)
+        end)
+
+        closeButton.MouseButton1Click:Connect(function()
+            mainFrame.Visible = false
+            print("ปิด GUI")
+        end)
+
+        UserInputService.InputBegan:Connect(function(input, gameProcessed)
+            if input.KeyCode == Enum.KeyCode.P and not gameProcessed then
+                mainFrame.Visible = not mainFrame.Visible
+                print("สลับ GUI ด้วย P:", mainFrame.Visible)
             end
-            currentTab = tabName
-            print("เปลี่ยนไปแท็บ:", tabName)
-        end
--------------------------------------
-        -- 🌌 หน้าหลัก "วาปไปจุดต่างๆ"
-        -------------------------------------
-        local warpFrame = Instance.new("Frame")
-        warpFrame.Name = "วาปไปจุดต่างๆ"
-        warpFrame.Size = UDim2.new(1, 0, 1, 0)
-        warpFrame.Visible = false
-        warpFrame.BackgroundTransparency = 1
-        warpFrame.ZIndex = 10
-        warpFrame.Parent = contentFrame
-
-        local warpPoints = {
-            {Label = "วาปไปประตู 1 รีเบิร์ด", Position = Vector3.new(-2623.02, 7.27, -409.07), Y = 40},
-            {Label = "วาปไปประตู 5 รีเบิร์ด", Position = Vector3.new(2250.78, 7.27, 1073.23), Y = 70},
-            {Label = "วาปไปประตู 15 รีเบิร์ด", Position = Vector3.new(-6758.96, 7.27, -1284.92), Y = 100},
-            {Label = "วาปไปประตู 30 รีเบิร์ด", Position = Vector3.new(4603.28, 991.45, -3897.87), Y = 130},
-            {Label = "วาปไปประตู 60 รีเบิร์ด", Position = Vector3.new(-8685.62, 6.70, 2392.33), Y = 160},
-            {Label = "วาปไปประตูคิง", Position = Vector3.new(-8625.93, 17.12, -5730.47), Y = 190},
-            {Label = "วาปตรงกลางแมพ", Position = Vector3.new(10.00, 7.27, 179.95), Y = 220}
-        }
-
-        for i, point in ipairs(warpPoints) do
-            local warpLabel = Instance.new("TextLabel")
-            warpLabel.Text = point.Label
-            warpLabel.Size = UDim2.new(0, 150, 0, 25)
-            warpLabel.Position = UDim2.new(0, 10, 0, point.Y)
-            warpLabel.TextColor3 = Color3.new(1, 1, 1)
-            warpLabel.BackgroundTransparency = 1
-            warpLabel.TextScaled = true
-            warpLabel.TextWrapped = true
-            warpLabel.ZIndex = 10
-            warpLabel.Parent = warpFrame
-
-            local warpButton = Instance.new("TextButton")
-            warpButton.Size = UDim2.new(0, 80, 0, 25)
-            warpButton.Position = UDim2.new(0, 170, 0, point.Y)
-            warpButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-            warpButton.Text = "วาป"
-            warpButton.TextColor3 = Color3.new(1, 1, 1)
-            warpButton.TextScaled = true
-            warpButton.TextWrapped = true
-            warpButton.ZIndex = 10
-            warpButton.Parent = warpFrame
-
-            local buttonCorner = Instance.new("UICorner")
-            buttonCorner.CornerRadius = UDim.new(0, 8)
-            buttonCorner.Parent = warpButton
-
-            warpButton.MouseButton1Click:Connect(function()
-                local character = LocalPlayer.Character
-                if character and character:FindFirstChild("HumanoidRootPart") then
-                    character.HumanoidRootPart.CFrame = CFrame.new(point.Position)
-                    warpButton.Text = "วาร์ปแล้ว!"
-                    task.wait(1)
-                    warpButton.Text = "วาป"
-                    print("วาร์ปไป:", point.Label)
-                else
-                    warpButton.Text = "ไม่พบตัวละคร!"
-                    task.wait(1)
-                    warpButton.Text = "วาป"
-                    print("วาร์ปล้มเหลว: ไม่พบตัวละคร")
-                end
-            end)
-        end
+        end)
 -------------------------------------
         -- 🎮 หน้าหลัก "ผู้เล่น"
         -------------------------------------
@@ -311,7 +250,6 @@ local success, err = pcall(function()
         jumpToggle.Position = UDim2.new(0, 190, 0, 80)
         jumpToggle.Parent = playerFrame
 
-        -- ปุ่ม "ปรับขนาดตัว2"
         local sizeLabel = Instance.new("TextLabel")
         sizeLabel.Text = "ปรับขนาดตัว2:"
         sizeLabel.Size = UDim2.new(0, 80, 0, 25)
@@ -393,21 +331,32 @@ local success, err = pcall(function()
                     -- ลองค้นหา Remote ในตำแหน่งที่เป็นไปได้
                     local remote = ReplicatedStorage:FindFirstChild("rEvents") and ReplicatedStorage.rEvents:FindFirstChild("changeSpeedSizeRemote")
                     if not remote then
-                        -- ลองค้นหาใน ReplicatedStorage โดยตรง
                         remote = ReplicatedStorage:FindFirstChild("changeSpeedSizeRemote")
+                    end
+                    if not remote then
+                        remote = ReplicatedStorage:FindFirstChild("ChangeSizeRemote") or ReplicatedStorage:FindFirstChild("SizeRemote")
                     end
                     if remote then
                         local args = {"changeSize", size}
                         remote:InvokeServer(unpack(args))
-                        print("เรียก changeSpeedSizeRemote: Size =", size)
+                        print("เรียก Remote ปรับขนาดตัว: Size =", size)
                     else
-                        -- วิธีสำรอง: ปรับ BodyScale โดยตรง
+                        -- วิธีสำรอง: ปรับ BodyScale
                         if humanoid then
-                            local bodyScale = humanoid:FindFirstChildOfClass("BodyWidthScale") or humanoid:FindFirstChildOfClass("BodyDepthScale") or humanoid:FindFirstChildOfClass("BodyHeightScale")
-                            if bodyScale then
-                                bodyScale.Value = size
-                                print("ปรับ BodyScale โดยตรง: Size =", size)
-                            else
+                            local scales = {
+                                humanoid:FindFirstChildOfClass("BodyWidthScale"),
+                                humanoid:FindFirstChildOfClass("BodyDepthScale"),
+                                humanoid:FindFirstChildOfClass("BodyHeightScale")
+                            }
+                            local scaleAdjusted = false
+                            for _, scale in ipairs(scales) do
+                                if scale then
+                                    scale.Value = size
+                                    scaleAdjusted = true
+                                    print("ปรับ", scale.Name, ": Size =", size)
+                                end
+                            end
+                            if not scaleAdjusted then
                                 error("ไม่พบ BodyScale!")
                             end
                         else
@@ -417,7 +366,7 @@ local success, err = pcall(function()
                 end)
                 if not success then
                     sizeToggle.Text = "ข้อผิดพลาด: " .. tostring(err)
-                    task.wait(2)
+                    task.wait(3)
                     sizeToggle.Text = sizeEnabled and "เปิด" or "ปิด"
                     sizeEnabled = false
                     savedStates.SizeEnabled = false
@@ -425,14 +374,23 @@ local success, err = pcall(function()
                 end
             else
                 local success, err = pcall(function()
-                    local remote = ReplicatedStorage:FindFirstChild("rEvents") and ReplicatedStorage.rEvents:FindFirstChild("changeSpeedSizeRemote") or ReplicatedStorage:FindFirstChild("changeSpeedSizeRemote")
+                    local remote = ReplicatedStorage:FindFirstChild("rEvents") and ReplicatedStorage.rEvents:FindFirstChild("changeSpeedSizeRemote")
+                        or ReplicatedStorage:FindFirstChild("changeSpeedSizeRemote")
+                        or ReplicatedStorage:FindFirstChild("ChangeSizeRemote")
+                        or ReplicatedStorage:FindFirstChild("SizeRemote")
                     if remote then
                         local args = {"changeSize", 1}
                         remote:InvokeServer(unpack(args))
                     elseif humanoid then
-                        local bodyScale = humanoid:FindFirstChildOfClass("BodyWidthScale") or humanoid:FindFirstChildOfClass("BodyDepthScale") or humanoid:FindFirstChildOfClass("BodyHeightScale")
-                        if bodyScale then
-                            bodyScale.Value = 1
+                        local scales = {
+                            humanoid:FindFirstChildOfClass("BodyWidthScale"),
+                            humanoid:FindFirstChildOfClass("BodyDepthScale"),
+                            humanoid:FindFirstChildOfClass("BodyHeightScale")
+                        }
+                        for _, scale in ipairs(scales) do
+                            if scale then
+                                scale.Value = 1
+                            end
                         end
                     end
                 end)
@@ -467,8 +425,447 @@ local success, err = pcall(function()
                 end
             end
         end)
-
+-------------------------------------
+        -- 🏋️‍♂️ หน้าหลัก "อ้อโต้ยกน้ำหนัก"
         -------------------------------------
+        local weightFrame = Instance.new("Frame")
+        weightFrame.Name = "อ้อโต้ยกน้ำหนัก"
+        weightFrame.Size = UDim2.new(1, 0, 1, 0)
+        weightFrame.Visible = false
+        weightFrame.BackgroundTransparency = 1
+        weightFrame.ZIndex = 10
+        weightFrame.Parent = contentFrame
+
+        local weightTitle = Instance.new("TextLabel")
+        weightTitle.Text = "เลือกสิ่งที่จะออกกำลังกาย"
+        weightTitle.Size = UDim2.new(0, 300, 0, 30)
+        weightTitle.Position = UDim2.new(0, 10, 0, 10)
+        weightTitle.TextColor3 = Color3.new(1, 1, 1)
+        weightTitle.BackgroundTransparency = 1
+        weightTitle.TextScaled = true
+        weightTitle.TextWrapped = true
+        weightTitle.ZIndex = 10
+        weightTitle.Parent = weightFrame
+
+        local chooseButton = Instance.new("TextButton")
+        chooseButton.Size = UDim2.new(0, 150, 0, 35)
+        chooseButton.Position = UDim2.new(0, 10, 0, 50)
+        chooseButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+        chooseButton.Text = savedStates.WeightExercise and "เลือก: " .. savedStates.WeightExercise or "เลือก"
+        chooseButton.TextColor3 = Color3.new(1, 1, 1)
+        chooseButton.TextScaled = true
+        chooseButton.TextWrapped = true
+        chooseButton.ZIndex = 10
+        chooseButton.Parent = weightFrame
+
+        local startButton = Instance.new("TextButton")
+        startButton.Size = UDim2.new(0, 100, 0, 35)
+        startButton.Position = UDim2.new(0, 170, 0, 50)
+        startButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+        startButton.Text = savedStates.WeightRunning and "หยุด" or "เริ่ม"
+        startButton.TextColor3 = Color3.new(1, 1, 1)
+        startButton.TextScaled = true
+        startButton.TextWrapped = true
+        startButton.ZIndex = 10
+        startButton.Parent = weightFrame
+
+        local spinLabel = Instance.new("TextLabel")
+        spinLabel.Text = "อ้อโต้สปิน:"
+        spinLabel.Size = UDim2.new(0, 150, 0, 25)
+        spinLabel.Position = UDim2.new(0, 10, 0, 90)
+        spinLabel.TextColor3 = Color3.new(1, 1, 1)
+        spinLabel.BackgroundTransparency = 1
+        spinLabel.TextScaled = true
+        spinLabel.TextWrapped = true
+        spinLabel.ZIndex = 10
+        spinLabel.Parent = weightFrame
+
+        local spinToggle = Instance.new("TextButton")
+        spinToggle.Size = UDim2.new(0, 100, 0, 25)
+        spinToggle.Position = UDim2.new(0, 170, 0, 90)
+        spinToggle.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+        spinToggle.Text = savedStates.SpinEnabled and "เปิด" or "ปิด"
+        spinToggle.TextColor3 = Color3.new(1, 1, 1)
+        spinToggle.TextScaled = true
+        spinToggle.TextWrapped = true
+        spinToggle.ZIndex = 10
+        spinToggle.Parent = weightFrame
+
+        local rebirthLabel = Instance.new("TextLabel")
+        rebirthLabel.Text = "อ้อโต้รีเบิร์ด:"
+        rebirthLabel.Size = UDim2.new(0, 150, 0, 25)
+        rebirthLabel.Position = UDim2.new(0, 10, 0, 120)
+        rebirthLabel.TextColor3 = Color3.new(1, 1, 1)
+        rebirthLabel.BackgroundTransparency = 1
+        rebirthLabel.TextScaled = true
+        rebirthLabel.TextWrapped = true
+        rebirthLabel.ZIndex = 10
+        rebirthLabel.Parent = weightFrame
+
+        local rebirthToggle = Instance.new("TextButton")
+        rebirthToggle.Size = UDim2.new(0, 100, 0, 25)
+        rebirthToggle.Position = UDim2.new(0, 170, 0, 120)
+        rebirthToggle.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+        rebirthToggle.Text = savedStates.RebirthEnabled and "เปิด" or "ปิด"
+        rebirthToggle.TextColor3 = Color3.new(1, 1, 1)
+        rebirthToggle.TextScaled = true
+        rebirthToggle.TextWrapped = true
+        rebirthToggle.ZIndex = 10
+        rebirthToggle.Parent = weightFrame
+
+        local proteinLabel = Instance.new("TextLabel")
+        proteinLabel.Text = "อ้อโต้กินโปรตัน:"
+        proteinLabel.Size = UDim2.new(0, 150, 0, 25)
+        proteinLabel.Position = UDim2.new(0, 10, 0, 150)
+        proteinLabel.TextColor3 = Color3.new(1, 1, 1)
+        proteinLabel.BackgroundTransparency = 1
+        proteinLabel.TextScaled = true
+        proteinLabel.TextWrapped = true
+        proteinLabel.ZIndex = 10
+        proteinLabel.Parent = weightFrame
+
+        local proteinToggle = Instance.new("TextButton")
+        proteinToggle.Size = UDim2.new(0, 100, 0, 25)
+        proteinToggle.Position = UDim2.new(0, 170, 0, 150)
+        proteinToggle.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+        proteinToggle.Text = savedStates.ProteinEnabled and "เปิด" or "ปิด"
+        proteinToggle.TextColor3 = Color3.new(1, 1, 1)
+        proteinToggle.TextScaled = true
+        proteinToggle.TextWrapped = true
+        proteinToggle.ZIndex = 10
+        proteinToggle.Parent = weightFrame
+
+        local joinBrawlLabel = Instance.new("TextLabel")
+        joinBrawlLabel.Text = "อ้อโต้จอยเวที:"
+        joinBrawlLabel.Size = UDim2.new(0, 150, 0, 25)
+        joinBrawlLabel.Position = UDim2.new(0, 10, 0, 180)
+        joinBrawlLabel.TextColor3 = Color3.new(1, 1, 1)
+        joinBrawlLabel.BackgroundTransparency = 1
+        joinBrawlLabel.TextScaled = true
+        joinBrawlLabel.TextWrapped = true
+        joinBrawlLabel.ZIndex = 10
+        joinBrawlLabel.Parent = weightFrame
+
+        local joinBrawlToggle = Instance.new("TextButton")
+        joinBrawlToggle.Size = UDim2.new(0, 100, 0, 25)
+        joinBrawlToggle.Position = UDim2.new(0, 170, 0, 180)
+        joinBrawlToggle.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+        joinBrawlToggle.Text = savedStates.JoinBrawlEnabled and "เปิด" or "ปิด"
+        joinBrawlToggle.TextColor3 = Color3.new(1, 1, 1)
+        joinBrawlToggle.TextScaled = true
+        joinBrawlToggle.TextWrapped = true
+        joinBrawlToggle.ZIndex = 10
+        joinBrawlToggle.Parent = weightFrame
+
+        local joinBrawlCorner = Instance.new("UICorner")
+        joinBrawlCorner.CornerRadius = UDim.new(0, 8)
+        joinBrawlCorner.Parent = joinBrawlToggle
+
+        local selectedExercise = savedStates.WeightExercise
+        local running = savedStates.WeightRunning
+        local spinEnabled = savedStates.SpinEnabled
+        local rebirthEnabled = savedStates.RebirthEnabled
+        local proteinEnabled = savedStates.ProteinEnabled
+        local joinBrawlEnabled = savedStates.JoinBrawlEnabled or false
+        local muscleEvent = LocalPlayer:WaitForChild("muscleEvent", 5)
+        local backpack = LocalPlayer:WaitForChild("Backpack", 5)
+        local fortuneWheelRemote = ReplicatedStorage:WaitForChild("rEvents", 5) and ReplicatedStorage.rEvents:WaitForChild("openFortuneWheelRemote", 5)
+        local fortuneWheel = ReplicatedStorage:WaitForChild("fortuneWheelChances", 5) and ReplicatedStorage.fortuneWheelChances:WaitForChild("Fortune Wheel", 5)
+        local rebirthRemote = ReplicatedStorage:WaitForChild("rEvents", 5) and ReplicatedStorage.rEvents:WaitForChild("rebirthRemote", 5)
+        local brawlEvent = ReplicatedStorage:WaitForChild("rEvents", 5) and ReplicatedStorage.rEvents:WaitForChild("brawlEvent", 5)
+        local changeSpeedSizeRemote = ReplicatedStorage:FindFirstChild("rEvents") and ReplicatedStorage.rEvents:FindFirstChild("changeSpeedSizeRemote")
+            or ReplicatedStorage:FindFirstChild("changeSpeedSizeRemote")
+            or ReplicatedStorage:FindFirstChild("ChangeSizeRemote")
+            or ReplicatedStorage:FindFirstChild("SizeRemote")
+
+        if not muscleEvent then warn("ไม่พบ muscleEvent!") end
+        if not backpack then warn("ไม่พบ Backpack!") end
+        if not fortuneWheelRemote then warn("ไม่พบ openFortuneWheelRemote!") end
+        if not fortuneWheel then warn("ไม่พบ Fortune Wheel!") end
+        if not rebirthRemote then warn("ไม่พบ rebirthRemote!") end
+        if not brawlEvent then warn("ไม่พบ brawlEvent!") end
+        if not changeSpeedSizeRemote then warn("ไม่พบ changeSpeedSizeRemote!") end
+
+        chooseButton.MouseButton1Click:Connect(function()
+            if PlayerGui:FindFirstChild("SelectionGui") then
+                PlayerGui.SelectionGui:Destroy()
+            end
+
+            local choices = {"Weight", "Handstands", "Pushups", "Situps"}
+            local selectionGui = Instance.new("Frame")
+            selectionGui.Name = "SelectionGui"
+            selectionGui.Size = UDim2.new(0, 200, 0, 180)
+            selectionGui.Position = UDim2.new(0.5, -100, 0.5, -90)
+            selectionGui.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+            selectionGui.BorderSizePixel = 0
+            selectionGui.Active = true
+            selectionGui.Draggable = true
+            selectionGui.ZIndex = 10
+            selectionGui.Parent = gui
+
+            local corner = Instance.new("UICorner")
+            corner.CornerRadius = UDim.new(0, 8)
+            corner.Parent = selectionGui
+
+            for i, choice in ipairs(choices) do
+                local btn = Instance.new("TextButton")
+                btn.Size = UDim2.new(1, -10, 0, 35)
+                btn.Position = UDim2.new(0, 5, 0, (i - 1) * 40 + 5)
+                btn.Text = choice
+                btn.TextScaled = true
+                btn.TextWrapped = true
+                btn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+                btn.TextColor3 = Color3.new(1, 1, 1)
+                btn.ZIndex = 10
+                btn.Parent = selectionGui
+
+                local btnCorner = Instance.new("UICorner")
+                btnCorner.CornerRadius = UDim.new(0, 8)
+                btnCorner.Parent = btn
+
+                btn.MouseButton1Click:Connect(function()
+                    selectedExercise = choice
+                    savedStates.WeightExercise = choice
+                    chooseButton.Text = "เลือก: " .. choice
+                    selectionGui:Destroy()
+                    print("เลือก Exercise:", choice)
+                end)
+            end
+        end)
+
+        startButton.MouseButton1Click:Connect(function()
+            if not selectedExercise then
+                startButton.Text = "เลือกก่อน!"
+                task.wait(1)
+                startButton.Text = running and "หยุด" or "เริ่ม"
+                print("ออโต้ยกน้ำหนัก: ต้องเลือก Exercise ก่อน")
+                return
+            end
+
+            running = not running
+            savedStates.WeightRunning = running
+            startButton.Text = running and "หยุด" or "เริ่ม"
+            print("สลับออโต้ยกน้ำหนัก:", running)
+
+            if running then
+                local tool = backpack and backpack:FindFirstChild(selectedExercise)
+                if tool and humanoid then
+                    humanoid:EquipTool(tool)
+                else
+                    startButton.Text = "ไม่พบไอเทม!"
+                    task.wait(1)
+                    startButton.Text = running and "หยุด" or "เริ่ม"
+                    running = false
+                    savedStates.WeightRunning = false
+                    print("ออโต้ยกน้ำหนักล้มเหลว: ไม่พบไอเทม")
+                    return
+                end
+
+                spawn(function()
+                    while running do
+                        if muscleEvent then
+                            muscleEvent:FireServer("rep")
+                        else
+                            startButton.Text = "ไม่พบ Remote!"
+                            task.wait(1)
+                            startButton.Text = running and "หยุด" or "เริ่ม"
+                            running = false
+                            savedStates.WeightRunning = false
+                            print("ออโต้ยกน้ำหนักล้มเหลว: ไม่พบ muscleEvent")
+                            break
+                        end
+                        task.wait(math.random(0.08, 0.12))
+                    end
+                end)
+            end
+        end)
+
+        spinToggle.MouseButton1Click:Connect(function()
+            spinEnabled = not spinEnabled
+            savedStates.SpinEnabled = spinEnabled
+            spinToggle.Text = spinEnabled and "เปิด" or "ปิด"
+            print("สลับออโต้สปิน:", spinEnabled)
+
+            if spinEnabled then
+                spawn(function()
+                    while spinEnabled do
+                        if fortuneWheelRemote and fortuneWheel then
+                            local args = {"openFortuneWheel", fortuneWheel}
+                            local success, err = pcall(function()
+                                fortuneWheelRemote:InvokeServer(unpack(args))
+                            end)
+                            if not success then
+                                spinToggle.Text = "ข้อผิดพลาด!"
+                                task.wait(1)
+                                spinToggle.Text = spinEnabled and "เปิด" or "ปิด"
+                                spinEnabled = false
+                                savedStates.SpinEnabled = false
+                                print("ออโต้สปินล้มเหลว: " .. err)
+                                break
+                            end
+                        else
+                            spinToggle.Text = "ไม่พบ Remote!"
+                            task.wait(1)
+                            spinToggle.Text = spinEnabled and "เปิด" or "ปิด"
+                            spinEnabled = false
+                            savedStates.SpinEnabled = false
+                            print("ออโต้สปินล้มเหลว: ไม่พบ Remote")
+                            break
+                        end
+                        task.wait(1)
+                    end
+                end)
+            end
+        end)
+
+        rebirthToggle.MouseButton1Click:Connect(function()
+            rebirthEnabled = not rebirthEnabled
+            savedStates.RebirthEnabled = rebirthEnabled
+            rebirthToggle.Text = rebirthEnabled and "เปิด" or "ปิด"
+            print("สลับออโต้รีเบิร์ด:", rebirthEnabled)
+
+            if rebirthEnabled then
+                spawn(function()
+                    while rebirthEnabled do
+                        if rebirthRemote then
+                            local args = {"rebirthRequest"}
+                            local success, err = pcall(function()
+                                rebirthRemote:InvokeServer(unpack(args))
+                            end)
+                            if not success then
+                                rebirthToggle.Text = "ข้อผิดพลาด!"
+                                task.wait(1)
+                                rebirthToggle.Text = rebirthEnabled and "เปิด" or "ปิด"
+                                rebirthEnabled = false
+                                savedStates.RebirthEnabled = false
+                                print("ออโต้รีเบิร์ดล้มเหลว: " .. err)
+                                break
+                            end
+                        else
+                            rebirthToggle.Text = "ไม่พบ Remote!"
+                            task.wait(1)
+                            rebirthToggle.Text = rebirthEnabled and "เปิด" or "ปิด"
+                            rebirthEnabled = false
+                            savedStates.RebirthEnabled = false
+                            print("ออโต้รีเบิร์ดล้มเหลว: ไม่พบ Remote")
+                            break
+                        end
+                        task.wait(1)
+                    end
+                end)
+            end
+        end)
+
+        proteinToggle.MouseButton1Click:Connect(function()
+            proteinEnabled = not proteinEnabled
+            savedStates.ProteinEnabled = proteinEnabled
+            proteinToggle.Text = proteinEnabled and "เปิด" or "ปิด"
+            print("สลับออโต้กินโปรตัน:", proteinEnabled)
+
+            if proteinEnabled then
+                spawn(function()
+                    while proteinEnabled and humanoid and backpack do
+                        local proteinTools = {"Protein Bar", "Protein Shake", "ULTRA Shake", "TOUGH Bar", "Energy Bar"}
+                        local foundTool = nil
+                        for _, toolName in ipairs(proteinTools) do
+                            local tool = backpack:FindFirstChild(toolName)
+                            if tool then
+                                foundTool = tool
+                                break
+                            end
+                        end
+                        if foundTool then
+                            local success, err = pcall(function()
+                                humanoid:EquipTool(foundTool)
+                                task.wait(0.1)
+                                foundTool:Activate()
+                                print("กินโปรตัน:", foundTool.Name)
+                            end)
+                            if not success then
+                                proteinToggle.Text = "ข้อผิดพลาด!"
+                                task.wait(1)
+                                proteinToggle.Text = proteinEnabled and "เปิด" or "ปิด"
+                                print("กินโปรตันล้มเหลว: " .. err)
+                            end
+                        else
+                            proteinToggle.Text = "ไม่พบโปรตีน!"
+                            task.wait(1)
+                            proteinToggle.Text = proteinEnabled and "เปิด" or "ปิด"
+                            print("ออโต้กินโปรตัน: ไม่พบโปรตีนใน Backpack")
+                        end
+                        task.wait(1)
+                    end
+                end)
+            end
+        end)
+
+        joinBrawlToggle.MouseButton1Click:Connect(function()
+            joinBrawlEnabled = not joinBrawlEnabled
+            savedStates.JoinBrawlEnabled = joinBrawlEnabled
+            joinBrawlToggle.Text = joinBrawlEnabled and "เปิด" or "ปิด"
+            print("สลับออโต้จอยเวที:", joinBrawlEnabled)
+
+            if joinBrawlEnabled then
+                spawn(function()
+                    while joinBrawlEnabled do
+                        if brawlEvent then
+                            local args = {"joinBrawl"}
+                            local success, err = pcall(function()
+                                brawlEvent:FireServer(unpack(args))
+                            end)
+                            if not success then
+                                joinBrawlToggle.Text = "ข้อผิดพลาด!"
+                                task.wait(1)
+                                joinBrawlToggle.Text = joinBrawlEnabled and "เปิด" or "ปิด"
+                                joinBrawlEnabled = false
+                                savedStates.JoinBrawlEnabled = false
+                                print("ออโต้จอยเวทีล้มเหลว: " .. err)
+                                break
+                            end
+                        else
+                            joinBrawlToggle.Text = "ไม่พบ Remote!"
+                            task.wait(1)
+                            joinBrawlToggle.Text = joinBrawlEnabled and "เปิด" or "ปิด"
+                            joinBrawlEnabled = false
+                            savedStates.JoinBrawlEnabled = false
+                            print("ออโต้จอยเวทีล้มเหลว: ไม่พบ brawlEvent")
+                            break
+                        end
+                        task.wait(math.random(0.95, 1.05))
+                    end
+                end)
+            end
+        end)
+
+        backpack.ChildAdded:Connect(function(child)
+            if running and child.Name == selectedExercise and humanoid then
+                task.wait(0.1)
+                local success, err = pcall(function()
+                    humanoid:EquipTool(child)
+                end)
+                if success then
+                    print("ถือ Tool อัตโนมัติ:", child.Name)
+                else
+                    print("ถือ Tool ล้มเหลว:", err)
+                end
+            end
+            if proteinEnabled and table.find({"Protein Bar", "Protein Shake", "ULTRA Shake", "TOUGH Bar", "Energy Bar"}, child.Name) and humanoid then
+                task.wait(0.1)
+                local success, err = pcall(function()
+                    humanoid:EquipTool(child)
+                    task.wait(0.1)
+                local success, err = pcall(function()
+                    humanoid:EquipTool(child)
+                    task.wait(0.1)
+                    child:Activate()
+                    print("กินโปรตันอัตโนมัติ:", child.Name)
+                end)
+                if not success then
+                    print("กินโปรตันล้มเหลวใน ChildAdded: " .. err)
+                end
+            end
+        end)
+-------------------------------------
         -- ⚙️ หน้าหลัก "การตั้งค่า"
         -------------------------------------
         local settingFrame = Instance.new("Frame")
@@ -639,7 +1036,6 @@ local success, err = pcall(function()
             updateFpsPing(fpsLabel, pingLabel)
         end
 
-        -- 📊 ฟีเจอร์ "แสดงข้อมูลทั้งเซิร์ฟ" (PlayerInfoGUI)
         local function createPlayerInfoGui()
             print("สร้าง PlayerInfoGUI")
             local ScreenGui = Instance.new("ScreenGui")
@@ -869,412 +1265,6 @@ local success, err = pcall(function()
             serverInfoGui, cleanupConnections = createPlayerInfoGui()
             serverInfoGui.Enabled = true
         end
--------------------------------------
-        -- 🏋️‍♂️ หน้าหลัก "อ้อโต้ยกน้ำหนัก"
-        -------------------------------------
-        local weightFrame = Instance.new("Frame")
-        weightFrame.Name = "อ้อโต้ยกน้ำหนัก"
-        weightFrame.Size = UDim2.new(1, 0, 1, 0)
-        weightFrame.Visible = false
-        weightFrame.BackgroundTransparency = 1
-        weightFrame.ZIndex = 10
-        weightFrame.Parent = contentFrame
-
-        local weightTitle = Instance.new("TextLabel")
-        weightTitle.Text = "เลือกสิ่งที่จะออกกำลังกาย"
-        weightTitle.Size = UDim2.new(0, 300, 0, 30)
-        weightTitle.Position = UDim2.new(0, 10, 0, 10)
-        weightTitle.TextColor3 = Color3.new(1, 1, 1)
-        weightTitle.BackgroundTransparency = 1
-        weightTitle.TextScaled = true
-        weightTitle.TextWrapped = true
-        weightTitle.ZIndex = 10
-        weightTitle.Parent = weightFrame
-
-        local chooseButton = Instance.new("TextButton")
-        chooseButton.Size = UDim2.new(0, 150, 0, 35)
-        chooseButton.Position = UDim2.new(0, 10, 0, 50)
-        chooseButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-        chooseButton.Text = savedStates.WeightExercise and "เลือก: " .. savedStates.WeightExercise or "เลือก"
-        chooseButton.TextColor3 = Color3.new(1, 1, 1)
-        chooseButton.TextScaled = true
-        chooseButton.TextWrapped = true
-        chooseButton.ZIndex = 10
-        chooseButton.Parent = weightFrame
-
-        local startButton = Instance.new("TextButton")
-        startButton.Size = UDim2.new(0, 100, 0, 35)
-        startButton.Position = UDim2.new(0, 170, 0, 50)
-        startButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-        startButton.Text = savedStates.WeightRunning and "หยุด" or "เริ่ม"
-        startButton.TextColor3 = Color3.new(1, 1, 1)
-        startButton.TextScaled = true
-        startButton.TextWrapped = true
-        startButton.ZIndex = 10
-        startButton.Parent = weightFrame
-
-        local spinLabel = Instance.new("TextLabel")
-        spinLabel.Text = "อ้อโต้สปิน:"
-        spinLabel.Size = UDim2.new(0, 150, 0, 25)
-        spinLabel.Position = UDim2.new(0, 10, 0, 90)
-        spinLabel.TextColor3 = Color3.new(1, 1, 1)
-        spinLabel.BackgroundTransparency = 1
-        spinLabel.TextScaled = true
-        spinLabel.TextWrapped = true
-        spinLabel.ZIndex = 10
-        spinLabel.Parent = weightFrame
-
-        local spinToggle = Instance.new("TextButton")
-        spinToggle.Size = UDim2.new(0, 100, 0, 25)
-        spinToggle.Position = UDim2.new(0, 170, 0, 90)
-        spinToggle.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-        spinToggle.Text = savedStates.SpinEnabled and "เปิด" or "ปิด"
-        spinToggle.TextColor3 = Color3.new(1, 1, 1)
-        spinToggle.TextScaled = true
-        spinToggle.TextWrapped = true
-        spinToggle.ZIndex = 10
-        spinToggle.Parent = weightFrame
-
-        local rebirthLabel = Instance.new("TextLabel")
-        rebirthLabel.Text = "อ้อโต้รีเบิร์ด:"
-        rebirthLabel.Size = UDim2.new(0, 150, 0, 25)
-        rebirthLabel.Position = UDim2.new(0, 10, 0, 120)
-        rebirthLabel.TextColor3 = Color3.new(1, 1, 1)
-        rebirthLabel.BackgroundTransparency = 1
-        rebirthLabel.TextScaled = true
-        rebirthLabel.TextWrapped = true
-        rebirthLabel.ZIndex = 10
-        rebirthLabel.Parent = weightFrame
-
-        local rebirthToggle = Instance.new("TextButton")
-        rebirthToggle.Size = UDim2.new(0, 100, 0, 25)
-        rebirthToggle.Position = UDim2.new(0, 170, 0, 120)
-        rebirthToggle.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-        rebirthToggle.Text = savedStates.RebirthEnabled and "เปิด" or "ปิด"
-        rebirthToggle.TextColor3 = Color3.new(1, 1, 1)
-        rebirthToggle.TextScaled = true
-        rebirthToggle.TextWrapped = true
-        rebirthToggle.ZIndex = 10
-        rebirthToggle.Parent = weightFrame
-
-        local proteinLabel = Instance.new("TextLabel")
-        proteinLabel.Text = "อ้อโต้กินโปรตัน:"
-        proteinLabel.Size = UDim2.new(0, 150, 0, 25)
-        proteinLabel.Position = UDim2.new(0, 10, 0, 150)
-        proteinLabel.TextColor3 = Color3.new(1, 1, 1)
-        proteinLabel.BackgroundTransparency = 1
-        proteinLabel.TextScaled = true
-        proteinLabel.TextWrapped = true
-        proteinLabel.ZIndex = 10
-        proteinLabel.Parent = weightFrame
-
-        local proteinToggle = Instance.new("TextButton")
-        proteinToggle.Size = UDim2.new(0, 100, 0, 25)
-        proteinToggle.Position = UDim2.new(0, 170, 0, 150)
-        proteinToggle.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-        proteinToggle.Text = savedStates.ProteinEnabled and "เปิด" or "ปิด"
-        proteinToggle.TextColor3 = Color3.new(1, 1, 1)
-        proteinToggle.TextScaled = true
-        proteinToggle.TextWrapped = true
-        proteinToggle.ZIndex = 10
-        proteinToggle.Parent = weightFrame
-
-        local joinBrawlLabel = Instance.new("TextLabel")
-        joinBrawlLabel.Text = "อ้อโต้จอยเวที:"
-        joinBrawlLabel.Size = UDim2.new(0, 150, 0, 25)
-        joinBrawlLabel.Position = UDim2.new(0, 10, 0, 180)
-        joinBrawlLabel.TextColor3 = Color3.new(1, 1, 1)
-        joinBrawlLabel.BackgroundTransparency = 1
-        joinBrawlLabel.TextScaled = true
-        joinBrawlLabel.TextWrapped = true
-        joinBrawlLabel.ZIndex = 10
-        joinBrawlLabel.Parent = weightFrame
-
-        local joinBrawlToggle = Instance.new("TextButton")
-        joinBrawlToggle.Size = UDim2.new(0, 100, 0, 25)
-        joinBrawlToggle.Position = UDim2.new(0, 170, 0, 180)
-        joinBrawlToggle.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-        joinBrawlToggle.Text = savedStates.JoinBrawlEnabled and "เปิด" or "ปิด"
-        joinBrawlToggle.TextColor3 = Color3.new(1, 1, 1)
-        joinBrawlToggle.TextScaled = true
-        joinBrawlToggle.TextWrapped = true
-        joinBrawlToggle.ZIndex = 10
-        joinBrawlToggle.Parent = weightFrame
-
-        local joinBrawlCorner = Instance.new("UICorner")
-        joinBrawlCorner.CornerRadius = UDim.new(0, 8)
-        joinBrawlCorner.Parent = joinBrawlToggle
-
-        local selectedExercise = savedStates.WeightExercise
-        local running = savedStates.WeightRunning
-        local spinEnabled = savedStates.SpinEnabled
-        local rebirthEnabled = savedStates.RebirthEnabled
-        local proteinEnabled = savedStates.ProteinEnabled
-        local joinBrawlEnabled = savedStates.JoinBrawlEnabled or false
-        local muscleEvent = LocalPlayer:WaitForChild("muscleEvent", 5)
-        local backpack = LocalPlayer:WaitForChild("Backpack", 5)
-        local fortuneWheelRemote = ReplicatedStorage:WaitForChild("rEvents", 5) and ReplicatedStorage.rEvents:WaitForChild("openFortuneWheelRemote", 5)
-        local fortuneWheel = ReplicatedStorage:WaitForChild("fortuneWheelChances", 5) and ReplicatedStorage.fortuneWheelChances:WaitForChild("Fortune Wheel", 5)
-        local rebirthRemote = ReplicatedStorage:WaitForChild("rEvents", 5) and ReplicatedStorage.rEvents:WaitForChild("rebirthRemote", 5)
-        local brawlEvent = ReplicatedStorage:WaitForChild("rEvents", 5) and ReplicatedStorage.rEvents:WaitForChild("brawlEvent", 5)
-        local changeSpeedSizeRemote = ReplicatedStorage:FindFirstChild("rEvents") and ReplicatedStorage.rEvents:FindFirstChild("changeSpeedSizeRemote") or ReplicatedStorage:FindFirstChild("changeSpeedSizeRemote")
-
-        if not muscleEvent then warn("ไม่พบ muscleEvent!") end
-        if not backpack then warn("ไม่พบ Backpack!") end
-        if not fortuneWheelRemote then warn("ไม่พบ openFortuneWheelRemote!") end
-        if not fortuneWheel then warn("ไม่พบ Fortune Wheel!") end
-        if not rebirthRemote then warn("ไม่พบ rebirthRemote!") end
-        if not brawlEvent then warn("ไม่พบ brawlEvent!") end
-        if not changeSpeedSizeRemote then warn("ไม่พบ changeSpeedSizeRemote!") end
-
-        chooseButton.MouseButton1Click:Connect(function()
-            if PlayerGui:FindFirstChild("SelectionGui") then
-                PlayerGui.SelectionGui:Destroy()
-            end
-
-            local choices = {"Weight", "Handstands", "Pushups", "Situps"}
-            local selectionGui = Instance.new("Frame")
-            selectionGui.Name = "SelectionGui"
-            selectionGui.Size = UDim2.new(0, 200, 0, 180)
-            selectionGui.Position = UDim2.new(0.5, -100, 0.5, -90)
-            selectionGui.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-            selectionGui.BorderSizePixel = 0
-            selectionGui.Active = true
-            selectionGui.Draggable = true
-            selectionGui.ZIndex = 10
-            selectionGui.Parent = gui
-
-            local corner = Instance.new("UICorner")
-            corner.CornerRadius = UDim.new(0, 8)
-            corner.Parent = selectionGui
-
-            for i, choice in ipairs(choices) do
-                local btn = Instance.new("TextButton")
-                btn.Size = UDim2.new(1, -10, 0, 35)
-                btn.Position = UDim2.new(0, 5, 0, (i - 1) * 40 + 5)
-                btn.Text = choice
-                btn.TextScaled = true
-                btn.TextWrapped = true
-                btn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-                btn.TextColor3 = Color3.new(1, 1, 1)
-                btn.ZIndex = 10
-                btn.Parent = selectionGui
-
-                local btnCorner = Instance.new("UICorner")
-                btnCorner.CornerRadius = UDim.new(0, 8)
-                btnCorner.Parent = btn
-
-                btn.MouseButton1Click:Connect(function()
-                    selectedExercise = choice
-                    savedStates.WeightExercise = choice
-                    chooseButton.Text = "เลือก: " .. choice
-                    selectionGui:Destroy()
-                    print("เลือก Exercise:", choice)
-                end)
-            end
-        end)
-
-        startButton.MouseButton1Click:Connect(function()
-            if not selectedExercise then
-                startButton.Text = "เลือกก่อน!"
-                task.wait(1)
-                startButton.Text = running and "หยุด" or "เริ่ม"
-                print("ออโต้ยกน้ำหนัก: ต้องเลือก Exercise ก่อน")
-                return
-            end
-
-            running = not running
-            savedStates.WeightRunning = running
-            startButton.Text = running and "หยุด" or "เริ่ม"
-            print("สลับออโต้ยกน้ำหนัก:", running)
-
-            if running then
-                local tool = backpack and backpack:FindFirstChild(selectedExercise)
-                if tool and humanoid then
-                    humanoid:EquipTool(tool)
-                else
-                    startButton.Text = "ไม่พบไอเทม!"
-                    task.wait(1)
-                    startButton.Text = running and "หยุด" or "เริ่ม"
-                    running = false
-                    savedStates.WeightRunning = false
-                    print("ออโต้ยกน้ำหนักล้มเหลว: ไม่พบไอเทม")
-                    return
-                end
-
-                spawn(function()
-                    while running do
-                        if muscleEvent then
-                            muscleEvent:FireServer("rep")
-                        else
-                            startButton.Text = "ไม่พบ Remote!"
-                            task.wait(1)
-                            startButton.Text = running and "หยุด" or "เริ่ม"
-                            running = false
-                            savedStates.WeightRunning = false
-                            print("ออโต้ยกน้ำหนักล้มเหลว: ไม่พบ muscleEvent")
-                            break
-                        end
-                        task.wait(math.random(0.08, 0.12))
-                    end
-                end)
-            end
-        end)
-
-        spinToggle.MouseButton1Click:Connect(function()
-            spinEnabled = not spinEnabled
-            savedStates.SpinEnabled = spinEnabled
-            spinToggle.Text = spinEnabled and "เปิด" or "ปิด"
-            print("สลับออโต้สปิน:", spinEnabled)
-
-            if spinEnabled then
-                spawn(function()
-                    while spinEnabled do
-                        if fortuneWheelRemote and fortuneWheel then
-                            local args = {"openFortuneWheel", fortuneWheel}
-                            fortuneWheelRemote:InvokeServer(unpack(args))
-                        else
-                            spinToggle.Text = "ไม่พบ Remote!"
-                            task.wait(1)
-                            spinToggle.Text = spinEnabled and "เปิด" or "ปิด"
-                            spinEnabled = false
-                            savedStates.SpinEnabled = false
-                            print("ออโต้สปินล้มเหลว: ไม่พบ Remote")
-                            break
-                        end
-                        task.wait(1)
-                    end
-                end)
-            end
-        end)
-
-        rebirthToggle.MouseButton1Click:Connect(function()
-            rebirthEnabled = not rebirthEnabled
-            savedStates.RebirthEnabled = rebirthEnabled
-            rebirthToggle.Text = rebirthEnabled and "เปิด" or "ปิด"
-            print("สลับออโต้รีเบิร์ด:", rebirthEnabled)
-
-            if rebirthEnabled then
-                spawn(function()
-                    while rebirthEnabled do
-                        if rebirthRemote then
-                            local args = {"rebirthRequest"}
-                            rebirthRemote:InvokeServer(unpack(args))
-                        else
-                            rebirthToggle.Text = "ไม่พบ Remote!"
-                            task.wait(1)
-                            rebirthToggle.Text = rebirthEnabled and "เปิด" or "ปิด"
-                            rebirthEnabled = false
-                            savedStates.RebirthEnabled = false
-                            print("ออโต้รีเบิร์ดล้มเหลว: ไม่พบ Remote")
-                            break
-                        end
-                        task.wait(1)
-                    end
-                end)
-            end
-        end)
-
-        proteinToggle.MouseButton1Click:Connect(function()
-            proteinEnabled = not proteinEnabled
-            savedStates.ProteinEnabled = proteinEnabled
-            proteinToggle.Text = proteinEnabled and "เปิด" or "ปิด"
-            print("สลับออโต้กินโปรตัน:", proteinEnabled)
-
-            if proteinEnabled then
-                spawn(function()
-                    while proteinEnabled and humanoid and backpack do
-                        local proteinTools = {"Protein Bar", "Protein Shake", "ULTRA Shake", "TOUGH Bar", "Energy Bar"}
-                        local foundTool = nil
-                        for _, toolName in ipairs(proteinTools) do
-                            local tool = backpack:FindFirstChild(toolName)
-                            if tool then
-                                foundTool = tool
-                                break
-                            end
-                        end
-                        if foundTool then
-                            local success, err = pcall(function()
-                                humanoid:EquipTool(foundTool)
-                                task.wait(0.1)
-                                foundTool:Activate()
-                                print("กินโปรตัน:", foundTool.Name)
-                            end)
-                            if not success then
-                                proteinToggle.Text = "ข้อผิดพลาด!"
-                                task.wait(1)
-                                proteinToggle.Text = proteinEnabled and "เปิด" or "ปิด"
-                                print("กินโปรตันล้มเหลว: " .. err)
-                            end
-                        else
-                            proteinToggle.Text = "ไม่พบโปรตีน!"
-                            task.wait(1)
-                            proteinToggle.Text = proteinEnabled and "เปิด" or "ปิด"
-                            print("ออโต้กินโปรตัน: ไม่พบโปรตีนใน Backpack")
-                        end
-                        task.wait(1)
-                    end
-                end)
-            end
-        end)
-
-        joinBrawlToggle.MouseButton1Click:Connect(function()
-            joinBrawlEnabled = not joinBrawlEnabled
-            savedStates.JoinBrawlEnabled = joinBrawlEnabled
-            joinBrawlToggle.Text = joinBrawlEnabled and "เปิด" or "ปิด"
-            print("สลับออโต้จอยเวที:", joinBrawlEnabled)
-
-            if joinBrawlEnabled then
-                spawn(function()
-                    while joinBrawlEnabled do
-                        if brawlEvent then
-                            local args = {"joinBrawl"}
-                            local success, err = pcall(function()
-                                brawlEvent:FireServer(unpack(args))
-                            end)
-                            if not success then
-                                joinBrawlToggle.Text = "ข้อผิดพลาด!"
-                                task.wait(1)
-                                joinBrawlToggle.Text = joinBrawlEnabled and "เปิด" or "ปิด"
-                                joinBrawlEnabled = false
-                                savedStates.JoinBrawlEnabled = false
-                                print("ออโต้จอยเวทีล้มเหลว: " .. err)
-                                break
-                            end
-                        else
-                            joinBrawlToggle.Text = "ไม่พบ Remote!"
-                            task.wait(1)
-                            joinBrawlToggle.Text = joinBrawlEnabled and "เปิด" or "ปิด"
-                            joinBrawlEnabled = false
-                            savedStates.JoinBrawlEnabled = false
-                            print("ออโต้จอยเวทีล้มเหลว: ไม่พบ brawlEvent")
-                            break
-                        end
-                        task.wait(math.random(0.95, 1.05))
-                    end
-                end)
-            end
-        end)
-
-        backpack.ChildAdded:Connect(function(child)
-            if running and child.Name == selectedExercise and humanoid then
-                task.wait(0.1)
-                humanoid:EquipTool(child)
-                print("ถือ Tool อัตโนมัติ:", child.Name)
-            end
-            if proteinEnabled and table.find({"Protein Bar", "Protein Shake", "ULTRA Shake", "TOUGH Bar", "Energy Bar"}, child.Name) and humanoid then
-                task.wait(0.1)
-                local success, err = pcall(function()
-                    humanoid:EquipTool(child)
-                    task.wait(0.1)
-                    child:Activate()
-                    print("กินโปรตันอัตโนมัติ:", child.Name)
-                end)
-                if not success then
-                    print("กินโปรตันล้มเหลวใน ChildAdded: " .. err)
-                end
-            end
-        end)
 
         local saveEnabled = false
         saveToggle.MouseButton1Click:Connect(function()
@@ -1282,54 +1272,48 @@ local success, err = pcall(function()
             saveToggle.Text = saveEnabled and "เปิด" or "ปิด"
             print("สลับบันทึกสถานะ:", saveEnabled)
             if saveEnabled then
-                if savedStates.Speed then
-                    speedEnabled = true
-                    speedToggle.Text = "เปิด"
-                    if humanoid then
+                local success, err = pcall(function()
+                    if savedStates.Speed and humanoid then
+                        speedEnabled = true
+                        speedToggle.Text = "เปิด"
                         local speed = tonumber(savedStates.SpeedValue) or 16
-                        pcall(function()
-                            humanoid.WalkSpeed = speed
-                        end)
+                        humanoid.WalkSpeed = speed
                     end
-                end
-                if savedStates.Jump then
-                    jumpEnabled = true
-                    jumpToggle.Text = "เปิด"
-                    if humanoid then
+                    if savedStates.Jump and humanoid then
+                        jumpEnabled = true
+                        jumpToggle.Text = "เปิด"
                         local jump = tonumber(savedStates.JumpValue) or 50
                         if jump <= 150 then
-                            pcall(function()
-                                humanoid.JumpPower = jump
-                            end)
+                            humanoid.JumpPower = jump
                         end
                     end
-                end
-                if savedStates.WeightRunning and savedStates.WeightExercise then
-                    running = true
-            startButton.Text = "หยุด"
-            chooseButton.Text = "เลือก: " .. savedStates.WeightExercise
-            selectedExercise = savedStates.WeightExercise
-            local tool = backpack and backpack:FindFirstChild(savedStates.WeightExercise)
-            if tool and humanoid then
-                humanoid:EquipTool(tool)
-            end
-            spawn(function()
-                while running do
-                    if muscleEvent then
-                        muscleEvent:FireServer("rep")
+                    if savedStates.WeightRunning and savedStates.WeightExercise then
+                        running = true
+                        startButton.Text = "หยุด"
+                        chooseButton.Text = "เลือก: " .. savedStates.WeightExercise
+                        selectedExercise = savedStates.WeightExercise
+                        local tool = backpack and backpack:FindFirstChild(savedStates.WeightExercise)
+                        if tool and humanoid then
+                            humanoid:EquipTool(tool)
+                        end
+                        spawn(function()
+                            while running and saveEnabled do
+                                if muscleEvent then
+                                    muscleEvent:FireServer("rep")
+                                end
+                                task.wait(math.random(0.08, 0.12))
+                            end
+                        end)
                     end
-                    task.wait(math.random(0.08, 0.12))
-                end
-            end)
-        end
-        if savedStates.SpinEnabled then
-            spinEnabled = true
-            spinToggle.Text = "เปิด"
-            spawn(function()
-                while spinEnabled do
-                    if fortuneWheelRemote and fortuneWheel then
-                        local args = {"openFortuneWheel", fortuneWheel}
-                        fortuneWheelRemote:InvokeServer(unpack(args))
+                    if savedStates.SpinEnabled then
+                        spinEnabled = true
+                        spinToggle.Text = "เปิด"
+                        spawn(function()
+                            while spinEnabled and saveEnabled do
+                                if fortuneWheelRemote and fortuneWheel then
+                                    local args = {"openFortuneWheel", fortuneWheel}
+                                    fortuneWheelRemote:InvokeServer(unpack(args))
+                        end)
                     end
                     task.wait(1)
                 end
@@ -1342,7 +1326,9 @@ local success, err = pcall(function()
                 while rebirthEnabled do
                     if rebirthRemote then
                         local args = {"rebirthRequest"}
-                        rebirthRemote:InvokeServer(unpack(args))
+                        pcall(function()
+                            rebirthRemote:InvokeServer(unpack(args))
+                        end)
                     end
                     task.wait(1)
                 end
@@ -1407,6 +1393,7 @@ local success, err = pcall(function()
 
     LocalPlayer.CharacterAdded:Connect(function(char)
         humanoid = char:WaitForChild("Humanoid")
+        local backpack = LocalPlayer:WaitForChild("Backpack", 5)
         if savedStates.Speed and humanoid then
             local speed = tonumber(savedStates.SpeedValue) or 16
             pcall(function()
@@ -1422,10 +1409,11 @@ local success, err = pcall(function()
             end
         end
         if savedStates.WeightRunning and savedStates.WeightExercise then
-            local backpack = LocalPlayer:WaitForChild("Backpack", 5)
             local tool = backpack and backpack:FindFirstChild(savedStates.WeightExercise)
             if tool and humanoid then
-                humanoid:EquipTool(tool)
+                pcall(function()
+                    humanoid:EquipTool(tool)
+                end)
             end
         end
         if savedStates.ProteinEnabled then
@@ -1457,59 +1445,44 @@ local success, err = pcall(function()
                 end
             end)
         end
-        if savedStates.FpsPingEnabled and not PlayerGui:FindFirstChild("FpsPingGui") then
-            local fpsPingGui, fpsLabel, pingLabel = createFpsPingGui()
-            fpsPingGui.Enabled = true
-            updateFpsPing(fpsLabel, pingLabel)
-        end
-        if savedStates.ServerInfoEnabled and not PlayerGui:FindFirstChild("PlayerInfoGUI") then
-            local serverInfoGui, cleanupConnections = createPlayerInfoGui()
-            serverInfoGui.Enabled = true
-        end
-        if savedStates.JoinBrawlEnabled then
-            joinBrawlEnabled = true
-            joinBrawlToggle.Text = "เปิด"
-            spawn(function()
-                while joinBrawlEnabled do
-                    if brawlEvent then
-                        local args = {"joinBrawl"}
-                        pcall(function()
-                            brawlEvent:FireServer(unpack(args))
-                        end)
-                    end
-                    task.wait(math.random(0.95, 1.05))
-                end
-            end)
-        end
         if savedStates.SizeEnabled then
             sizeEnabled = true
             sizeToggle.Text = "เปิด"
             local success, err = pcall(function()
-                local remote = ReplicatedStorage:FindFirstChild("rEvents") and ReplicatedStorage.rEvents:FindFirstChild("changeSpeedSizeRemote") or ReplicatedStorage:FindFirstChild("changeSpeedSizeRemote")
+                local remote = ReplicatedStorage:FindFirstChild("rEvents") and ReplicatedStorage.rEvents:FindFirstChild("changeSpeedSizeRemote")
+                    or ReplicatedStorage:FindFirstChild("changeSpeedSizeRemote")
+                    or ReplicatedStorage:FindFirstChild("ChangeSizeRemote")
+                    or ReplicatedStorage:FindFirstChild("SizeRemote")
                 if remote then
                     local size = tonumber(savedStates.SizeValue) or 2
                     local args = {"changeSize", size}
                     remote:InvokeServer(unpack(args))
                 elseif humanoid then
-                    local bodyScale = humanoid:FindFirstChildOfClass("BodyWidthScale") or humanoid:FindFirstChildOfClass("BodyDepthScale") or humanoid:FindFirstChildOfClass("BodyHeightScale")
-                    if bodyScale then
-                        bodyScale.Value = tonumber(savedStates.SizeValue) or 2
+                    local scales = {
+                        humanoid:FindFirstChildOfClass("BodyWidthScale"),
+                        humanoid:FindFirstChildOfClass("BodyDepthScale"),
+                        humanoid:FindFirstChildOfClass("BodyHeightScale")
+                    }
+                    for _, scale in ipairs(scales) do
+                        if scale then
+                            scale.Value = tonumber(savedStates.SizeValue) or 2
+                        end
                     end
                 end
             end)
             if not success then
-                print("คืนค่าสถานะขนาดตัวล้มเหลวใน CharacterAdded: " .. err)
+                print("คืนค่าสถานะขนาดตัวใน CharacterAdded ล้มเหลว: " .. err)
             end
         end
-        if not PlayerGui:FindFirstChild("MainGUI") or not PlayerGui:FindFirstChild("ToggleGui") then
-            createGui()
-        end
-        print("ตัวละครเกิดใหม่: คืนค่าสถานะ")
     end)
 
-    createGui()
+    -- เริ่มต้น GUI
+    local success, err = pcall(createGui)
+    if not success then
+        warn("เกิดข้อผิดพลาดในการสร้าง GUI: " .. err)
+    end
 end)
 
 if not success then
-    warn("เกิดข้อผิดพลาดในสคริปต์: " .. err)
+    warn("เกิดข้อผิดพลาดในสคริปต์หลัก: " .. err)
 end
