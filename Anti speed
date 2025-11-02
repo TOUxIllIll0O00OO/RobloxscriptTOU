@@ -1,93 +1,81 @@
--- Anti Speed Hack Server Script
--- Place this script inside ServerScriptService
+-- LocalScript
+-- วางใน StarterPlayerScripts หรือ StarterGui
 
 local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+local UserInputService = game:GetService("UserInputService")
 
--- CONFIG
-local DEFAULT_WALKSPEED = 16        -- normal game walk speed
-local MAX_WALKSPEED = 20            -- maximum allowed WalkSpeed before correction
-local CHECK_INTERVAL = 1.0          -- seconds between movement checks per character
-local MAX_DISTANCE_PER_SEC = 20     -- maximum allowed distance (studs) per second (tune per game)
-local RESPONSE = "reset"            -- "reset" to restore speed, "kick" to kick player
+-- GUI
+local ScreenGui = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
+ScreenGui.Name = "AnimLoggerUI"
 
--- Helper: apply response when cheating detected
-local function handleCheat(player, reason)
-    if RESPONSE == "kick" then
-        pcall(function()
-            player:Kick("Speed hack detected: " .. reason)
-        end)
-    else -- default behaviour: reset values
-        local char = player.Character
-        if char then
-            local hum = char:FindFirstChildOfClass("Humanoid")
-            if hum then
-                hum.WalkSpeed = DEFAULT_WALKSPEED
-                -- optional: set JumpPower back if you want to restrict jump hacks too
-                -- hum.JumpPower = DEFAULT_JUMPPOWER
-            end
-        end
-    end
-    warn("[AntiSpeed] " .. player.Name .. " flagged: " .. reason)
-end
+local Frame = Instance.new("Frame", ScreenGui)
+Frame.Size = UDim2.new(0, 300, 0, 150)
+Frame.Position = UDim2.new(0.3, 0, 0.3, 0)
+Frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+Frame.BorderSizePixel = 0
+Frame.Active = true
+Frame.Draggable = true
+Frame.Name = "MainFrame"
 
--- Start monitoring a character's Humanoid/RootPart
-local function monitorCharacter(player, character)
-    local humanoid = character:WaitForChild("Humanoid", 5)
-    local root = character:FindFirstChild("HumanoidRootPart")
+local UICorner = Instance.new("UICorner", Frame)
+UICorner.CornerRadius = UDim.new(0, 10)
 
-    if not humanoid or not root then
-        return
-    end
+local Title = Instance.new("TextLabel", Frame)
+Title.Size = UDim2.new(1, 0, 0, 30)
+Title.BackgroundTransparency = 1
+Title.Text = "🎬 Animation Logger"
+Title.TextColor3 = Color3.fromRGB(0, 255, 150)
+Title.Font = Enum.Font.FredokaOne
+Title.TextSize = 20
 
-    -- 1) Watch WalkSpeed property changes
-    humanoid:GetPropertyChangedSignal("WalkSpeed"):Connect(function()
-        if humanoid.WalkSpeed and humanoid.WalkSpeed > MAX_WALKSPEED then
-            handleCheat(player, "WalkSpeed > MAX_WALKSPEED (" .. tostring(humanoid.WalkSpeed) .. ")")
-        end
-    end)
+local TextBox = Instance.new("TextBox", Frame)
+TextBox.Size = UDim2.new(1, -20, 0, 40)
+TextBox.Position = UDim2.new(0, 10, 0, 40)
+TextBox.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+TextBox.Text = "Animation ID จะขึ้นตรงนี้"
+TextBox.Font = Enum.Font.SourceSansBold
+TextBox.TextSize = 18
+TextBox.ClearTextOnFocus = false
 
-    -- 2) Periodic movement-based detection (distance / sec)
-    spawn(function()
-        local lastPos = root.Position
-        while character.Parent ~= nil do
-            local start = tick()
-            wait(CHECK_INTERVAL)
-            if not root.Parent then break end
-            local now = tick()
-            local dt = now - start + CHECK_INTERVAL - CHECK_INTERVAL -- compensate if wait was exact or not (keeps dt ~ CHECK_INTERVAL)
-            -- we will compute distance and divide by CHECK_INTERVAL (safe approximation)
-            local newPos = root.Position
-            local dist = (newPos - lastPos).magnitude
-            local speedEstimate = dist / CHECK_INTERVAL
-            -- If estimate is unreasonably large, flag
-            if speedEstimate > MAX_DISTANCE_PER_SEC then
-                handleCheat(player, string.format("High travel speed: %.2f studs/sec (threshold %.2f)", speedEstimate, MAX_DISTANCE_PER_SEC))
-                break
-            end
-            lastPos = newPos
-        end
-    end)
-end
+local CopyButton = Instance.new("TextButton", Frame)
+CopyButton.Size = UDim2.new(0, 120, 0, 40)
+CopyButton.Position = UDim2.new(0.5, -60, 1, -50)
+CopyButton.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+CopyButton.Text = "คัดลอก ID"
+CopyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+CopyButton.Font = Enum.Font.FredokaOne
+CopyButton.TextSize = 18
 
--- Connect player events
-Players.PlayerAdded:Connect(function(player)
-    player.CharacterAdded:Connect(function(character)
-        -- small delay to ensure Humanoid/RootPart exist
-        wait(0.2)
-        monitorCharacter(player, character)
-    end)
+local UICornerBtn = Instance.new("UICorner", CopyButton)
+UICornerBtn.CornerRadius = UDim.new(0, 8)
+
+-- ปุ่มคัดลอก
+CopyButton.MouseButton1Click:Connect(function()
+	if setclipboard then
+		setclipboard(TextBox.Text)
+	elseif toclipboard then
+		toclipboard(TextBox.Text)
+	end
 end)
 
--- Optionally, run on existing players (if script added at runtime)
-for _, player in ipairs(Players:GetPlayers()) do
-    if player.Character then
-        monitorCharacter(player, player.Character)
-    end
-    player.CharacterAdded:Connect(function(character)
-        wait(0.2)
-        monitorCharacter(player, character)
-    end)
+-- ฟังก์ชันตรวจอนิเมชัน
+local function trackAnimations()
+	local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+	local humanoid = char:WaitForChild("Humanoid")
+
+	humanoid.AnimationPlayed:Connect(function(animTrack)
+		local anim = animTrack.Animation
+		if anim and anim.AnimationId then
+			local animId = anim.AnimationId:gsub("rbxassetid://","")
+			TextBox.Text = animId
+		end
+	end)
 end
 
-return
+-- รันตอนเริ่ม
+LocalPlayer.CharacterAdded:Connect(trackAnimations)
+if LocalPlayer.Character then
+	trackAnimations()
+end
