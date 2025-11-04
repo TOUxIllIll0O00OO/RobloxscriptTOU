@@ -1,8 +1,9 @@
---// TOU HUB V23 - FULL SCRIPT: คนไม่มีสิทธิ์ & basic โดนทุกคำสั่ง! 🕵️‍♂️👑
+--// TOU HUB V24 - FULL SCRIPT: ปุ่มเปิด GUI ทำงาน + คนไม่มีสิทธิ์โดนหมด! 🕵️‍♂️👑
 local Players = game:GetService("Players")
 local TextChatService = game:GetService("TextChatService")
 local player = Players.LocalPlayer
 local CoreGui = game:GetService("CoreGui")
+local UserInputService = game:GetService("UserInputService")
 
 --// === ระบบยศ (กำหนดผู้ใช้) ===
 local Ranks = {
@@ -73,8 +74,9 @@ local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "TOU_HUB_GUI"
 ScreenGui.Parent = CoreGui
 ScreenGui.ResetOnSpawn = false
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
---// ปุ่ม Toggle แยก (ลากได้)
+--// ปุ่ม Toggle แยก (ลากได้ + แก้คลิกไม่ได้)
 local ToggleBtn = Instance.new("TextButton")
 ToggleBtn.Size = UDim2.new(0, 60, 0, 60)
 ToggleBtn.Position = UDim2.new(0, 20, 0.5, -30)
@@ -85,6 +87,7 @@ ToggleBtn.Font = Enum.Font.GothamBold
 ToggleBtn.TextSize = 24
 ToggleBtn.Active = true
 ToggleBtn.Draggable = true
+ToggleBtn.ZIndex = 999
 ToggleBtn.Parent = ScreenGui
 
 local ToggleCorner = Instance.new("UICorner")
@@ -98,7 +101,7 @@ ToggleShadow.BackgroundTransparency = 1
 ToggleShadow.Image = "rbxassetid://6014261993"
 ToggleShadow.ImageColor3 = Color3.new(0,0,0)
 ToggleShadow.ImageTransparency = 0.7
-ToggleShadow.ZIndex = 0
+ToggleShadow.ZIndex = 998
 ToggleShadow.Parent = ToggleBtn
 
 --// GUI หลัก (เริ่มซ่อน)
@@ -110,6 +113,7 @@ MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
 MainFrame.Draggable = true
 MainFrame.Visible = false
+MainFrame.ZIndex = 997
 MainFrame.Parent = ScreenGui
 
 local Corner = Instance.new("UICorner")
@@ -123,13 +127,13 @@ Shadow.BackgroundTransparency = 1
 Shadow.Image = "rbxassetid://6014261993"
 Shadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
 Shadow.ImageTransparency = 0.6
-Shadow.ZIndex = 0
+Shadow.ZIndex = 996
 Shadow.Parent = MainFrame
 
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, 0, 0, 50)
 Title.BackgroundTransparency = 1
-Title.Text = "ยศ: " .. myRank .. " 🔥 TOU HUB V23"
+Title.Text = "ยศ: " .. myRank .. " 🔥 TOU HUB V24"
 Title.TextColor3 = myRank == "DEX" and Color3.fromRGB(255, 215, 0) or
                  myRank == "Premium" and Color3.fromRGB(0, 255, 255) or
                  Color3.fromRGB(100, 255, 100)
@@ -144,6 +148,7 @@ ScrollFrame.BackgroundTransparency = 1
 ScrollFrame.ScrollBarThickness = 6
 ScrollFrame.ClipsDescendants = true
 ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+ScrollFrame.ZIndex = 995
 ScrollFrame.Parent = MainFrame
 
 local UIGridLayout = Instance.new("UIGridLayout")
@@ -205,6 +210,7 @@ local function addToGUI(realName, displayName, thumb, triggerType)
     Entry.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
     Entry.BorderSizePixel = 0
     Entry.LayoutOrder = #ScrollFrame:GetChildren()
+    Entry.ZIndex = 994
     Entry.Parent = ScrollFrame
 
     local EntryCorner = Instance.new("UICorner")
@@ -216,6 +222,7 @@ local function addToGUI(realName, displayName, thumb, triggerType)
     Avatar.Position = UDim2.new(0, 10, 0, 10)
     Avatar.BackgroundTransparency = 1
     Avatar.Image = thumb
+    Avatar.ZIndex = 993
     Avatar.Parent = Entry
 
     local AvatarCorner = Instance.new("UICorner")
@@ -226,6 +233,7 @@ local function addToGUI(realName, displayName, thumb, triggerType)
     InfoFrame.Size = UDim2.new(0, 200, 1, 0)
     InfoFrame.Position = UDim2.new(0, 80, 0, 0)
     InfoFrame.BackgroundTransparency = 1
+    InfoFrame.ZIndex = 992
     InfoFrame.Parent = Entry
 
     local RealNameLabel = Instance.new("TextLabel")
@@ -235,6 +243,7 @@ local function addToGUI(realName, displayName, thumb, triggerType)
     RealNameLabel.TextColor3 = Color3.fromRGB(200, 200, 255)
     RealNameLabel.Font = Enum.Font.GothamBold
     RealNameLabel.TextXAlignment = Enum.TextXAlignment.Left
+    RealNameLabel.ZIndex = 991
     RealNameLabel.Parent = InfoFrame
 
     local DisplayLabel = Instance.new("TextLabel")
@@ -245,6 +254,7 @@ local function addToGUI(realName, displayName, thumb, triggerType)
     DisplayLabel.TextColor3 = Color3.fromRGB(150, 255, 150)
     DisplayLabel.Font = Enum.Font.Gotham
     DisplayLabel.TextXAlignment = Enum.TextXAlignment.Left
+    DisplayLabel.ZIndex = 990
     DisplayLabel.Parent = InfoFrame
 
     local TriggerLabel = Instance.new("TextLabel")
@@ -255,6 +265,7 @@ local function addToGUI(realName, displayName, thumb, triggerType)
     TriggerLabel.TextColor3 = Color3.new(1,1,1)
     TriggerLabel.Font = Enum.Font.GothamBold
     TriggerLabel.TextSize = 14
+    TriggerLabel.ZIndex = 989
     TriggerLabel.Parent = Entry
     local tc = Instance.new("UICorner", TriggerLabel); tc.CornerRadius = UDim.new(0,6)
 
@@ -263,6 +274,7 @@ local function addToGUI(realName, displayName, thumb, triggerType)
     ButtonFrame.Size = UDim2.new(0, 450, 1, 0)
     ButtonFrame.Position = UDim2.new(0, 320, 0, 0)
     ButtonFrame.BackgroundTransparency = 1
+    ButtonFrame.ZIndex = 988
     ButtonFrame.Parent = Entry
 
     local UIListLayout = Instance.new("UIListLayout")
@@ -279,6 +291,7 @@ local function addToGUI(realName, displayName, thumb, triggerType)
         btn.TextColor3 = Color3.new(1,1,1)
         btn.Font = Enum.Font.GothamBold
         btn.TextSize = 14
+        btn.ZIndex = 987
         btn.Parent = ButtonFrame
         local c = Instance.new("UICorner", btn); c.CornerRadius = UDim.new(0, 8)
         btn.MouseButton1Click:Connect(action)
@@ -358,7 +371,7 @@ channel.OnMessageDoneFiltering:Connect(function(message)
         addToGUI(realName, displayName, thumb, "script")
     end
 
-    -- !ฆ่า, !ดึง, !เตะ จากคนมียศ → ทำงานในฝั่งเป้าหมาย (ถ้าเป้าหมายรันสคริปต์)
+    -- !ฆ่า, !ดึง, !เตะ จากคนมียศ → ทำงานในฝั่งเป้าหมาย
     local senderRank = getRank(realName)
     if senderRank == "DEX" or senderRank == "Premium" then
         if lower:find("!ฆ่า") then
@@ -399,10 +412,29 @@ UIGridLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
     ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, UIGridLayout.AbsoluteContentSize.Y + 20)
 end)
 
---// Toggle GUI
+--// === Toggle GUI (แก้คลิกไม่ได้ 100%) ===
 local visible = false
-ToggleBtn.MouseButton1Click:Connect(function()
+local function toggleGUI()
     visible = not visible
     MainFrame.Visible = visible
     ToggleBtn.Text = visible and "❌" or "🔥"
+end
+
+-- วิธีที่ 1: MouseButton1Click
+ToggleBtn.MouseButton1Click:Connect(function()
+    spawn(toggleGUI)
+end)
+
+-- วิธีที่ 2: InputBegan (สำรอง)
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        local mousePos = UserInputService:GetMouseLocation()
+        local btnPos = ToggleBtn.AbsolutePosition
+        local btnSize = ToggleBtn.AbsoluteSize
+        if mousePos.X >= btnPos.X and mousePos.X <= btnPos.X + btnSize.X
+        and mousePos.Y >= btnPos.Y and mousePos.Y <= btnPos.Y + btnSize.Y then
+            spawn(toggleGUI)
+        end
+    end
 end)
