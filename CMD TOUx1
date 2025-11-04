@@ -1,4 +1,4 @@
---// TOU HUB V16 - FULL SCRIPT: RANK SYSTEM + TOGGLE BUTTON + FIXED MENU POPUP 🕵️‍♂️👑
+--// TOU HUB V17 - FULL SCRIPT: RANK SYSTEM + TOGGLE + FIXED CHECK & PULL 🕵️‍♂️👑
 local Players = game:GetService("Players")
 local TextChatService = game:GetService("TextChatService")
 local player = Players.LocalPlayer
@@ -136,7 +136,7 @@ local function sendChat(msg)
     end)
 end
 
---// ฟังก์ชันดึง
+--// ฟังก์ชันดึง (วาปจริงทุกคนเห็น)
 local function pullPlayer(targetName)
     local targetRank = getRank(targetName)
     if targetRank == "DEX" then return end
@@ -168,7 +168,7 @@ local function killPlayer(targetName)
     end
 end
 
---// ฟังก์ชันเพิ่มชื่อลง GUI
+--// ฟังก์ชันเพิ่มชื่อลง GUI + ปุ่มแยก
 local function addToGUI(realName, displayName, thumb, triggerType)
     if nameLog[realName] then return end
     nameLog[realName] = true
@@ -225,7 +225,7 @@ local function addToGUI(realName, displayName, thumb, triggerType)
     TriggerLabel.Parent = Entry
 
     -- ปุ่มคำสั่งแยกข้างชื่อ
-    local x = 0.6  -- ตำแหน่งเริ่มต้นข้างชื่อ
+    local x = 0.6
     local function addCmdBtn(text, color, action)
         local btn = Instance.new("TextButton")
         btn.Size = UDim2.new(0, 50, 0, 30)
@@ -241,7 +241,6 @@ local function addToGUI(realName, displayName, thumb, triggerType)
         x = x + 0.1
     end
 
-    -- เพิ่มปุ่มตามยศ
     if myRank == "DEX" or myRank == "Premium" then
         addCmdBtn("ฆ่า", Color3.fromRGB(180,20,20), function()
             sendChat("!ฆ่า " .. realName)
@@ -267,10 +266,16 @@ local function addToGUI(realName, displayName, thumb, triggerType)
         sendChat("!เช็ค " .. realName)
     end)
 
+    -- ปุ่มล้าง
+    addCmdBtn("ล้าง", Color3.fromRGB(100,100,100), function()
+        nameLog[realName] = nil
+        Entry:Destroy()
+    end)
+
     ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y + 20)
 end
 
---// ตรวจจับข้อความ
+--// ตรวจจับข้อความ + แก้ !เช็ค (เห็นแต่ไม่ตอบกลับ)
 TextChatService.TextChannels.RBXGeneral.MessageReceived:Connect(function(msgData)
     local text = msgData.Text
     local lower = text:lower()
@@ -283,17 +288,23 @@ TextChatService.TextChannels.RBXGeneral.MessageReceived:Connect(function(msgData
     local displayName = p.DisplayName
     local thumb = Players:GetUserThumbnailAsync(sender.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size48x48)
 
+    -- แก้ !เช็ค: ถ้าคนอื่นพิมพ์ → เห็นแต่ไม่ตอบกลับ
     if lower == "!เช็ค" then
-        sendChat("✅ **TOU HUB ACTIVE** | " .. realName .. " 🕶️")
-        addToGUI(realName, displayName, thumb, "check")
+        if sender.UserId ~= player.UserId then
+            addToGUI(realName, displayName, thumb, "check")
+        else
+            sendChat("✅ **TOU HUB ACTIVE** | " .. realName .. " 🕶️")
+            addToGUI(realName, displayName, thumb, "check")
+        end
     end
 
+    -- Trigger SCRIPT
     if text:upper() == "SCRIPT CITY THAILAND 2 BY:TOUX1" then
         sendChat("🔥 **TRIGGER DETECTED** | " .. realName .. " 🕵️‍♂️")
         addToGUI(realName, displayName, thumb, "script")
     end
 
-    -- Trap สำหรับทุกคน (ยกเว้น DEX)
+    -- Trap !ฆ่า
     if getRank(player.Name) ~= "DEX" and lower:find("!ฆ่า") and lower:find(player.Name:lower()) then
         sendChat("💀 **โดนคำสั่งฆ่า!** " .. player.Name .. " ตาย!")
         task.wait(0.1)
