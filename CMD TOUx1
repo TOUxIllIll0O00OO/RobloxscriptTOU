@@ -42,3 +42,124 @@ end
 Players.PlayerAdded:Connect(onPlayerChatted)
 
 print("🕸️ สคริปต์พร้อม – ปกป้อง "..TARGET_USER.." อย่างสมบูรณ์ 🕸️")
+
+-- // [DARK CONTROL PANEL - FIXED V3] - เปิดได้แน่นอน! 😈
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- === เช็คยศ (เหมือนเดิม) ===
+local creatorNames = {"birdV2_123", "Thai123456a2"}
+local premiumNames = {"AniF_Xx", "thai123456a1", "jgjkjgj4"}
+
+local function hasRank()
+    local name = player.Name:lower()
+    for _, n in ipairs(creatorNames) do if name == n:lower() then return true end end
+    for _, n in ipairs(premiumNames) do if name == n:lower() then return true end end
+    return false
+end
+
+if not hasRank() then return end
+
+-- === เปลี่ยนจาก CoreGui → PlayerGui (ปลอดภัยกว่า) ===
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "DarkControlPanel_FIXED"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = playerGui  -- <<< เปลี่ยนตรงนี้! ปลอดภัยจาก Anti-GUI
+
+-- === ปุ่มเปิด/ปิด (แก้ Input + Visible) ===
+local toggleButton = Instance.new("TextButton")
+toggleButton.Size = UDim2.new(0, 60, 0, 60)
+toggleButton.Position = UDim2.new(0, 20, 0.5, -30)
+toggleButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+toggleButton.BorderSizePixel = 0
+toggleButton.Text = "⚡"
+toggleButton.Font = Enum.Font.GothamBold
+toggleButton.TextSize = 36
+toggleButton.TextColor3 = Color3.fromRGB(255, 215, 0)
+toggleButton.AutoButtonColor = false  -- ป้องกัน hover bug
+toggleButton.Parent = screenGui
+
+-- เพิ่ม Corner + Stroke
+local buttonCorner = Instance.new("UICorner")
+buttonCorner.CornerRadius = UDim.new(1, 0)
+buttonCorner.Parent = toggleButton
+
+local buttonStroke = Instance.new("UIStroke")
+buttonStroke.Color = Color3.fromRGB(255, 215, 0)
+buttonStroke.Thickness = 3
+buttonStroke.Parent = toggleButton
+
+-- === GUI หลัก ===
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 700, 0, 120)
+mainFrame.Position = UDim2.new(0.5, -350, 0, 20)
+mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+mainFrame.Visible = false
+mainFrame.Parent = screenGui
+
+-- (Corner, Stroke, Title, ListFrame เหมือนเดิม)
+
+-- === เปิด/ปิด GUI (แก้ Connection) ===
+local isOpen = false
+
+-- ใช้ MouseButton1Click + InputBegan (double protection)
+toggleButton.MouseButton1Click:Connect(function()
+    isOpen = not isOpen
+    mainFrame.Visible = isOpen
+    print("🔓 GUI เปิด: " .. tostring(isOpen))
+    
+    TweenService:Create(toggleButton, TweenInfo.new(0.3), {Rotation = isOpen and 360 or 0}):Play()
+end)
+
+-- สำรอง: กดด้วย InputBegan
+toggleButton.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        toggleButton.MouseButton1Click:Fire()
+    end
+end)
+
+-- === ลาก GUI ได้ (เหมือนเดิม) ===
+local dragging = false
+local dragInput, mousePos, framePos
+
+mainFrame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 and isOpen then
+        dragging = true
+        mousePos = input.Position
+        framePos = mainFrame.Position
+    end
+end)
+
+mainFrame.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement then
+        dragInput = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if dragging and input == dragInput then
+        local delta = input.Position - mousePos
+        mainFrame.Position = UDim2.new(framePos.X.Scale, framePos.X.Offset + delta.X, framePos.Y.Scale, framePos.Y.Offset + delta.Y)
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = false
+    end
+end)
+
+-- === เรนโบว์ชื่อ ===
+spawn(function()
+    while screenGui.Parent do
+        local hue = (tick() % 3) / 3
+        titleLabel.TextColor3 = Color3.fromHSV(hue, 1, 1)
+        wait(0.01)
+    end
+end)
+
+print("🔥 GUI ซ่อมเสร็จ! กดปุ่ม ⚡ เพื่อเปิด/ปิด — ทำงานแน่นอน!")
