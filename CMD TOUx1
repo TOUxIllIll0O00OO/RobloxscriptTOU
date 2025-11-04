@@ -1,4 +1,4 @@
---// TOU HUB V25 - FULL SCRIPT: แก้ Error Humanoid + GUI ไม่ขึ้น + พิมพ์คำสั่งไม่ได้ + เต็มทุกอย่าง! 🕵️‍♂️👑
+--// TOU HUB V26 - FULL SCRIPT: แก้ !เช็ค ไม่ตอบ + ชื่อไม่เข้า GUI + DEX ใช้คำสั่งได้! 🕵️‍♂️👑
 local Players = game:GetService("Players")
 local TextChatService = game:GetService("TextChatService")
 local player = Players.LocalPlayer
@@ -8,9 +8,9 @@ local RunService = game:GetService("RunService")
 
 --// === ระบบยศ (กำหนดผู้ใช้) ===
 local Ranks = {
-    DEX = {"birdV2_123"},          -- ยศสูงสุด (เฉพาะ DEX ใช้ !Wither)
+    DEX = {"birdV2_123"},          -- ยศสูงสุด
     Premium = {},                  -- เพิ่มชื่อได้ที่นี่
-    basic = {"AniF_Xx"}            -- basic (โดนคำสั่งจาก Premium/DEX)
+    basic = {"AniF_Xx"}            -- basic
 }
 
 --// ฟังก์ชันเช็คยศ
@@ -23,14 +23,13 @@ end
 
 local myRank = getRank(player.Name)
 
---// === รอ Character โหลดก่อน (แก้ Error Humanoid) ===
+--// === รอ Character โหลดก่อน ===
 local character = player.Character or player.CharacterAdded:Wait()
 local humanoid = character:WaitForChild("Humanoid", 10)
 local rootPart = character:WaitForChild("HumanoidRootPart", 10)
 
---// === ถ้าไม่มีสิทธิ์ → ซ่อน GUI + ไม่ให้พิมพ์คำสั่ง + โดนทุกคำสั่ง ===
+--// === ถ้าไม่มีสิทธิ์ → โดนทุกคำสั่ง + ไม่พิมพ์ได้ + ตอบ !เช็ค เฉพาะคนมียศ ===
 if not myRank then
-    -- คนไม่มีสิทธิ์: โดนทุกคำสั่ง + ไม่พิมพ์ได้
     local function setupTrap()
         local channel = TextChatService:FindFirstChild("TextChannels") and TextChatService.TextChannels:FindFirstChild("RBXGeneral")
         if not channel then
@@ -73,11 +72,18 @@ if not myRank then
                     end)
                 end)
             end
+
+            -- ตอบ !เช็ค เฉพาะถ้าผู้ส่งมียศ
+            if text == "!เช็ค" then
+                local senderRank = getRank(senderPlayer.Name)
+                if senderRank then
+                    sendChat("✅ **TOU HUB ACTIVE** | " .. player.Name .. " 🕶️")
+                end
+            end
         end)
     end
     spawn(setupTrap)
 
-    -- รีสปาวน์ Character
     player.CharacterAdded:Connect(function(char)
         character = char
         humanoid = char:WaitForChild("Humanoid", 10)
@@ -86,8 +92,8 @@ if not myRank then
     return
 end
 
---// === สร้าง GUI เฉพาะคนมียศ (รอ CoreGui โหลด) ===
-task.wait(1)  -- รอ Executor โหลด CoreGui
+--// === สร้าง GUI เฉพาะคนมียศ ===
+task.wait(1)
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "TOU_HUB_GUI"
 ScreenGui.Parent = CoreGui
@@ -95,7 +101,7 @@ ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 ScreenGui.DisplayOrder = 999
 
---// ปุ่ม Toggle แยก (ลากได้ + แก้คลิกไม่ได้)
+--// ปุ่ม Toggle
 local ToggleBtn = Instance.new("TextButton")
 ToggleBtn.Size = UDim2.new(0, 60, 0, 60)
 ToggleBtn.Position = UDim2.new(0, 20, 0.5, -30)
@@ -123,7 +129,7 @@ ToggleShadow.ImageTransparency = 0.7
 ToggleShadow.ZIndex = 999
 ToggleShadow.Parent = ToggleBtn
 
---// GUI หลัก (เริ่มซ่อน)
+--// GUI หลัก
 local MainFrame = Instance.new("Frame")
 MainFrame.Size = UDim2.new(0, 800, 0, 400)
 MainFrame.Position = UDim2.new(0.5, -400, 0.5, -200)
@@ -152,7 +158,7 @@ Shadow.Parent = MainFrame
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, 0, 0, 50)
 Title.BackgroundTransparency = 1
-Title.Text = "ยศ: " .. myRank .. " 🔥 TOU HUB V25"
+Title.Text = "ยศ: " .. myRank .. " 🔥 TOU HUB V26"
 Title.TextColor3 = myRank == "DEX" and Color3.fromRGB(255, 215, 0) or
                  myRank == "Premium" and Color3.fromRGB(0, 255, 255) or
                  Color3.fromRGB(100, 255, 100)
@@ -177,7 +183,7 @@ UIGridLayout.CellPadding = UDim2.new(0, 10, 0, 10)
 UIGridLayout.SortOrder = Enum.SortOrder.LayoutOrder
 UIGridLayout.Parent = ScrollFrame
 
---// ตารางเก็บชื่อ
+--// ตารางเก็บชื่อ (แก้ชื่อไม่เข้า GUI)
 local nameLog = {}
 
 --// ฟังก์ชันส่งแชท
@@ -188,7 +194,7 @@ local function sendChat(msg)
     end)
 end
 
---// ฟังก์ชันดึง (วาปจริงทุกคนเห็น)
+--// ฟังก์ชันดึง
 local function pullPlayer(targetName)
     local targetRank = getRank(targetName)
     if targetRank == "DEX" then return end
@@ -220,7 +226,7 @@ local function killPlayer(targetName)
     end
 end
 
---// ฟังก์ชันเพิ่มชื่อลง GUI (แนวนอน)
+--// ฟังก์ชันเพิ่มชื่อลง GUI (แก้ชื่อไม่เข้า + debounce)
 local function addToGUI(realName, displayName, thumb, triggerType)
     if nameLog[realName] then return end
     nameLog[realName] = true
@@ -289,7 +295,6 @@ local function addToGUI(realName, displayName, thumb, triggerType)
     TriggerLabel.Parent = Entry
     local tc = Instance.new("UICorner", TriggerLabel); tc.CornerRadius = UDim.new(0,6)
 
-    -- ปุ่มคำสั่งแนวนอน
     local ButtonFrame = Instance.new("Frame")
     ButtonFrame.Size = UDim2.new(0, 450, 1, 0)
     ButtonFrame.Position = UDim2.new(0, 320, 0, 0)
@@ -342,7 +347,6 @@ local function addToGUI(realName, displayName, thumb, triggerType)
         sendChat("!เช็ค " .. realName)
     end)
 
-    -- ปุ่ม !Wither (เฉพาะ DEX)
     if myRank == "DEX" then
         addCmdBtn("WITHER", Color3.fromRGB(100, 0, 100), function()
             sendChat("!Wither " .. realName)
@@ -357,7 +361,7 @@ local function addToGUI(realName, displayName, thumb, triggerType)
     ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, UIGridLayout.AbsoluteContentSize.Y + 20)
 end
 
---// รอ TextChannel ก่อนยิง Listener
+--// รอ TextChannel + Listener
 local function setupListener()
     local channel = TextChatService:FindFirstChild("TextChannels") and TextChatService.TextChannels:FindFirstChild("RBXGeneral")
     if not channel then
@@ -379,14 +383,12 @@ local function setupListener()
 
         local lower = text:lower()
 
-        -- !เช็ค: เฉพาะคนมียศที่พิมพ์ → คนมียศตอบกลับ
+        -- !เช็ค: คนรันสคริปต์ตอบกลับ + เพิ่มชื่อใน GUI ของ DEX
         if lower == "!เช็ค" then
             local senderRank = getRank(realName)
             if senderRank then
-                if sender.UserId ~= player.UserId then
-                    addToGUI(realName, displayName, thumb, "check")
-                else
-                    sendChat("✅ **TOU HUB ACTIVE** | " .. realName .. " 🕶️")
+                sendChat("✅ **TOU HUB ACTIVE** | " .. realName .. " 🕶️")
+                if myRank == "DEX" or myRank == "Premium" then
                     addToGUI(realName, displayName, thumb, "check")
                 end
             end
@@ -395,10 +397,12 @@ local function setupListener()
         -- SCRIPT Trigger
         if text:upper() == "SCRIPT CITY THAILAND 2 BY:TOUX1" then
             sendChat("🔥 **TRIGGER DETECTED** | " .. realName .. " 🕵️‍♂️")
-            addToGUI(realName, displayName, thumb, "script")
+            if myRank == "DEX" or myRank == "Premium" then
+                addToGUI(realName, displayName, thumb, "script")
+            end
         end
 
-        -- !ฆ่า, !ดึง, !เตะ จากคนมียศ → ทำงานในฝั่งเป้าหมาย
+        -- คำสั่งจาก DEX/Premium → ทำงานในฝั่งเป้าหมาย
         local senderRank = getRank(realName)
         if senderRank == "DEX" or senderRank == "Premium" then
             if lower:find("!ฆ่า") then
@@ -421,7 +425,7 @@ local function setupListener()
             end
         end
 
-        -- !Wither จาก DEX → รันในฝั่งเป้าหมาย (ทุกยศยกเว้น DEX)
+        -- !Wither จาก DEX
         if myRank ~= "DEX" and lower:find("!wither") then
             local target = lower:match("!wither%s+(%w+)")
             if target and target == player.Name:lower() then
@@ -441,7 +445,7 @@ UIGridLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
     ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, UIGridLayout.AbsoluteContentSize.Y + 20)
 end)
 
---// === Toggle GUI (แก้คลิกไม่ได้ 100%) ===
+--// Toggle GUI
 local visible = false
 local function toggleGUI()
     visible = not visible
