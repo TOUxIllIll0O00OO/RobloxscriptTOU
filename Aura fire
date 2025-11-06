@@ -1,0 +1,101 @@
+-- LocalScript โดย ChatGPT (ปรับให้ใช้ Heartbeat แบบตัวอย่างของผู้ใช้)
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local hrp = character:WaitForChild("HumanoidRootPart")
+
+-- เก็บตำแหน่งเริ่มต้น
+local startPos = hrp.Position
+
+-- ตั้งค่าอนิเมชัน
+local anim = Instance.new("Animation")
+anim.AnimationId = "rbxassetid://4606368243"
+local track = humanoid:LoadAnimation(anim)
+
+-- จุดวาร์ป และ จุดสำหรับค้นหา ClickDetector
+local warpPos = Vector3.new(518.47, 179.03, -130.83)
+local clickPos = Vector3.new(514.24, 178.53, -126.68)
+
+-- ระยะตรวจหา (ปรับได้) — ถ้าระยะไกลเกินไป ให้ลดค่า
+local checkRange = 20
+
+-- เวลา timeout เผื่อหาไม่เจอ (วินาที)
+local timeout = 5
+
+-- ฟังก์ชัน teleport (ใช้ CFrame เพื่อให้ทันที)
+local function teleportTo(pos)
+    hrp.CFrame = CFrame.new(pos)
+end
+
+-- ฟังก์ชันค้นหา ClickDetector ใกล้ตำแหน่ง (ไม่หยุดเอง — จะถูกเรียกใน Heartbeat)
+local function findNearestClickDetector(position, maxRange)
+    local best, bestDist = nil, math.huge
+    for _, v in pairs(workspace:GetDescendants()) do
+        if v:IsA("ClickDetector") and v.Parent and v.Parent:IsA("BasePart") then
+            local dist = (v.Parent.Position - position).Magnitude
+            if dist < bestDist and dist <= maxRange then
+                bestDist = dist
+                best = v
+            end
+        end
+    end
+    return best, bestDist
+end
+
+-- เริ่มกระบวนการ
+spawn(function()
+    -- เล่นอนิเมชัน
+    track:Play()
+
+    task.wait(0.15) -- รอให้อนิเมเริ่มซักนิด
+    -- วาปไปตำแหน่งเป้าหมาย
+    teleportTo(warpPos)
+
+    -- จากนั้นเช็คหา ClickDetector โดยใช้ Heartbeat
+    local connected
+    local startTime = tick()
+
+    connected = RunService.Heartbeat:Connect(function()
+        -- timeout เช็ค
+        if tick() - startTime > timeout then
+            -- หาไม่เจอ -> ตัดการเชื่อมต่อ และไปขั้นตอนถัดไป
+            connected:Disconnect()
+            connected = nil
+            return
+        end
+
+        local detector, dist = findNearestClickDetector(clickPos, checkRange)
+        if detector then
+            -- เจอแล้ว -> Fire สองรอบ ตามที่ต้องการ
+            pcall(function()
+                fireclickdetector(detector)
+            end)
+            task.wait(0.25) -- เว้นนิดนึง
+            pcall(function()
+                fireclickdetector(detector)
+            end)
+            -- ปริ้นเพื่อ debug (ถ้าต้องการ)
+            -- print("Fired ClickDetector:", detector.Parent and detector.Parent.Name or "Unknown")
+
+            -- หยุดการเชื่อมต่อ Heartbeat
+            if connected then
+                connected:Disconnect()
+                connected = nil
+            end
+        end
+    end)
+
+    -- รอให้ Heartbeat ทำงานเสร็จ (หรือ timeout)
+    while connected do
+        task.wait()
+    end
+
+    -- หยุดอนิเมชัน
+    track:Stop()
+
+    task.wait(0.12)
+    -- วาปกลับตำแหน่งเริ่มต้น
+    teleportTo(startPos)
+end)
