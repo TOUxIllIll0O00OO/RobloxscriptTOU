@@ -1,0 +1,213 @@
+-- 🌑 Zelda Majora’s Mask Moon CRASH + SELF-KICK FATE (Troll Edition) 💥🎉
+-- 🔥 สั่น 5 วิ + จอขาว + แมพปกติ + Kick "🎉" สุดท้าย!
+
+local Players = game:GetService("Players")
+local Lighting = game:GetService("Lighting")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local player = Players.LocalPlayer
+local camera = workspace.CurrentCamera
+local char = player.Character or player.CharacterAdded:Wait()
+local hrp = char:WaitForChild("HumanoidRootPart")
+
+-- 🔊 เสียงเริ่มต้น
+local startSound = Instance.new("Sound", workspace)
+startSound.SoundId = "rbxassetid://18139737431"
+startSound.Volume = 6
+startSound:Play()
+
+-- ☁️ ควันดำ
+task.spawn(function()
+	for i = 1, 35 do
+		task.wait(math.random(0.5, 2))
+		local smokePart = Instance.new("Part")
+		smokePart.Anchored = true
+		smokePart.CanCollide = false
+		smokePart.Transparency = 1
+		smokePart.Size = Vector3.new(1,1,1)
+		smokePart.Position = hrp.Position + Vector3.new(math.random(-500,500), math.random(10,200), math.random(-500,500))
+		smokePart.Parent = workspace
+
+		local smoke = Instance.new("ParticleEmitter")
+		smoke.Texture = "rbxassetid://483406524"
+		smoke.Color = ColorSequence.new(Color3.fromRGB(20,0,0))
+		smoke.Size = NumberSequence.new({NumberSequenceKeypoint.new(0,5), NumberSequenceKeypoint.new(1,25)})
+		smoke.Lifetime = NumberRange.new(10,15)
+		smoke.Rate = 80
+		smoke.Speed = NumberRange.new(2,5)
+		smoke.SpreadAngle = Vector2.new(45,45)
+		smoke.Parent = smokePart
+		game.Debris:AddItem(smokePart, 15)
+	end
+end)
+
+-- 🎑 ดวงจันทร์นรก
+task.delay(4, function()
+	local moon = Instance.new("Part")
+	moon.Name = "MajoraMoon"
+	moon.Shape = Enum.PartType.Ball
+	moon.Anchored = true
+	moon.CanCollide = false
+	moon.Material = Enum.Material.Neon
+	moon.Color = Color3.fromRGB(180, 50, 50)
+	moon.Size = Vector3.new(250, 250, 250)
+	moon.Position = hrp.Position + Vector3.new(0, 600, -400)
+	moon.Parent = workspace
+
+	-- 🌓 หน้า 6 ด้าน + หันตรง
+	local faces = {Enum.NormalId.Front, Enum.NormalId.Back, Enum.NormalId.Left, Enum.NormalId.Right, Enum.NormalId.Top, Enum.NormalId.Bottom}
+	for _, face in pairs(faces) do
+		local decal = Instance.new("Decal")
+		decal.Texture = "rbxassetid://128534078979368"
+		decal.Face = face
+		decal.Parent = moon
+	end
+	local directionToPlayer = (hrp.Position - moon.Position).Unit
+	moon.CFrame = CFrame.lookAt(moon.Position, moon.Position + directionToPlayer)
+
+	-- 💡 แสงเลือด
+	local light = Instance.new("PointLight", moon)
+	light.Color = Color3.fromRGB(255, 30, 30)
+	light.Range = 1500
+	light.Brightness = 3
+	light.Shadows = true
+
+	-- 🌇 บันทึกค่า Lighting เดิม
+	local originalLighting = {
+		Ambient = Lighting.Ambient,
+		OutdoorAmbient = Lighting.OutdoorAmbient,
+		FogColor = Lighting.FogColor,
+		FogEnd = Lighting.FogEnd,
+		FogStart = Lighting.FogStart,
+		Brightness = Lighting.Brightness,
+		ClockTime = Lighting.ClockTime
+	}
+	local sky = Lighting:FindFirstChildOfClass("Sky") or Instance.new("Sky", Lighting)
+	for _, prop in pairs({"SkyboxBk", "SkyboxFt", "SkyboxLf", "SkyboxRt", "SkyboxUp", "SkyboxDn"}) do
+		sky[prop] = "rbxassetid://6024661053"
+	end
+	Lighting.Ambient = Color3.fromRGB(80, 0, 0)
+	Lighting.OutdoorAmbient = Color3.fromRGB(100, 0, 0)
+	Lighting.FogColor = Color3.fromRGB(80, 0, 0)
+	Lighting.FogEnd = 200
+	Lighting.FogStart = 50
+	Lighting.ClockTime = 0
+	Lighting.Brightness = 0.5
+
+	-- 👁️ สั่นกล้องสั้นๆ (ไม่ล็อค!)
+	task.wait(1.5)
+	local originalCamType = camera.CameraType
+	camera.CameraType = Enum.CameraType.Scriptable
+	camera.FieldOfView = 65
+	local targetCFrame = CFrame.lookAt(camera.CFrame.Position, moon.Position + Vector3.new(0, 50, 0))
+	local shakeSound = Instance.new("Sound", workspace)
+	shakeSound.SoundId = "rbxassetid://8067169632"
+	shakeSound.Volume = 7
+	shakeSound.Looped = true
+	shakeSound:Play()
+
+	local shakeIntensity = 8
+	for i = 1, 50 do
+		local offset = CFrame.new(math.random(-shakeIntensity, shakeIntensity), math.random(-shakeIntensity, shakeIntensity), math.random(-shakeIntensity, shakeIntensity)) * 
+			CFrame.Angles(math.rad(math.random(-10,10)), math.rad(math.random(-10,10)), math.rad(math.random(-5,5)))
+		camera.CFrame = targetCFrame * offset
+		task.wait(0.03)
+		shakeIntensity = shakeIntensity * 0.98
+	end
+	camera.CFrame = targetCFrame
+	shakeSound:Stop()
+	shakeSound:Destroy()
+
+	-- คืนกล้องทันที
+	task.wait(0.5)
+	camera.CameraType = originalCamType
+
+	-- 🌀 พุ่งชนพื้น
+	local targetPos = hrp.Position + Vector3.new(0, 20, -50)
+	local crashTween = TweenService:Create(moon, TweenInfo.new(25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Position = targetPos, Size = Vector3.new(600,600,600)})
+	crashTween:Play()
+	crashTween.Completed:Wait()
+
+	-- 💥 เสียงระเบิด + สั่นโครตแรง 5 วิ
+	local explosionSound = Instance.new("Sound", workspace)
+	explosionSound.SoundId = "rbxassetid://9119701508"
+	explosionSound.Volume = 10
+	explosionSound:Play()
+
+	local shakeStartTime = tick()
+	local maxShakeTime = 5
+	local ultraIntensity = 25
+	local connection
+	connection = RunService.Heartbeat:Connect(function()
+		local elapsed = tick() - shakeStartTime
+		if elapsed >= maxShakeTime then
+			connection:Disconnect()
+			return
+		end
+		local intensity = ultraIntensity * (1 - elapsed / maxShakeTime)
+		local offset = CFrame.new(
+			math.random(-intensity, intensity)/10,
+			math.random(-intensity, intensity)/10,
+			math.random(-intensity, intensity)/10
+		) * CFrame.Angles(
+			math.rad(math.random(-intensity, intensity)),
+			math.rad(math.random(-intensity, intensity)),
+			math.rad(math.random(-intensity/2, intensity/2))
+		)
+		camera.CFrame = camera.CFrame * offset
+	end)
+
+	-- 🌟 จอขาวเริ่มระหว่างสั่น
+	local whiteTween = TweenService:Create(Lighting, TweenInfo.new(2, Enum.EasingStyle.Sine, Enum.EasingDirection.In), {Brightness = 8})
+	whiteTween:Play()
+
+	-- รอสั่นเสร็จรอบสุดท้าย + เสียงจบ
+	explosionSound.Ended:Wait()
+	task.wait(maxShakeTime - (tick() - shakeStartTime))
+
+	-- 🌑 จอขาวหาย 2 วิ + คืนแมพปกติ
+	local normalTween = TweenService:Create(Lighting, TweenInfo.new(2, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+		Brightness = originalLighting.Brightness,
+		Ambient = originalLighting.Ambient,
+		OutdoorAmbient = originalLighting.OutdoorAmbient,
+		FogColor = originalLighting.FogColor,
+		FogEnd = originalLighting.FogEnd,
+		FogStart = originalLighting.FogStart,
+		ClockTime = originalLighting.ClockTime
+	})
+	normalTween:Play()
+	normalTween.Completed:Wait()
+
+	-- 🔥 ไฟ low lag
+	local firePart = Instance.new("Part")
+	firePart.Anchored = true
+	firePart.CanCollide = false
+	firePart.Transparency = 1
+	firePart.Size = Vector3.new(0.1,0.1,0.1)
+	firePart.Position = targetPos
+	firePart.Parent = workspace
+
+	local fireEmitter = Instance.new("ParticleEmitter")
+	fireEmitter.Texture = "rbxassetid://241650934"
+	fireEmitter.Color = ColorSequence.new(Color3.fromRGB(255, 150, 0), Color3.fromRGB(255, 50, 0))
+	fireEmitter.Size = NumberSequence.new(1, 5)
+	fireEmitter.Lifetime = NumberRange.new(2, 4)
+	fireEmitter.Rate = 20
+	fireEmitter.Speed = NumberRange.new(5, 10)
+	fireEmitter.SpreadAngle = Vector2.new(30, 30)
+	fireEmitter.Parent = firePart
+
+	for i = 1, 8 do
+		task.wait(0.2)
+		local extraFire = firePart:Clone()
+		extraFire.Position = targetPos + Vector3.new(math.random(-20,20), 0, math.random(-20,20))
+		extraFire.Parent = workspace
+		game.Debris:AddItem(extraFire, 10)
+	end
+	game.Debris:AddItem(firePart, 20)
+	game.Debris:AddItem(moon, 30)
+
+	-- 🎉 จุดจบ: Kick ตัวเองพร้อม "🎉" หลังสั่นเสร็จ!
+	task.wait(0.5)  -- Pause เล็กน้อยให้เห็นแมพปกติ
+	player:Kick("🎉")
+end)
