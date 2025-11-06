@@ -44,163 +44,172 @@ Players.PlayerAdded:Connect(onPlayerChatted)
 print("🕸️ สคริปต์พร้อม – ปกป้อง "..TARGET_USER.." อย่างสมบูรณ์ 🕸️")
 
 
---// เป็ดจ๋า 🦆 (GUI เท่ๆ ดูป + เสกเฉพาะ Duck Tools) ⚡🦆
+-- 🧩 GUI ส่วนเสริม⚙️ - ปุ่มไฟเปลี่ยนรัน Loadstring + ทุกอย่างใหญ่โตเท่! 🚀💀
 local player = game.Players.LocalPlayer
 local gui = Instance.new("ScreenGui")
-gui.Name = "เป็ดจ๋า 🦆"
+gui.Name = "ส่วนเสริม⚙️"
 gui.ResetOnSpawn = false
 gui.Parent = player:WaitForChild("PlayerGui")
 
--- กรอบหลัก
-local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 260, 0, 200)
-mainFrame.Position = UDim2.new(0.5, -130, 0.5, -100)
-mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
-mainFrame.BorderSizePixel = 0
-mainFrame.Active = true
-mainFrame.Draggable = true
-mainFrame.Parent = gui
+-- ⚙️ ปุ่มหลัก (ลากได้)
+local button = Instance.new("TextButton")
+button.Name = "SettingsButton"
+button.Text = "⚙️"
+button.Size = UDim2.new(0, 55, 0, 55)
+button.Position = UDim2.new(0.05, 0, 0.4, 0)
+button.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+button.TextColor3 = Color3.fromRGB(255,255,255)
+button.TextSize = 30
+button.Font = Enum.Font.GothamBold
+button.BackgroundTransparency = 0.1
+button.AutoButtonColor = true
+button.Parent = gui
 
--- มุมโค้ง + เงาเท่ๆ
-local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(0, 12)
-corner.Parent = mainFrame
+-- 🧲 ระบบลาก (เสถียรสุด)
+local UserInputService = game:GetService("UserInputService")
+local dragging = false
+local dragInput, dragStart, startPos
 
-local shadow = Instance.new("ImageLabel")
-shadow.Name = "Shadow"
-shadow.AnchorPoint = Vector2.new(0.5, 0.5)
-shadow.Position = UDim2.new(0.5, 0, 0.5, 8)
-shadow.Size = UDim2.new(1, 30, 1, 30)
-shadow.ZIndex = -1
-shadow.Image = "rbxassetid://1316045217"
-shadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
-shadow.ImageTransparency = 0.6
-shadow.ScaleType = Enum.ScaleType.Slice
-shadow.SliceCenter = Rect.new(10, 10, 118, 118)
-shadow.Parent = mainFrame
-
--- หัวข้อใหม่
-local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, 0, 0, 30)
-title.BackgroundTransparency = 1
-title.Text = "เป็ดจ๋า 🦆"
-title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.Font = Enum.Font.GothamBold
-title.TextSize = 20
-title.Parent = mainFrame
-
--- ปุ่มดูปของ
-local dupButton = Instance.new("TextButton")
-dupButton.Size = UDim2.new(0, 200, 0, 40)
-dupButton.Position = UDim2.new(0.5, -100, 0, 40)
-dupButton.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
-dupButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-dupButton.Font = Enum.Font.GothamBold
-dupButton.TextSize = 16
-dupButton.Text = "👀 ดูปของ (10 รอบ)"
-dupButton.Parent = mainFrame
-
-local btnCorner1 = Instance.new("UICorner")
-btnCorner1.CornerRadius = UDim.new(0, 8)
-btnCorner1.Parent = dupButton
-
--- ปุ่มเสกเป็ดทั้งหมด (เฉพาะ Duck!)
-local spawnButton = Instance.new("TextButton")
-spawnButton.Size = UDim2.new(0, 200, 0, 40)
-spawnButton.Position = UDim2.new(0.5, -100, 0, 95)
-spawnButton.BackgroundColor3 = Color3.fromRGB(100, 30, 30)
-spawnButton.TextColor3 = Color3.fromRGB(255, 220, 100)
-spawnButton.Font = Enum.Font.GothamBold
-spawnButton.TextSize = 16
-spawnButton.Text = "🦆 เสกเป็ดทั้งหมด!"
-spawnButton.Parent = mainFrame
-
-local btnCorner2 = Instance.new("UICorner")
-btnCorner2.CornerRadius = UDim.new(0, 8)
-btnCorner2.Parent = spawnButton
-
--- เอฟเฟกต์ Hover
-for _, btn in {dupButton, spawnButton} do
-	btn.MouseEnter:Connect(function()
-		btn.BackgroundColor3 = btn.BackgroundColor3:lerp(Color3.fromRGB(255,255,255), 0.3)
-	end)
-	btn.MouseLeave:Connect(function()
-		if btn == dupButton then
-			btn.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
-		else
-			btn.BackgroundColor3 = Color3.fromRGB(100, 30, 30)
-		end
-	end)
+local function updateInput(input)
+    local delta = input.Position - dragStart
+    button.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
 end
 
---// ฟังก์ชันเสกเฉพาะ Duck Tools (กรองชื่อ "Duck")
-local function spawnAllDucks()
-	print("🦆 เริ่มเสกเป็ด Duck Tools เท่านั้น... กรองแล้ว! 🔍⚡")
-	local backpack = player:WaitForChild("Backpack")
-	local character = player.Character or player.CharacterAdded:Wait()
-	local duckCount = 0
-
-	for _, tool in ipairs(backpack:GetChildren()) do
-		if tool:IsA("Tool") and string.find(string.lower(tool.Name), "duck") then
-			duckCount = duckCount + 1
-			print("🦆 พบ: " .. tool.Name .. " — เสกเลย!")
-			
-			-- ถือ + ใช้ + เก็บ (ไวสุด)
-			tool.Parent = character
-			task.defer(function()
-				pcall(function()
-					tool:Activate()
-				end)
-			end)
-			task.wait(0.05)
-			if tool.Parent == character then
-				tool.Parent = backpack
-			end
-		end
-	end
-	
-	print("✅ เสกครบ " .. duckCount .. " ตัวเป็ด Duck แล้ว! 🔥🦆")
-end
-
---// ระบบดูปของ (เดิม)
-dupButton.MouseButton1Click:Connect(function()
-	print("🔄 เริ่มระบบดูปของ 10 รอบ...")
-
-	for round = 1, 10 do
-		print("รอบที่ "..round.." 🌀")
-
-		loadstring(game:HttpGet("https://raw.githubusercontent.com/TOUxIllIll0O00OO/RobloxscriptTOU/refs/heads/main/Script%20tool"))()
-		task.wait(1)
-
-		local char = player.Character or player.CharacterAdded:Wait()
-		local tool = char:FindFirstChildOfClass("Tool")
-		if tool then
-			tool.Parent = player.Backpack
-			print("✅ เก็บ Tool เข้ากระเป๋า")
-		else
-			print("⚠️ ไม่พบ Tool")
-		end
-
-		task.wait(0.5)
-
-		pcall(function()
-			game:GetService("ReplicatedStorage"):WaitForChild("ToolStorage"):WaitForChild("ToolsStorage"):FireServer("Save", "Duck")
-		end)
-		print("💾 Save Duck (รอบ "..round..")")
-
-		task.wait(0.5)
-	end
-
-	print("🌀 ครบ 10 รอบ! เริ่ม Get Duck 10 ครั้ง...")
-	for i = 1, 10 do
-		pcall(function()
-			game:GetService("ReplicatedStorage"):WaitForChild("ToolStorage"):WaitForChild("ToolsStorage"):FireServer("Get", "Duck")
-		end)
-		task.wait(0.05)
-	end
-
-	print("🎉 ดูปของสำเร็จ!")
+button.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = button.Position
+        
+        local connection
+        connection = input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+                connection:Disconnect()
+            end
+        end)
+    end
 end)
 
---// กดปุ่มเสกเป็ด
-spawnButton.MouseButton1Click:Connect(spawnAllDucks)
+UserInputService.InputChanged:Connect(function(input)
+    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        updateInput(input)
+    end
+end)
+
+-- 🌟 GUI หลัก - ใหญ่ 450x350
+local main = Instance.new("Frame")
+main.Name = "MainFrame"
+main.Size = UDim2.new(0, 450, 0, 350)
+main.Position = UDim2.new(0.5, -225, 0.5, -175)
+main.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+main.BackgroundTransparency = 0.2
+main.Visible = false
+main.Parent = gui
+
+local corner = Instance.new("UICorner", main)
+corner.CornerRadius = UDim.new(0, 16)
+local stroke = Instance.new("UIStroke", main)
+stroke.Thickness = 3
+stroke.Color = Color3.fromRGB(0, 255, 255)
+
+-- 🏷️ ป้ายชื่อ
+local label = Instance.new("TextLabel")
+label.Size = UDim2.new(1, 0, 0, 50)
+label.Text = "ส่วนเสริม⚙️ - Exploiter Mode 🔥"
+label.Font = Enum.Font.GothamBold
+label.TextSize = 26
+label.TextColor3 = Color3.fromRGB(0, 255, 255)
+label.BackgroundTransparency = 1
+label.Parent = main
+
+-- 🔥 Row 1: "อ้อโต้ทำตัวติดไฟ" + ปุ่ม "เริ่ม" (เปลี่ยนรัน Loadstring!)
+local fireLabel = Instance.new("TextLabel")
+fireLabel.Size = UDim2.new(0.6, -10, 0, 50)
+fireLabel.Position = UDim2.new(0, 10, 0, 65)
+fireLabel.Text = "🔥 อ้อโต้ทำตัวติดไฟ 🔥"
+fireLabel.Font = Enum.Font.GothamBold
+fireLabel.TextSize = 22
+fireLabel.TextColor3 = Color3.fromRGB(255, 100, 0)
+fireLabel.BackgroundTransparency = 1
+fireLabel.TextXAlignment = Enum.TextXAlignment.Left
+fireLabel.Parent = main
+
+local startButton = Instance.new("TextButton")
+startButton.Size = UDim2.new(0.35, -10, 0, 50)
+startButton.Position = UDim2.new(0.62, 0, 0, 65)
+startButton.Text = "เริ่ม 🔥"
+startButton.Font = Enum.Font.GothamBold
+startButton.TextSize = 20
+startButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+startButton.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+startButton.AutoButtonColor = true
+startButton.Parent = main
+
+local startCorner = Instance.new("UICorner", startButton)
+startCorner.CornerRadius = UDim.new(0, 10)
+
+-- 🦆 Row 2: สแปมเป็ด VIP
+local duckLabel = Instance.new("TextLabel")
+duckLabel.Size = UDim2.new(0.6, -10, 0, 50)
+duckLabel.Position = UDim2.new(0, 10, 0, 130)
+duckLabel.Text = "🦆 สแปมเป็ด (ต้องมีเกมพาสVIP)"
+duckLabel.Font = Enum.Font.GothamBold
+duckLabel.TextSize = 22
+duckLabel.TextColor3 = Color3.fromRGB(255, 200, 0)
+duckLabel.BackgroundTransparency = 1
+duckLabel.TextXAlignment = Enum.TextXAlignment.Left
+duckLabel.Parent = main
+
+local duckButton = Instance.new("TextButton")
+duckButton.Size = UDim2.new(0.35, -10, 0, 50)
+duckButton.Position = UDim2.new(0.62, 0, 0, 130)
+duckButton.Text = "รัน 🦆"
+duckButton.Font = Enum.Font.GothamBold
+duckButton.TextSize = 20
+duckButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+duckButton.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
+duckButton.AutoButtonColor = true
+duckButton.Parent = main
+
+local duckCorner = Instance.new("UICorner", duckButton)
+duckCorner.CornerRadius = UDim.new(0, 10)
+
+-- 🌈 Animation เปิด/ปิด
+local TweenService = game:GetService("TweenService")
+local open = false
+
+button.MouseButton1Click:Connect(function()
+    open = not open
+    if open then
+        main.Visible = true
+        main.Size = UDim2.new(0, 0, 0, 0)
+        TweenService:Create(main, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+            Size = UDim2.new(0, 450, 0, 350)
+        }):Play()
+    else
+        TweenService:Create(main, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+            Size = UDim2.new(0, 0, 0, 0)
+        }):Play()
+        task.wait(0.4)
+        main.Visible = false
+    end
+end)
+
+-- ==============================================
+-- 🔥 ปุ่ม "อ้อโต้ทำตัวติดไฟ" → รัน Loadstring จาก GitHub!
+-- ==============================================
+startButton.MouseButton1Click:Connect(function()
+    pcall(function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/TOUxIllIll0O00OO/RobloxscriptTOU/refs/heads/main/Aura%20fire"))()
+    end)
+end)
+
+-- ==============================================
+-- 🦆 สแปมเป็ด VIP - Loadstring เดิม
+-- ==============================================
+duckButton.MouseButton1Click:Connect(function()
+    pcall(function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/TOUxIllIll0O00OO/RobloxscriptTOU/refs/heads/main/Game%20pass%20Duck"))()
+    end)
+end)
