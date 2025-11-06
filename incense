@@ -1,0 +1,32 @@
+--// 🔥 Script: Fire ClickDetector ใกล้ที่สุดจากตำแหน่งที่กำหนด แล้วหยุดเมื่อกดได้
+--// ใช้ได้กับ LocalScript หรือ Script ปกติ
+
+local targetPosition = Vector3.new(490.31, 176.17, -51.26) -- ตำแหน่งเป้าหมายใหม่
+local checkRange = 50 -- ระยะตรวจหา
+local RunService = game:GetService("RunService")
+
+local connected -- สำหรับเก็บการเชื่อมต่อ RunService
+
+connected = RunService.Heartbeat:Connect(function()
+	local closestDetector
+	local closestDistance = math.huge
+
+	-- หาวัตถุ ClickDetector ที่ใกล้ที่สุด
+	for _, v in pairs(workspace:GetDescendants()) do
+		if v:IsA("ClickDetector") and v.Parent and v.Parent:IsA("BasePart") then
+			local pos = v.Parent.Position
+			local dist = (pos - targetPosition).Magnitude
+			if dist < closestDistance and dist <= checkRange then
+				closestDistance = dist
+				closestDetector = v
+			end
+		end
+	end
+
+	-- ถ้ามีอันใกล้สุด -> Fire แล้วหยุดการทำงานทันที
+	if closestDetector then
+		fireclickdetector(closestDetector)
+		print("✅ Fired ClickDetector:", closestDetector.Parent.Name)
+		connected:Disconnect()
+	end
+end)
