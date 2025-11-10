@@ -120,9 +120,9 @@ local function tweenStroke(stroke, color, transparency)
     TweenService:Create(stroke, TweenInfo.new(0.3), {Color = color, Transparency = transparency}):Play()
 end
 
--- === MAIN GUI ===
+-- === MAIN GUI (ชื่อ: TOU V2 CMD) ===
 local gui = Instance.new("ScreenGui")
-gui.Name = "CyberExploiterHub"
+gui.Name = "TOU V2 CMD"
 gui.Parent = CoreGui
 gui.ResetOnSpawn = false
 
@@ -140,22 +140,27 @@ local title = Instance.new("TextLabel", frameNormal)
 title.Size = UDim2.new(1, -20, 0, 40)
 title.Position = UDim2.new(0, 10, 0, 10)
 title.BackgroundTransparency = 1
-title.Text = "🔥 CYBER EXPLOITER HUB 🔥"
+title.Text = "🔥 TOU V2 CMD 🔥"
 title.TextColor3 = Color3.new(1,1,1)
 title.TextScaled = false
 title.TextSize = 20
 title.Font = Enum.Font.GothamBold
+title.TextStrokeTransparency = 0
+title.TextStrokeColor3 = Color3.new(0,0,0)
 createGradient(title, Color3.fromRGB(255, 100, 150), Color3.fromRGB(150, 0, 255))
 
 local textBox = Instance.new("TextBox", frameNormal)
-textBox.PlaceholderText = "👤 ใส่คำสั่งมืด... (speed 100)"
+textBox.PlaceholderText = "👤 ใส่คำสั่งมืด... (ปืน)"
 textBox.Size = UDim2.new(0.9, 0, 0, 45)
 textBox.Position = UDim2.new(0.05, 0, 0.3, 0)
 textBox.TextScaled = false
 textBox.TextSize = 16
 textBox.BackgroundColor3 = Color3.fromRGB(20, 20, 40)
 textBox.TextColor3 = Color3.new(1,1,1)
+textBox.PlaceholderColor3 = Color3.fromRGB(150, 150, 150)
 textBox.Font = Enum.Font.Gotham
+textBox.TextStrokeTransparency = 0
+textBox.TextStrokeColor3 = Color3.new(0,0,0)
 createCorner(textBox, 12)
 createGradient(textBox, Color3.fromRGB(40, 20, 80), Color3.fromRGB(60, 0, 100))
 createStroke(textBox, 2, Color3.fromRGB(0, 255, 150))
@@ -169,6 +174,8 @@ confirmBtn.TextSize = 18
 confirmBtn.BackgroundColor3 = Color3.fromRGB(255, 50, 100)
 confirmBtn.TextColor3 = Color3.new(1,1,1)
 confirmBtn.Font = Enum.Font.GothamBold
+confirmBtn.TextStrokeTransparency = 0
+confirmBtn.TextStrokeColor3 = Color3.new(0,0,0)
 createCorner(confirmBtn, 12)
 createGradient(confirmBtn, Color3.fromRGB(255, 0, 80), Color3.fromRGB(200, 0, 150))
 local btnStroke = createStroke(confirmBtn, 3, Color3.new(1,1,1))
@@ -199,9 +206,9 @@ toggleBtn.MouseEnter:Connect(function()
     TweenService:Create(toggleBtn, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {Rotation = 360}):Play()
 end)
 
--- === COMMAND VAULT GUI (แสดงปุ่มตลอด!) ===
+-- === COMMAND VAULT GUI ===
 local commandGui = Instance.new("ScreenGui")
-commandGui.Name = "CommandVault"
+commandGui.Name = "TOU V2 CMD"
 commandGui.Parent = CoreGui
 commandGui.ResetOnSpawn = false
 
@@ -226,12 +233,14 @@ local vaultTitle = Instance.new("TextLabel", titleBar)
 vaultTitle.Size = UDim2.new(0.7, 0, 1, 0)
 vaultTitle.Position = UDim2.new(0, 15, 0, 0)
 vaultTitle.BackgroundTransparency = 1
-vaultTitle.Text = "📜 CYBER COMMAND VAULT"
+vaultTitle.Text = "📜 TOU V2 CMD VAULT"
 vaultTitle.TextColor3 = Color3.new(1,1,1)
 vaultTitle.TextScaled = false
 vaultTitle.TextSize = 20
 vaultTitle.Font = Enum.Font.GothamBold
 vaultTitle.TextXAlignment = Enum.TextXAlignment.Left
+vaultTitle.TextStrokeTransparency = 0
+vaultTitle.TextStrokeColor3 = Color3.new(0,0,0)
 
 local closeVaultBtn = Instance.new("TextButton", titleBar)
 closeVaultBtn.Size = UDim2.new(0, 40, 0, 40)
@@ -286,10 +295,12 @@ local function createCommandButton(text, cmd)
     btn.Size = UDim2.new(1, -10, 0, 40)
     btn.BackgroundColor3 = Color3.fromRGB(30, 0, 70)
     btn.Text = text
-    btn.TextColor3 = Color3.fromRGB(200, 255, 255)
+    btn.TextColor3 = Color3.new(1,1,1)
     btn.TextScaled = false
     btn.TextSize = 16
     btn.Font = Enum.Font.Gotham
+    btn.TextStrokeTransparency = 0
+    btn.TextStrokeColor3 = Color3.new(0,0,0)
     createCorner(btn, 10)
     createGradient(btn, Color3.fromRGB(50, 0, 100), Color3.fromRGB(100, 0, 150))
     local stroke = createStroke(btn, 2, Color3.fromRGB(150, 255, 200))
@@ -304,11 +315,9 @@ local function createCommandButton(text, cmd)
         TweenService:Create(btn, TweenInfo.new(0.2), {Size = UDim2.new(1, -10, 0, 40)}):Play()
     end)
 
-    -- 🔥 ซ่อม: รันคำสั่งแม้ clickMode ON!
     btn.MouseButton1Click:Connect(function()
         playRandomZap(0.5)
         textBox.Text = cmd
-        -- ใช้ Fire() โดยตรง → ไม่ต้องรอ textBox
         confirmBtn.MouseButton1Click:Fire()
     end)
 
@@ -333,6 +342,8 @@ helpBtn.TextScaled = true
 helpBtn.BackgroundColor3 = Color3.fromRGB(100, 0, 150)
 helpBtn.TextColor3 = Color3.new(1,1,1)
 helpBtn.Font = Enum.Font.GothamBlack
+helpBtn.TextStrokeTransparency = 0
+helpBtn.TextStrokeColor3 = Color3.new(0,0,0)
 createCorner(helpBtn, 10)
 createStroke(helpBtn, 2, Color3.fromRGB(255, 200, 100))
 
@@ -354,9 +365,9 @@ closeVaultBtn.MouseButton1Click:Connect(function()
     task.delay(0.3, function() commandVault.Visible = false end)
 end)
 
--- === SETTINGS GUI (ครึ่งแรก) ===
+-- === SETTINGS GUI ===
 local settingsGui = Instance.new("ScreenGui")
-settingsGui.Name = "CyberSettings"
+settingsGui.Name = "TOU V2 CMD"
 settingsGui.Parent = CoreGui
 settingsGui.ResetOnSpawn = false
 
@@ -375,11 +386,13 @@ local settingsTitle = Instance.new("TextLabel", settingsFrame)
 settingsTitle.Size = UDim2.new(1, -20, 0, 50)
 settingsTitle.Position = UDim2.new(0, 10, 0, 10)
 settingsTitle.BackgroundTransparency = 1
-settingsTitle.Text = "⚙️ CYBER SETTINGS PANEL"
+settingsTitle.Text = "⚙️ TOU V2 CMD SETTINGS"
 settingsTitle.TextColor3 = Color3.new(1,1,1)
 settingsTitle.TextScaled = false
 settingsTitle.TextSize = 20
 settingsTitle.Font = Enum.Font.GothamBold
+settingsTitle.TextStrokeTransparency = 0
+settingsTitle.TextStrokeColor3 = Color3.new(0,0,0)
 
 local closeSettingsBtn = Instance.new("TextButton", settingsFrame)
 closeSettingsBtn.Size = UDim2.new(0, 40, 0, 40)
@@ -395,11 +408,13 @@ muteLabel.Size = UDim2.new(0.7, 0, 0, 40)
 muteLabel.Position = UDim2.new(0.1, 0, 0.25, 0)
 muteLabel.BackgroundTransparency = 1
 muteLabel.Text = "ปิดเสียงตอนกดปุ่ม"
-muteLabel.TextColor3 = Color3.fromRGB(200, 255, 255)
+muteLabel.TextColor3 = Color3.new(1,1,1)
 muteLabel.TextScaled = false
 muteLabel.TextSize = 18
 muteLabel.Font = Enum.Font.Gotham
 muteLabel.TextXAlignment = Enum.TextXAlignment.Left
+muteLabel.TextStrokeTransparency = 0
+muteLabel.TextStrokeColor3 = Color3.new(0,0,0)
 
 local muteToggle = Instance.new("TextButton", settingsFrame)
 muteToggle.Size = UDim2.new(0, 60, 0, 40)
@@ -409,6 +424,8 @@ muteToggle.TextScaled = false
 muteToggle.TextSize = 18
 muteToggle.BackgroundColor3 = settings.muteButtonSounds and Color3.fromRGB(0, 200, 0) or Color3.fromRGB(200, 0, 0)
 muteToggle.Font = Enum.Font.GothamBold
+muteToggle.TextStrokeTransparency = 0
+muteToggle.TextStrokeColor3 = Color3.new(0,0,0)
 createCorner(muteToggle, 12)
 
 local saveLabel = Instance.new("TextLabel", settingsFrame)
@@ -416,11 +433,13 @@ saveLabel.Size = UDim2.new(0.7, 0, 0, 40)
 saveLabel.Position = UDim2.new(0.1, 0, 0.45, 0)
 saveLabel.BackgroundTransparency = 1
 saveLabel.Text = "Save การตั้งค่า"
-saveLabel.TextColor3 = Color3.fromRGB(200, 255, 255)
+saveLabel.TextColor3 = Color3.new(1,1,1)
 saveLabel.TextScaled = false
 saveLabel.TextSize = 18
 saveLabel.Font = Enum.Font.Gotham
 saveLabel.TextXAlignment = Enum.TextXAlignment.Left
+saveLabel.TextStrokeTransparency = 0
+saveLabel.TextStrokeColor3 = Color3.new(0,0,0)
 
 local saveToggle = Instance.new("TextButton", settingsFrame)
 saveToggle.Size = UDim2.new(0, 60, 0, 40)
@@ -430,18 +449,22 @@ saveToggle.TextScaled = false
 saveToggle.TextSize = 18
 saveToggle.BackgroundColor3 = settings.autoSave and Color3.fromRGB(0, 200, 0) or Color3.fromRGB(200, 0, 0)
 saveToggle.Font = Enum.Font.GothamBold
+saveToggle.TextStrokeTransparency = 0
+saveToggle.TextStrokeColor3 = Color3.new(0,0,0)
 createCorner(saveToggle, 12)
 
 local clickModeLabel = Instance.new("TextLabel", settingsFrame)
 clickModeLabel.Size = UDim2.new(0.7, 0, 0, 40)
 clickModeLabel.Position = UDim2.new(0.1, 0, 0.65, 0)
 clickModeLabel.BackgroundTransparency = 1
-clickModeLabel.Text = "ระบบแบบกด (ตอนนี้ใช้ได้ทุกโหมด!)"
-clickModeLabel.TextColor3 = Color3.fromRGB(200, 255, 255)
+clickModeLabel.Text = "ระบบแบบกด (ใช้ได้ทุกโหมด!)"
+clickModeLabel.TextColor3 = Color3.new(1,1,1)
 clickModeLabel.TextScaled = false
 clickModeLabel.TextSize = 18
 clickModeLabel.Font = Enum.Font.Gotham
 clickModeLabel.TextXAlignment = Enum.TextXAlignment.Left
+clickModeLabel.TextStrokeTransparency = 0
+clickModeLabel.TextStrokeColor3 = Color3.new(0,0,0)
 
 local clickModeToggle = Instance.new("TextButton", settingsFrame)
 clickModeToggle.Size = UDim2.new(0, 60, 0, 40)
@@ -451,6 +474,8 @@ clickModeToggle.TextScaled = false
 clickModeToggle.TextSize = 18
 clickModeToggle.BackgroundColor3 = settings.clickMode and Color3.fromRGB(0, 200, 0) or Color3.fromRGB(200, 0, 0)
 clickModeToggle.Font = Enum.Font.GothamBold
+clickModeToggle.TextStrokeTransparency = 0
+clickModeToggle.TextStrokeColor3 = Color3.new(0,0,0)
 createCorner(clickModeToggle, 12)
 muteToggle.MouseButton1Click:Connect(function()
     settings.muteButtonSounds = not settings.muteButtonSounds
@@ -471,7 +496,6 @@ clickModeToggle.MouseButton1Click:Connect(function()
     clickModeToggle.Text = settings.clickMode and "ON" or "OFF"
     clickModeToggle.BackgroundColor3 = settings.clickMode and Color3.fromRGB(0, 200, 0) or Color3.fromRGB(200, 0, 0)
     saveSettings()
-    -- 🔥 ไม่ต้องซ่อนปุ่มอีก → คำสั่งรันได้ทุกโหมด!
 end)
 
 closeSettingsBtn.MouseButton1Click:Connect(function()
@@ -488,6 +512,8 @@ settingsBtn.TextScaled = true
 settingsBtn.BackgroundColor3 = Color3.fromRGB(100, 0, 200)
 settingsBtn.TextColor3 = Color3.new(1,1,1)
 settingsBtn.Font = Enum.Font.GothamBlack
+settingsBtn.TextStrokeTransparency = 0
+settingsBtn.TextStrokeColor3 = Color3.new(0,0,0)
 createCorner(settingsBtn, 10)
 createStroke(settingsBtn, 2, Color3.fromRGB(0, 255, 255))
 
@@ -509,8 +535,13 @@ toggleBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- === COMMAND LOGIC (ทุกคำสั่งใช้ได้แม้ clickMode ON!) ===
+-- === COMMAND LOGIC (ปืนใหม่ + warn สีขาว!) ===
 local oldPositions = {}
+
+-- 🔥 ฟังก์ชัน warn สีขาวชัด
+local function whiteWarn(msg)
+    warn("\255\255\255"..msg)  -- ANSI white text
+end
 
 confirmBtn.MouseButton1Click:Connect(function()
     playRandomZap(0.7)
@@ -522,14 +553,14 @@ confirmBtn.MouseButton1Click:Connect(function()
             local speed = tonumber(cmd:match("%d+"))
             if speed then
                 local hum = getHumanoid()
-                if hum then hum.WalkSpeed = speed; warn("✅ ความเร็วตั้งเป็น "..speed) end
+                if hum then hum.WalkSpeed = speed; whiteWarn("✅ ความเร็วตั้งเป็น "..speed) end
             end
         elseif cmd == "รีตัว" then
             local char = player.Character
-            if char and char:FindFirstChild("Humanoid") then char:BreakJoints(); warn("✅ รีตัวสำเร็จ") end
+            if char and char:FindFirstChild("Humanoid") then char:BreakJoints(); whiteWarn("✅ รีตัวสำเร็จ") end
         elseif cmd == "ขโมยเสียง" then
             pcall(loadstring(game:HttpGet("https://raw.githubusercontent.com/TOUx1/Roblox-script/refs/heads/main/Audio%20logger")))
-            warn("✅ ขโมยเสียงเริ่มแล้ว")
+            whiteWarn("✅ ขโมยเสียงเริ่มแล้ว")
         elseif cmd == "ลำโพงหลากสี" then
             local colors = { BrickColor.new(331), BrickColor.new(1001), BrickColor.new(1003) }
             local radio = workspace:FindFirstChild("DRadio_Script")
@@ -544,14 +575,16 @@ confirmBtn.MouseButton1Click:Connect(function()
                         end
                     end
                 end)
-                warn("✅ ลำโพงหลากสีเปิดแล้ว")
+                whiteWarn("✅ ลำโพงหลากสีเปิดแล้ว")
             end
         elseif cmd == "เลิกลำโพงหลากสี" then
             _G.SpeakerLoop = false
-            warn("✅ เลิกลำโพงหลากสี")
+            whiteWarn("✅ เลิกลำโพงหลากสี")
         elseif cmd == "ตำรวจ" then
-            pcall(loadstring(game:HttpGet("https://pastefy.app/lnD46alx/raw")))
-            warn("✅ ตำรวจมาแล้ว")
+            task.spawn(function()
+                pcall(loadstring(game:HttpGet("https://pastefy.app/lnD46alx/raw")))
+            end)
+            whiteWarn("🚔 ตำรวจมาแล้ว! (เร็วทันใจ)")
         elseif cmd == "อ้อโต้ความหิว" then
             local hrp = getHRP()
             if not hrp then return end
@@ -576,17 +609,17 @@ confirmBtn.MouseButton1Click:Connect(function()
                     end
                 end
             end)
-            warn("✅ อ้อโต้ความหิวเปิดแล้ว")
+            whiteWarn("✅ อ้อโต้ความหิวเปิดแล้ว")
         elseif cmd == "ตัวสูง" then
             local args = {{ BodyScale = { BodyTypeScale = 1.5, DepthScale = 0.5, HeadScale = 1, HeightScale = 1.5, WidthScale = 0.5, ProportionScale = 0 } }}
             local remote = game:GetService("ReplicatedStorage"):FindFirstChild("BloxbizRemotes")
             if remote then remote = remote:FindFirstChild("CatalogOnApplyToRealHumanoid") end
-            if remote then remote:FireServer(unpack(args)); warn("✅ ตัวสูงแล้ว") end
+            if remote then remote:FireServer(unpack(args)); whiteWarn("✅ ตัวสูงแล้ว") end
         elseif cmd == "ตัวเล็ก" then
             local args = {{ BodyScale = { BodyTypeScale = 0, DepthScale = 0.9949401021003723, HeadScale = 1, HeightScale = 0.5, WidthScale = 0.6259825229644775, ProportionScale = 0 } }}
             local remote = game:GetService("ReplicatedStorage"):FindFirstChild("BloxbizRemotes")
             if remote then remote = remote:FindFirstChild("CatalogOnApplyToRealHumanoid") end
-            if remote then remote:FireServer(unpack(args)); warn("✅ ตัวเล็กแล้ว") end
+            if remote then remote:FireServer(unpack(args)); whiteWarn("✅ ตัวเล็กแล้ว") end
         elseif cmd == "จับโจร" then
             _G.CatchStarLoop = true
             oldPositions = {}
@@ -608,7 +641,7 @@ confirmBtn.MouseButton1Click:Connect(function()
                     task.wait(0.1)
                 end
             end)
-            warn("✅ จับโจรเปิดแล้ว")
+            whiteWarn("✅ จับโจรเปิดแล้ว")
         elseif cmd == "เลิกจับโจร" then
             _G.CatchStarLoop = false
             task.spawn(function()
@@ -618,18 +651,13 @@ confirmBtn.MouseButton1Click:Connect(function()
                 end
                 oldPositions = {}
             end)
-            warn("✅ เลิกจับโจร")
+            whiteWarn("✅ เลิกจับโจร")
         elseif cmd == "ปืน" then
-            local hrp = getHRP()
-            if hrp then
-                local originalPos = hrp.CFrame
-                hrp.CFrame = CFrame.new(Vector3.new(-34.67, 176.97, 249.55))
-                task.wait(3)
-                hrp.CFrame = CFrame.new(Vector3.new(417.96, 168.09, 257.09))
-                task.wait(1)
-                hrp.CFrame = originalPos
-                warn("✅ ได้ปืนแล้ว")
-            end
+            -- 🔥 เปลี่ยนใหม่: รัน HttpGet นี้แทน!
+            task.spawn(function()
+                pcall(loadstring(game:HttpGet("https://pastefy.app/2vTIdDO8/raw")))()
+            end)
+            whiteWarn("🔫 ได้ปืนแล้ว! (สคริปต์ใหม่)")
         elseif cmd == "เกิดกลับ" then
             if _G.ReviveBackConnection then _G.ReviveBackConnection:Disconnect() end
             _G.LastDeathPos = nil
@@ -649,16 +677,16 @@ confirmBtn.MouseButton1Click:Connect(function()
                     task.wait(0.2)
                 end
             end)
-            warn("✅ เกิดกลับเปิดแล้ว")
+            whiteWarn("✅ เกิดกลับเปิดแล้ว")
         elseif cmd == "เลิกเกิดกลับ" then
             if _G.ReviveBackConnection then _G.ReviveBackConnection:Disconnect(); _G.ReviveBackConnection = nil end
             _G.LastDeathPos = nil
-            warn("✅ เลิกเกิดกลับ")
+            whiteWarn("✅ เลิกเกิดกลับ")
         elseif cmd == "ui แอดมิน" then
             if isVIP(player.Name) then
-                warn("✅ เปิด UI แอดมินได้ (VIP)")
+                whiteWarn("✅ เปิด UI แอดมินได้ (VIP)")
             else
-                warn("❌ คุณไม่มีสิทธิ์ใช้คำสั่งนี้")
+                whiteWarn("❌ คุณไม่มีสิทธิ์ใช้คำสั่งนี้")
             end
         elseif cmd == "ตั้งค่า" then
             settingsFrame.Visible = true
@@ -672,7 +700,7 @@ confirmBtn.MouseButton1Click:Connect(function()
                 task.delay(0.3, function() settingsFrame.Visible = false end)
             end
         else
-            warn("❌ ไม่พบคำสั่ง: "..cmd)
+            whiteWarn("❌ ไม่พบคำสั่ง: "..cmd)
         end
     end)
 end)
@@ -687,7 +715,7 @@ end)
 
 -- === SPLASH SCREEN ===
 local splashGui = Instance.new("ScreenGui")
-splashGui.Name = "CyberSplash"
+splashGui.Name = "TOU V2 CMD Splash"
 splashGui.Parent = player:WaitForChild("PlayerGui")
 splashGui.IgnoreGuiInset = true
 
@@ -708,7 +736,7 @@ local splashText = Instance.new("TextLabel", splashFrame)
 splashText.Size = UDim2.new(1, 0, 0.2, 0)
 splashText.Position = UDim2.new(0, 0, 0.4, 0)
 splashText.BackgroundTransparency = 1
-splashText.Text = "💀 script by:TOUx1 | CYBER HUB LOADED 💀"
+splashText.Text = "💀 TOU V2 CMD LOADED 💀"
 splashText.TextColor3 = Color3.fromRGB(255, 0, 150)
 splashText.TextScaled = true
 splashText.Font = Enum.Font.GothamBlack
