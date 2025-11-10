@@ -70,13 +70,29 @@ local function playRandomZap(volume)
     end)
 end
 
--- ฟังก์ชันช่วย
+-- ฟังก์ชันช่วย (ซ่อม error: รอ Character + Humanoid)
 local function getHRP()
-    return player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    local char = player.Character
+    if not char then 
+        char = player.CharacterAdded:Wait()
+    end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hrp then
+        hrp = char:WaitForChild("HumanoidRootPart", 5)
+    end
+    return hrp
 end
 
 local function getHumanoid()
-    return player.Character and player.Character:FindFirstChildWhichIsA("Humanoid")
+    local char = player.Character
+    if not char then 
+        char = player.CharacterAdded:Wait()
+    end
+    local hum = char:FindFirstChildWhichIsA("Humanoid")
+    if not hum then
+        hum = char:WaitForChild("Humanoid", 5)
+    end
+    return hum
 end
 
 local function createCorner(parent, radius)
@@ -89,7 +105,7 @@ end
 local function createStroke(parent, thickness, color)
     local stroke = Instance.new("UIStroke")
     stroke.Thickness = thickness or 2
-    stroke.Color = color or Color3.fromRGB(255, 0, 0)
+    stroke.Color = color or:nil
     stroke.Transparency = 0.5
     stroke.Parent = parent
     return stroke
@@ -249,13 +265,12 @@ scrollFrame.ScrollBarImageColor3 = Color3.fromRGB(255, 50, 150)
 createCorner(scrollFrame, 15)
 
 local commandList = Instance.new("Frame", scrollFrame)
-commandList.Size = UDim2.new(1, -10, 1, 0)
+commandList.Size submarines = UDim2.new(1, -10, 1, 0)
 commandList.Position = UDim2.new(0, 5, 0, 5)
 commandList.BackgroundTransparency = 1
 
 local layout = Instance.new("UIListLayout", commandList)
 layout.SortOrder = Enum.SortOrder.LayoutOrder
-l
 layout.Padding = UDim.new(0, 8)
 
 local commandButtons = {}
@@ -523,7 +538,7 @@ toggleBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- === COMMAND LOGIC ===
+-- === COMMAND LOGIC (ซ่อม error ทุกจุด) ===
 local oldPositions = {}
 
 confirmBtn.MouseButton1Click:Connect(function()
@@ -534,144 +549,168 @@ confirmBtn.MouseButton1Click:Connect(function()
     if cmd:match("ความเร็ว") then
         local speed = tonumber(cmd:match("%d+"))
         if speed then
-            local humanoid = getHumanoid()
-            if humanoid then humanoid.WalkSpeed = speed end
+            pcall(function()
+                local humanoid = getHumanoid()
+                if humanoid then humanoid.WalkSpeed = speed end
+            end)
         end
     elseif cmd == "รีตัว" then
-        if player.Character then player.Character:BreakJoints() end
+        pcall(function()
+            local char = player.Character
+            if char then char:BreakJoints() end
+        end)
     elseif cmd == "ขโมยเสียง" then
-        local success, err = pcall(function()
+        pcall(function()
             loadstring(game:HttpGet("https://raw.githubusercontent.com/TOUx1/Roblox-script/refs/heads/main/Audio%20logger"))()
         end)
-        if success then
-            warn("🔊 ขโมยเสียงสำเร็จ!")
-        else
-            warn("❌ ขโมยเสียงล้ม: "..tostring(err))
-        end
     elseif cmd == "ลำโพงหลากสี" then
-        local colors = { BrickColor.new(331), BrickColor.new(1001), BrickColor.new(1003) }
-        local radio = workspace:WaitForChild("DRadio_Script"):WaitForChild("Color")
-        _G.SpeakerLoop = true
-        task.spawn(function()
-            while _G.SpeakerLoop do
-                for _, color in ipairs(colors) do
-                    radio:FireServer(color)
-                    task.wait(0.1)
-                end
+        pcall(function()
+            local colors = { BrickColor.new(331), BrickColor.new(1001), BrickColor.new(1003) }
+            local radio = workspace:FindFirstChild("DRadio_Script")
+            if radio then radio = radio:WaitForChild("Color", 3) end
+            if radio then
+                _G.SpeakerLoop = true
+                task.spawn(function()
+                    while _G.SpeakerLoop and radio and radio.Parent do
+                        for _, color in ipairs(colors) do
+                            if radio and radio.Parent then
+                                radio:FireServer(color)
+                            end
+                            task.wait(0.1)
+                        end
+                    end
+                end)
             end
         end)
     elseif cmd == "เลิกลำโพงหลากสี" then
         _G.SpeakerLoop = false
     elseif cmd == "ตำรวจ" then
-        local success, err = pcall(function()
+        pcall(function()
             loadstring(game:HttpGet("https://pastefy.app/lnD46alx/raw"))()
         end)
-        if success then
-            warn("✅ ตำรวจโหลดสำเร็จ!")
-        else
-            warn("❌ ตำรวจล้ม: "..tostring(err))
-        end
     elseif cmd == "อ้อโต้ความหิว" then
-        local hrp = getHRP()
-        if not hrp then return end
-        local targetPosition = Vector3.new(-27.47, 177.58, 236.50)
-        local oldCFrame = hrp.CFrame
-        task.spawn(function()
-            while task.wait(1) do
-                if player:FindFirstChild("Hungry") and player.Hungry.Value <= 50 then
-                    hrp.CFrame = CFrame.new(targetPosition + Vector3.new(0, 3, 0))
-                    for _ = 1, 10 do
-                        firetouchinterest(hrp, workspace.Terrain, 0)
-                        task.wait(0.05)
-                        firetouchinterest(hrp, workspace.Terrain, 1)
-                        task.wait(0.05)
+        pcall(function()
+            local hrp = getHRP()
+            if not hrp then return end
+            local targetPosition = Vector3.new(-27.47, 177.58, 236.50)
+            local oldCFrame = hrp.CFrame
+            task.spawn(function()
+                while task.wait(1) do
+                    local playerHunger = player:FindFirstChild("Hungry")
+                    if playerHunger and playerHunger.Value <= 50 then
+                        hrp.CFrame = CFrame.new(targetPosition + Vector3.new(0, 3, 0))
+                        for _ = 1, 10 do
+                            firetouchinterest(hrp, workspace.Terrain, 0)
+                            task.wait(0.05)
+                            firetouchinterest(hrp, workspace.Terrain, 1)
+                            task.wait(0.05)
+                        end
+                        repeat task.wait(0.2)
+                            firetouchinterest(hrp, workspace.Terrain, 0)
+                            firetouchinterest(hrp, workspace.Terrain, 1)
+                        until not player:FindFirstChild("Hungry") or player.Hungry.Value >= 100
+                        hrp.CFrame = oldCFrame
                     end
-                    repeat task.wait(0.2)
-                        firetouchinterest(hrp, workspace.Terrain, 0)
-                        firetouchinterest(hrp, workspace.Terrain, 1)
-                    until player.Hungry.Value >= 100
-                    hrp.CFrame = oldCFrame
                 end
-            end
+            end)
         end)
     elseif cmd == "ตัวสูง" then
-        local args = {{ BodyScale = { BodyTypeScale = 1.5, DepthScale = 0.5, HeadScale = 1, HeightScale = 1.5, WidthScale = 0.5, ProportionScale = 0 } }}
-        game:GetService("ReplicatedStorage"):WaitForChild("BloxbizRemotes"):WaitForChild("CatalogOnApplyToRealHumanoid"):FireServer(unpack(args))
+        pcall(function()
+            local args = {{ BodyScale = { BodyTypeScale = 1.5, DepthScale = 0.5, HeadScale = 1, HeightScale = 1.5, WidthScale = 0.5, ProportionScale = 0 } }}
+            local remote = game:GetService("ReplicatedStorage"):FindFirstChild("BloxbizRemotes")
+            if remote then remote = remote:FindFirstChild("CatalogOnApplyToRealHumanoid") end
+            if remote then remote:FireServer(unpack(args)) end
+        end)
     elseif cmd == "ตัวเล็ก" then
-        local args = {{ BodyScale = { BodyTypeScale = 0, DepthScale = 0.9949401021003723, HeadScale = 1, HeightScale = 0.5, WidthScale = 0.6259825229644775, ProportionScale = 0 } }}
-        game:GetService("ReplicatedStorage"):WaitForChild("BloxbizRemotes"):WaitForChild("CatalogOnApplyToRealHumanoid"):FireServer(unpack(args))
+        pcall(function()
+            local args = {{ BodyScale = { BodyTypeScale = 0, DepthScale = 0.9949401021003723, HeadScale = 1, HeightScale = 0.5, WidthScale = 0.6259825229644775, ProportionScale = 0 } }}
+            local remote = game:GetService("ReplicatedStorage"):FindFirstChild("BloxbizRemotes")
+            if remote then remote = remote:FindFirstChild("CatalogOnApplyToRealHumanoid") end
+            if remote then remote:FireServer(unpack(args)) end
+        end)
     elseif cmd == "จับโจร" then
-        _G.CatchStarLoop = true
-        oldPositions = {}
-        task.spawn(function()
-            while _G.CatchStarLoop do
-                for _, targetPlayer in ipairs(game.Players:GetPlayers()) do
-                    if targetPlayer ~= player and targetPlayer:FindFirstChild("Star") then
-                        local starValue = targetPlayer.Star.Value
-                        if starValue >= 1 and starValue <= 5 then
-                            local rightHand = player.Character and player.Character:FindFirstChild("RightHand")
-                            if rightHand and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                                if not oldPositions[targetPlayer] then
-                                    oldPositions[targetPlayer] = targetPlayer.Character.HumanoidRootPart.CFrame
+        pcall(function()
+            _G.CatchStarLoop = true
+            oldPositions = {}
+            task.spawn(function()
+                while _G.CatchStarLoop do
+                    for _, targetPlayer in ipairs(game.Players:GetPlayers()) do
+                        if targetPlayer ~= player and targetPlayer.Character and targetPlayer:FindFirstChild("Star") then
+                            local starValue = targetPlayer.Star.Value
+                            if starValue >= 1 and starValue <= 5 then
+                                local rightHand = player.Character and player.Character:FindFirstChild("RightHand")
+                                local targetHRP = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
+                                if rightHand and targetHRP then
+                                    if not oldPositions[targetPlayer] then
+                                        oldPositions[targetPlayer] = targetHRP.CFrame
+                                    end
+                                    targetHRP.CFrame = rightHand.CFrame
                                 end
-                                targetPlayer.Character.HumanoidRootPart.CFrame = rightHand.CFrame
                             end
                         end
                     end
+                    task.wait(0.1)
                 end
-                task.wait(0.1)
-            end
+            end)
         end)
     elseif cmd == "เลิกจับโจร" then
-        _G.CatchStarLoop = false
-        task.spawn(function()
-            for targetPlayer, oldCFrame in pairs(oldPositions) do
-                if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                    targetPlayer.Character.HumanoidRootPart.CFrame = oldCFrame
-                end
-            end
-            oldPositions = {}
-        end)
-    elseif cmd == "ปืน" then
-        local hrp = getHRP()
-        if hrp then
-            local originalPos = hrp.CFrame
-            hrp.CFrame = CFrame.new(Vector3.new(-34.67, 176.97, 249.55))
-            task.wait(3)
-            hrp.CFrame = CFrame.new(Vector3.new(417.96, 168.09, 257.09))
-            task.wait(1)
-            hrp.CFrame = originalPos
-        end
-    elseif cmd == "เกิดกลับ" then
-        if _G.ReviveBackConnection then _G.ReviveBackConnection
-        _G.ReviveBackConnection:Disconnect() end
-        _G.LastDeathPos = nil
-        _G.ReviveBackConnection = player.CharacterAdded:Connect(function(char)
-            task.wait(0.5)
-            local hrp = char:WaitForChild("HumanoidRootPart")
-            if _G.LastDeathPos then
-                hrp.CFrame = _G.LastDeathPos
-            end
-        end)
-        task.spawn(function()
-            while player.Character do
-                local char = player.Character
-                local humanoid = char:FindFirstChildOfClass("Humanoid")
-                if humanoid and humanoid.Health <= 0 then
-                    local hrp = char:FindFirstChild("HumanoidRootPart")
-                    if hrp then
-                        _G.LastDeathPos = hrp.CFrame
+        pcall(function()
+            _G.CatchStarLoop = false
+            task.spawn(function()
+                for targetPlayer, oldCFrame in pairs(oldPositions) do
+                    local targetHRP = targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart")
+                    if targetHRP then
+                        targetHRP.CFrame = oldCFrame
                     end
                 end
-                task.wait(0.2)
+                oldPositions = {}
+            end)
+        end)
+    elseif cmd == "ปืน" then
+        pcall(function()
+            local hrp = getHRP()
+            if hrp then
+                local originalPos = hrp.CFrame
+                hrp.CFrame = CFrame.new(Vector3.new(-34.67, 176.97, 249.55))
+                task.wait(3)
+                hrp.CFrame = CFrame.new(Vector3.new(417.96, 168.09, 257.09))
+                task.wait(1)
+                hrp.CFrame = originalPos
             end
         end)
+    elseif cmd == "เกิดกลับ" then
+        pcall(function()
+            if _G.ReviveBackConnection then _G.ReviveBackConnection:Disconnect() end
+            _G.LastDeathPos = nil
+            _G.ReviveBackConnection = player.CharacterAdded:Connect(function(char)
+                task.wait(1)
+                local hrp = char:FindFirstChild("HumanoidRootPart")
+                if hrp and _G.LastDeathPos then
+                    hrp.CFrame = _G.LastDeathPos
+                end
+            end)
+            task.spawn(function()
+                while player.Character do
+                    local char = player.Character
+                    local humanoid = char:FindFirstChildOfClass("Humanoid")
+                    if humanoid and humanoid.Health <= 0 then
+                        local hrp = char:FindFirstChild("HumanoidRootPart")
+                        if hrp then
+                            _G.LastDeathPos = hrp.CFrame
+                        end
+                    end
+                    task.wait(0.2)
+                end
+            end)
+        end)
     elseif cmd == "เลิกเกิดกลับ" then
-        if _G.ReviveBackConnection then
-            _G.ReviveBackConnection:Disconnect()
-            _G.ReviveBackConnection = nil
-        end
-        _G.LastDeathPos = nil
+        pcall(function()
+            if _G.ReviveBackConnection then
+                _G.ReviveBackConnection:Disconnect()
+                _G.ReviveBackConnection = nil
+            end
+            _G.LastDeathPos = nil
+        end)
     elseif cmd == "ui แอดมิน" then
         if isVIP(player.Name) then
             warn("เปิด UI แอดมินได้")
@@ -739,7 +778,7 @@ playRandomZap(1.0)
 TweenService:Create(splashImage, TweenInfo.new(2, Enum.EasingStyle.Sine), {ImageTransparency = 0.1}):Play()
 
 task.delay(3, function()
-    TweenService:Create(splashText, TweenInfo.new(2, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {TextTransparency = 1}):Play()
+    TweenService:Create(splashText, TweenInfo.new(2, Enum.Easing|Style.Quad, Enum.EasingDirection.In), {TextTransparency = 1}):Play()
 end)
 
 task.delay(5, function()
