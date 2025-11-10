@@ -24,14 +24,15 @@ local zapIds = {
 
 local currentZapSound = nil
 
--- Default Settings
+-- SETTINGS SYSTEM
+local saveFile = "cyber_settings.json"
 local settings = {
     muteButtonSounds = false,
-    autoSave = false
+    autoSave = false,
+    clickMode = false
 }
 
 -- Load Settings
-local saveFile = "cyber_settings.json"
 if isfile and readfile and isfile(saveFile) then
     local success, data = pcall(function()
         return HttpService:JSONDecode(readfile(saveFile))
@@ -39,6 +40,7 @@ if isfile and readfile and isfile(saveFile) then
     if success and data then
         settings.muteButtonSounds = data.muteButtonSounds or false
         settings.autoSave = data.autoSave or false
+        settings.clickMode = data.clickMode or false
     end
 end
 
@@ -133,7 +135,8 @@ title.Position = UDim2.new(0, 10, 0, 10)
 title.BackgroundTransparency = 1
 title.Text = "🔥 CYBER EXPLOITER HUB 🔥"
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.TextScaled = true
+title.TextScaled = false
+title.TextSize = 20
 title.Font = Enum.Font.GothamBold
 title.TextStrokeTransparency = 0.7
 title.TextStrokeColor3 = Color3.fromRGB(255, 0, 100)
@@ -143,7 +146,8 @@ local textBox = Instance.new("TextBox", frameNormal)
 textBox.PlaceholderText = "👤 ใส่คำสั่งมืด... (speed 100)"
 textBox.Size = UDim2.new(0.9, 0, 0, 45)
 textBox.Position = UDim2.new(0.05, 0, 0.3, 0)
-textBox.TextScaled = true
+textBox.TextScaled = false
+textBox.TextSize = 16
 textBox.BackgroundColor3 = Color3.fromRGB(20, 20, 40)
 textBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 textBox.Font = Enum.Font.Gotham
@@ -155,7 +159,8 @@ local confirmBtn = Instance.new("TextButton", frameNormal)
 confirmBtn.Text = "🚀 ยืนยันคำสั่ง"
 confirmBtn.Size = UDim2.new(0.9, 0, 0, 50)
 confirmBtn.Position = UDim2.new(0.05, 0, 0.65, 0)
-confirmBtn.TextScaled = true
+confirmBtn.TextScaled = false
+confirmBtn.TextSize = 18
 confirmBtn.BackgroundColor3 = Color3.fromRGB(255, 50, 100)
 confirmBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 confirmBtn.Font = Enum.Font.GothamBold
@@ -191,7 +196,7 @@ toggleBtn.MouseEnter:Connect(function()
     TweenService:Create(toggleBtn, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {Rotation = 360}):Play()
 end)
 
--- === COMMAND VAULT GUI (ลากได้) ===
+-- === COMMAND VAULT GUI (ลากได้ + ปุ่มกด) ===
 local commandGui = Instance.new("ScreenGui")
 commandGui.Name = "CommandVault"
 commandGui.Parent = CoreGui
@@ -221,7 +226,8 @@ vaultTitle.Position = UDim2.new(0, 15, 0, 0)
 vaultTitle.BackgroundTransparency = 1
 vaultTitle.Text = "📜 CYBER COMMAND VAULT"
 vaultTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-vaultTitle.TextScaled = true
+vaultTitle.TextScaled = false
+vaultTitle.TextSize = 20
 vaultTitle.Font = Enum.Font.GothamBold
 vaultTitle.TextXAlignment = Enum.TextXAlignment.Left
 
@@ -242,39 +248,86 @@ scrollFrame.ScrollBarThickness = 10
 scrollFrame.ScrollBarImageColor3 = Color3.fromRGB(255, 50, 150)
 createCorner(scrollFrame, 15)
 
-local vaultText = Instance.new("TextLabel", scrollFrame)
-vaultText.Size = UDim2.new(1, -10, 0, 1000)
-vaultText.Position = UDim2.new(0, 5, 0, 5)
-vaultText.BackgroundTransparency = 1
-vaultText.TextColor3 = Color3.fromRGB(200, 255, 255)
-vaultText.TextXAlignment = Enum.TextXAlignment.Left
-vaultText.TextYAlignment = Enum.TextYAlignment.Top
-vaultText.TextWrapped = true
-vaultText.TextScaled = true
-vaultText.Font = Enum.Font.Gotham
-vaultText.Text = [[
-🔥 CYBER EXPLOITER COMMANDS 🔥
+local commandList = Instance.new("Frame", scrollFrame)
+commandList.Size = UDim2.new(1, -10, 1, 0)
+commandList.Position = UDim2.new(0, 5, 0, 5)
+commandList.BackgroundTransparency = 1
 
-• ความเร็ว [เลข] → เปลี่ยน WalkSpeed
-• รีตัว → ฆ่าตัวตาย
-• ขโมยเสียง → Audio Logger
-• ลำโพงหลากสี → สแปมสี
-• เลิกลำโพงหลากสี
-• ตำรวจ → โหลดสคริปต์
-• อ้อโต้ความหิว → เติมหิว
-• ตัวสูง / ตัวเล็ก
-• จับโจร / เลิกจับโจร
-• vipวาป → VIP Zone
-• ปืน → วาปจุดปืน
-• เกิดกลับ / เลิกเกิดกลับ
-• UI แอดมิน (VIP Only)
-• ตั้งค่า → เปิด Settings
-• ปิดตั้งค่า → ปิด Settings
+local layout = Instance.new("UIListLayout", commandList)
+layout.SortOrder = Enum.SortOrder.LayoutOrder
+l
+layout.Padding = UDim.new(0, 8)
 
-⚡ ESC = ปิด GUI | ลาก Title Bar เพื่อย้าย
-💀 script by: TOUx1 | Exploiter Elite
-]]
-scrollFrame.CanvasSize = UDim2.new(0, 0, 0, vaultText.TextBounds.Y + 20)
+local commandButtons = {}
+
+local commandsList = {
+    {name = "ความเร็ว 100", cmd = "ความเร็ว 100"},
+    {name = "รีตัว", cmd = "รีตัว"},
+    {name = "ขโมยเสียง", cmd = "ขโมยเสียง"},
+    {name = "ลำโพงหลากสี", cmd = "ลำโพงหลากสี"},
+    {name = "เลิกลำโพงหลากสี", cmd = "เลิกลำโพงหลากสี"},
+    {name = "ตำรวจ", cmd = "ตำรวจ"},
+    {name = "อ้อโต้ความหิว", cmd = "อ้อโต้ความหิว"},
+    {name = "ตัวสูง", cmd = "ตัวสูง"},
+    {name = "ตัวเล็ก", cmd = "ตัวเล็ก"},
+    {name = "จับโจร", cmd = "จับโจร"},
+    {name = "เลิกจับโจร", cmd = "เลิกจับโจร"},
+    {name = "ปืน", cmd = "ปืน"},
+    {name = "เกิดกลับ", cmd = "เกิดกลับ"},
+    {name = "เลิกเกิดกลับ", cmd = "เลิกเกิดกลับ"},
+    {name = "UI แอดมิน", cmd = "ui แอดมิน"},
+    {name = "ตั้งค่า", cmd = "ตั้งค่า"},
+    {name = "ปิดตั้งค่า", cmd = "ปิดตั้งค่า"}
+}
+
+local function createCommandButton(text, cmd)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, -10, 0, 40)
+    btn.BackgroundColor3 = Color3.fromRGB(30, 0, 70)
+    btn.Text = text
+    btn.TextColor3 = Color3.fromRGB(200, 255, 255)
+    btn.TextScaled = false
+    btn.TextSize = 16
+    btn.Font = Enum.Font.Gotham
+    createCorner(btn, 10)
+    createGradient(btn, Color3.fromRGB(50, 0, 100), Color3.fromRGB(100, 0, 150))
+    local stroke = createStroke(btn, 2, Color3.fromRGB(150, 255, 200))
+    stroke.Transparency = 0.7
+
+    btn.MouseEnter:Connect(function()
+        tweenStroke(stroke, Color3.fromRGB(0, 255, 255), 0.3)
+        TweenService:Create(btn, TweenInfo.new(0.2), {Size = UDim2.new(1, -5, 0, 42)}):Play()
+    end)
+    btn.MouseLeave:Connect(function()
+        tweenStroke(stroke, Color3.fromRGB(150, 255, 200), 0.7)
+        TweenService:Create(btn, TweenInfo.new(0.2), {Size = UDim2.new(1, -10, 0, 40)}):Play()
+    end)
+
+    btn.MouseButton1Click:Connect(function()
+        playRandomZap(0.5)
+        textBox.Text = cmd
+        confirmBtn.MouseButton1Click:Fire()
+    end)
+
+    btn.Parent = commandList
+    return btn
+end
+
+local function updateCommandButtons()
+    for _, btn in ipairs(commandButtons) do
+        btn.Visible = settings.clickMode
+    end
+end
+
+for _, cmdData in ipairs(commandsList) do
+    local btn = createCommandButton(cmdData.name, cmdData.cmd)
+    btn.Visible = false
+    table.insert(commandButtons, btn)
+end
+
+commandList:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
+    scrollFrame.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 20)
+end)
 
 -- ปุ่ม 📜 ใน Main
 local helpBtn = Instance.new("TextButton", frameNormal)
@@ -294,6 +347,7 @@ helpBtn.MouseButton1Click:Connect(function()
     if commandVault.Visible then
         commandVault.BackgroundTransparency = 1
         TweenService:Create(commandVault, TweenInfo.new(0.4), {BackgroundTransparency = 0}):Play()
+        updateCommandButtons()
     else
         TweenService:Create(commandVault, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
         task.delay(0.3, function() commandVault.Visible = false end)
@@ -313,8 +367,8 @@ settingsGui.Parent = CoreGui
 settingsGui.ResetOnSpawn = false
 
 local settingsFrame = Instance.new("Frame", settingsGui)
-settingsFrame.Size = UDim2.new(0, 400, 0, 300)
-settingsFrame.Position = UDim2.new(0.5, -200, 0.5, -150)
+settingsFrame.Size = UDim2.new(0, 400, 0, 350)
+settingsFrame.Position = UDim2.new(0.5, -200, 0.5, -175)
 settingsFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 30)
 settingsFrame.Active = true
 settingsFrame.Draggable = true
@@ -329,7 +383,8 @@ settingsTitle.Position = UDim2.new(0, 10, 0, 10)
 settingsTitle.BackgroundTransparency = 1
 settingsTitle.Text = "⚙️ CYBER SETTINGS PANEL"
 settingsTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-settingsTitle.TextScaled = true
+settingsTitle.TextScaled = false
+settingsTitle.TextSize = 20
 settingsTitle.Font = Enum.Font.GothamBold
 
 local closeSettingsBtn = Instance.new("TextButton", settingsFrame)
@@ -341,13 +396,15 @@ closeSettingsBtn.BackgroundTransparency = 1
 closeSettingsBtn.TextScaled = true
 closeSettingsBtn.Font = Enum.Font.GothamBlack
 
+-- ปิดเสียง
 local muteLabel = Instance.new("TextLabel", settingsFrame)
 muteLabel.Size = UDim2.new(0.7, 0, 0, 40)
 muteLabel.Position = UDim2.new(0.1, 0, 0.25, 0)
 muteLabel.BackgroundTransparency = 1
 muteLabel.Text = "ปิดเสียงตอนกดปุ่ม"
 muteLabel.TextColor3 = Color3.fromRGB(200, 255, 255)
-muteLabel.TextScaled = true
+muteLabel.TextScaled = false
+muteLabel.TextSize = 18
 muteLabel.Font = Enum.Font.Gotham
 muteLabel.TextXAlignment = Enum.TextXAlignment.Left
 
@@ -355,18 +412,21 @@ local muteToggle = Instance.new("TextButton", settingsFrame)
 muteToggle.Size = UDim2.new(0, 60, 0, 40)
 muteToggle.Position = UDim2.new(0.8, 0, 0.25, 0)
 muteToggle.Text = settings.muteButtonSounds and "ON" or "OFF"
-muteToggle.TextScaled = true
+muteToggle.TextScaled = false
+muteToggle.TextSize = 18
 muteToggle.BackgroundColor3 = settings.muteButtonSounds and Color3.fromRGB(0, 200, 0) or Color3.fromRGB(200, 0, 0)
 muteToggle.Font = Enum.Font.GothamBold
 createCorner(muteToggle, 12)
 
+-- Save
 local saveLabel = Instance.new("TextLabel", settingsFrame)
 saveLabel.Size = UDim2.new(0.7, 0, 0, 40)
 saveLabel.Position = UDim2.new(0.1, 0, 0.45, 0)
 saveLabel.BackgroundTransparency = 1
 saveLabel.Text = "Save การตั้งค่า"
 saveLabel.TextColor3 = Color3.fromRGB(200, 255, 255)
-saveLabel.TextScaled = true
+saveLabel.TextScaled = false
+saveLabel.TextSize = 18
 saveLabel.Font = Enum.Font.Gotham
 saveLabel.TextXAlignment = Enum.TextXAlignment.Left
 
@@ -374,10 +434,33 @@ local saveToggle = Instance.new("TextButton", settingsFrame)
 saveToggle.Size = UDim2.new(0, 60, 0, 40)
 saveToggle.Position = UDim2.new(0.8, 0, 0.45, 0)
 saveToggle.Text = settings.autoSave and "ON" or "OFF"
-saveToggle.TextScaled = true
+saveToggle.TextScaled = false
+saveToggle.TextSize = 18
 saveToggle.BackgroundColor3 = settings.autoSave and Color3.fromRGB(0, 200, 0) or Color3.fromRGB(200, 0, 0)
 saveToggle.Font = Enum.Font.GothamBold
 createCorner(saveToggle, 12)
+
+-- ระบบแบบกด
+local clickModeLabel = Instance.new("TextLabel", settingsFrame)
+clickModeLabel.Size = UDim2.new(0.7, 0, 0, 40)
+clickModeLabel.Position = UDim2.new(0.1, 0, 0.65, 0)
+clickModeLabel.BackgroundTransparency = 1
+clickModeLabel.Text = "ระบบแบบกด"
+clickModeLabel.TextColor3 = Color3.fromRGB(200, 255, 255)
+clickModeLabel.TextScaled = false
+clickModeLabel.TextSize = 18
+clickModeLabel.Font = Enum.Font.Gotham
+clickModeLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local clickModeToggle = Instance.new("TextButton", settingsFrame)
+clickModeToggle.Size = UDim2.new(0, 60, 0, 40)
+clickModeToggle.Position = UDim2.new(0.8, 0, 0.65, 0)
+clickModeToggle.Text = settings.clickMode and "ON" or "OFF"
+clickModeToggle.TextScaled = false
+clickModeToggle.TextSize = 18
+clickModeToggle.BackgroundColor3 = settings.clickMode and Color3.fromRGB(0, 200, 0) or Color3.fromRGB(200, 0, 0)
+clickModeToggle.Font = Enum.Font.GothamBold
+createCorner(clickModeToggle, 12)
 
 muteToggle.MouseButton1Click:Connect(function()
     settings.muteButtonSounds = not settings.muteButtonSounds
@@ -391,6 +474,14 @@ saveToggle.MouseButton1Click:Connect(function()
     saveToggle.Text = settings.autoSave and "ON" or "OFF"
     saveToggle.BackgroundColor3 = settings.autoSave and Color3.fromRGB(0, 200, 0) or Color3.fromRGB(200, 0, 0)
     if settings.autoSave then saveSettings() end
+end)
+
+clickModeToggle.MouseButton1Click:Connect(function()
+    settings.clickMode = not settings.clickMode
+    clickModeToggle.Text = settings.clickMode and "ON" or "OFF"
+    clickModeToggle.BackgroundColor3 = settings.clickMode and Color3.fromRGB(0, 200, 0) or Color3.fromRGB(200, 0, 0)
+    saveSettings()
+    updateCommandButtons()
 end)
 
 closeSettingsBtn.MouseButton1Click:Connect(function()
@@ -541,35 +632,6 @@ confirmBtn.MouseButton1Click:Connect(function()
             end
             oldPositions = {}
         end)
-    elseif cmd == "vipวาป" then
-        local hrp = getHRP()
-        local humanoid = getHumanoid()
-        if hrp and humanoid then
-            hrp.CFrame = CFrame.new(Vector3.new(90.36, 179.89, 1427.13))
-            local warnGui = Instance.new("ScreenGui", CoreGui)
-            warnGui.Name = "SafeZoneWarn"
-            local text = Instance.new("TextLabel", warnGui)
-            text.Size = UDim2.new(0, 400, 0, 50)
-            text.Position = UDim2Image.new(0.5, -200, 0.8, 0)
-            text.BackgroundTransparency = 0.3
-            text.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-            text.TextColor3 = Color3.new(1, 1, 1)
-            text.TextScaled = true
-            text.Text = "ไม่สามารถหยิบของได้ คิดว่าเป็นจุดปลอดภัยแทน"
-            local oldWalk = humanoid.WalkSpeed
-            local oldJump = humanoid.JumpPower
-            humanoid.WalkSpeed = 0
-            humanoid.JumpPower = 0
-            task.delay(3, function()
-                if humanoid then
-                    humanoid.WalkSpeed = oldWalk
-                    humanoid.JumpPower = oldJump
-                end
-            end)
-            task.delay(5, function()
-                if warnGui then warnGui:Destroy() end
-            end)
-        end
     elseif cmd == "ปืน" then
         local hrp = getHRP()
         if hrp then
@@ -581,7 +643,8 @@ confirmBtn.MouseButton1Click:Connect(function()
             hrp.CFrame = originalPos
         end
     elseif cmd == "เกิดกลับ" then
-        if _G.ReviveBackConnection then _G.ReviveBackConnection:Disconnect() end
+        if _G.ReviveBackConnection then _G.ReviveBackConnection
+        _G.ReviveBackConnection:Disconnect() end
         _G.LastDeathPos = nil
         _G.ReviveBackConnection = player.CharacterAdded:Connect(function(char)
             task.wait(0.5)
@@ -686,3 +749,6 @@ end)
 task.delay(6, function()
     splashGui:Destroy()
 end)
+
+-- อัปเดตปุ่มตอนเริ่ม
+updateCommandButtons()
