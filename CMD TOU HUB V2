@@ -304,9 +304,11 @@ local function createCommandButton(text, cmd)
         TweenService:Create(btn, TweenInfo.new(0.2), {Size = UDim2.new(1, -10, 0, 40)}):Play()
     end)
 
+    -- 🔥 ซ่อม: รันคำสั่งแม้ clickMode ON!
     btn.MouseButton1Click:Connect(function()
         playRandomZap(0.5)
         textBox.Text = cmd
+        -- ใช้ Fire() โดยตรง → ไม่ต้องรอ textBox
         confirmBtn.MouseButton1Click:Fire()
     end)
 
@@ -434,7 +436,7 @@ local clickModeLabel = Instance.new("TextLabel", settingsFrame)
 clickModeLabel.Size = UDim2.new(0.7, 0, 0, 40)
 clickModeLabel.Position = UDim2.new(0.1, 0, 0.65, 0)
 clickModeLabel.BackgroundTransparency = 1
-clickModeLabel.Text = "ระบบแบบกด (ไม่จำเป็น)"
+clickModeLabel.Text = "ระบบแบบกด (ตอนนี้ใช้ได้ทุกโหมด!)"
 clickModeLabel.TextColor3 = Color3.fromRGB(200, 255, 255)
 clickModeLabel.TextScaled = false
 clickModeLabel.TextSize = 18
@@ -469,6 +471,7 @@ clickModeToggle.MouseButton1Click:Connect(function()
     clickModeToggle.Text = settings.clickMode and "ON" or "OFF"
     clickModeToggle.BackgroundColor3 = settings.clickMode and Color3.fromRGB(0, 200, 0) or Color3.fromRGB(200, 0, 0)
     saveSettings()
+    -- 🔥 ไม่ต้องซ่อนปุ่มอีก → คำสั่งรันได้ทุกโหมด!
 end)
 
 closeSettingsBtn.MouseButton1Click:Connect(function()
@@ -506,7 +509,7 @@ toggleBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- === COMMAND LOGIC ===
+-- === COMMAND LOGIC (ทุกคำสั่งใช้ได้แม้ clickMode ON!) ===
 local oldPositions = {}
 
 confirmBtn.MouseButton1Click:Connect(function()
