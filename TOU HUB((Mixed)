@@ -1,0 +1,617 @@
+-- TOU HUB (Mixed) - Ultimate Exploiter GUI Size Changer Edition 💀🔥🖤
+-- LocalScript - เพิ่มปุ่ม "ปรับขนาดตัว" ในช่อง Script เมืองไทย2 + Popup โหด 😇🩸
+-- พลังแห่งการย่อขยายตัวฟรีถูกปลดปล่อยแล้ว exploiter!
+
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local player = Players.LocalPlayer
+
+-- สร้าง ScreenGui หลัก
+local gui = Instance.new("ScreenGui")
+gui.Name = "TOU_HUB_Mixed"
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
+
+-- Main Frame
+local main = Instance.new("Frame")
+main.Size = UDim2.new(0, 520, 0, 420)
+main.Position = UDim2.new(0.5, -260, 0.5, -210)
+main.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+main.BorderSizePixel = 0
+main.Visible = false
+main.Active = true
+main.Parent = gui
+
+local corner = Instance.new("UICorner", main)
+corner.CornerRadius = UDim.new(0, 14)
+
+-- Shadow Effect
+local shadow = Instance.new("ImageLabel")
+shadow.Name = "Shadow"
+shadow.BackgroundTransparency = 1
+shadow.Image = "rbxassetid://1316045217"
+shadow.ImageTransparency = 0.5
+shadow.Size = UDim2.new(1, 40, 1, 40)
+shadow.Position = UDim2.new(0, -20, 0, -20)
+shadow.ZIndex = 0
+shadow.Parent = main
+
+-- Title Bar
+local top = Instance.new("Frame")
+top.Name = "TopBar"
+top.Size = UDim2.new(1, 0, 0, 45)
+top.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+top.BorderSizePixel = 0
+top.Parent = main
+
+Instance.new("UICorner", top).CornerRadius = UDim.new(0, 14)
+
+-- ชื่อ HUB
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, -20, 1, 0)
+title.Position = UDim2.new(0, 10, 0, 0)
+title.BackgroundTransparency = 1
+title.Text = "TOU HUB (Mixed)"
+title.TextColor3 = Color3.fromRGB(0, 255, 170)
+title.Font = Enum.Font.SourceSansBold
+title.TextSize = 22
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Parent = top
+
+-- === Tab Buttons ===
+local tabFrame = Instance.new("Frame")
+tabFrame.Size = UDim2.new(1, -20, 0, 30)
+tabFrame.Position = UDim2.new(0, 10, 0, 50)
+tabFrame.BackgroundTransparency = 1
+tabFrame.Parent = main
+
+-- ปุ่ม หน้าหลัก
+local homeBtn = Instance.new("TextButton")
+homeBtn.Size = UDim2.new(0, 110, 1, 0)
+homeBtn.Position = UDim2.new(0, 0, 0, 0)
+homeBtn.BackgroundColor3 = Color3.fromRGB(0, 255, 170)
+homeBtn.Text = "หน้าหลัก"
+homeBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
+homeBtn.Font = Enum.Font.SourceSansBold
+homeBtn.TextSize = 16
+homeBtn.Parent = tabFrame
+Instance.new("UICorner", homeBtn).CornerRadius = UDim.new(0, 8)
+
+-- ปุ่ม แนะนำ
+local recommendBtn = Instance.new("TextButton")
+recommendBtn.Size = UDim2.new(0, 110, 1, 0)
+recommendBtn.Position = UDim2.new(0, 120, 0, 0)
+recommendBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+recommendBtn.Text = "แนะนำ"
+recommendBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+recommendBtn.Font = Enum.Font.SourceSansBold
+recommendBtn.TextSize = 16
+recommendBtn.Parent = tabFrame
+Instance.new("UICorner", recommendBtn).CornerRadius = UDim.new(0, 8)
+
+-- ปุ่ม Script เมืองไทย2
+local thaiBtn = Instance.new("TextButton")
+thaiBtn.Size = UDim2.new(0, 130, 1, 0)
+thaiBtn.Position = UDim2.new(0, 240, 0, 0)
+thaiBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+thaiBtn.Text = "Script เมืองไทย2"
+thaiBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+thaiBtn.Font = Enum.Font.SourceSansBold
+thaiBtn.TextSize = 16
+thaiBtn.Parent = tabFrame
+Instance.new("UICorner", thaiBtn).CornerRadius = UDim.new(0, 8)
+
+-- ปุ่ม Script ทั่วไป
+local globalBtn = Instance.new("TextButton")
+globalBtn.Size = UDim2.new(0, 110, 1, 0)
+globalBtn.Position = UDim2.new(0, 380, 0, 0)
+globalBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+globalBtn.Text = "Script ทั่วไป"
+globalBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+globalBtn.Font = Enum.Font.SourceSansBold
+globalBtn.TextSize = 16
+globalBtn.Parent = tabFrame
+Instance.new("UICorner", globalBtn).CornerRadius = UDim.new(0, 8)
+
+-- ช่อง หน้าหลัก
+local tabHome = Instance.new("Frame")
+tabHome.Name = "Home"
+tabHome.Size = UDim2.new(1, -20, 1, -95)
+tabHome.Position = UDim2.new(0, 10, 0, 80)
+tabHome.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+tabHome.BorderSizePixel = 0
+tabHome.Visible = true
+tabHome.Parent = main
+Instance.new("UICorner", tabHome).CornerRadius = UDim.new(0, 12)
+
+-- สร้าง: birdV3_123
+local creatorCredit = Instance.new("TextLabel")
+creatorCredit.Size = UDim2.new(1, 0, 0, 40)
+creatorCredit.Position = UDim2.new(0, 0, 0, 10)
+creatorCredit.BackgroundTransparency = 1
+creatorCredit.Text = "สร้าง: birdV3_123"
+creatorCredit.TextColor3 = Color3.fromRGB(0, 255, 170)
+creatorCredit.Font = Enum.Font.SourceSansBold
+creatorCredit.TextSize = 24
+creatorCredit.Parent = tabHome
+
+-- TIKTOK + COPY
+local tiktokLabel = Instance.new("TextLabel")
+tiktokLabel.Size = UDim2.new(0, 200, 0, 30)
+tiktokLabel.Position = UDim2.new(0.5, -130, 0, 55)
+tiktokLabel.BackgroundTransparency = 1
+tiktokLabel.Text = "TIKTOK"
+tiktokLabel.TextColor3 = Color3.fromRGB(255, 0, 127)
+tiktokLabel.Font = Enum.Font.SourceSansBold
+tiktokLabel.TextSize = 20
+tiktokLabel.Parent = tabHome
+
+local tiktokCopy = Instance.new("TextButton")
+tiktokCopy.Size = UDim2.new(0, 80, 0, 30)
+tiktokCopy.Position = UDim2.new(0.5, 20, 0, 55)
+tiktokCopy.BackgroundColor3 = Color3.fromRGB(0, 255, 170)
+tiktokCopy.Text = "COPY"
+tiktokCopy.TextColor3 = Color3.fromRGB(0, 0, 0)
+tiktokCopy.Font = Enum.Font.SourceSansBold
+tiktokCopy.TextSize = 16
+tiktokCopy.Parent = tabHome
+Instance.new("UICorner", tiktokCopy).CornerRadius = UDim.new(0, 8)
+tiktokCopy.MouseButton1Click:Connect(function()
+    setclipboard("https://www.tiktok.com/@tou.x1?_r=1&_t=ZS-92BqURUsgPF")
+end)
+
+-- DISCORD + COPY
+local discordLabel = Instance.new("TextLabel")
+discordLabel.Size = UDim2.new(0, 200, 0, 30)
+discordLabel.Position = UDim2.new(0.5, -130, 0, 95)
+discordLabel.BackgroundTransparency = 1
+discordLabel.Text = "DISCORD"
+discordLabel.TextColor3 = Color3.fromRGB(88, 101, 242)
+discordLabel.Font = Enum.Font.SourceSansBold
+discordLabel.TextSize = 20
+discordLabel.Parent = tabHome
+
+local discordCopy = Instance.new("TextButton")
+discordCopy.Size = UDim2.new(0, 80, 0, 30)
+discordCopy.Position = UDim2.new(0.5, 20, 0, 95)
+discordCopy.BackgroundColor3 = Color3.fromRGB(0, 255, 170)
+discordCopy.Text = "COPY"
+discordCopy.TextColor3 = Color3.fromRGB(0, 0, 0)
+discordCopy.Font = Enum.Font.SourceSansBold
+discordCopy.TextSize = 16
+discordCopy.Parent = tabHome
+Instance.new("UICorner", discordCopy).CornerRadius = UDim.new(0, 8)
+discordCopy.MouseButton1Click:Connect(function()
+    setclipboard("https://discord.gg/BrDpFKrUXZ")
+end)
+
+-- รูปตัวละคร
+local creatorAvatar = Instance.new("ImageLabel")
+creatorAvatar.Size = UDim2.new(0, 180, 0, 180)
+creatorAvatar.Position = UDim2.new(0.5, -90, 0, 170)
+creatorAvatar.BackgroundTransparency = 1
+creatorAvatar.Image = "rbxassetid://8681969145"
+creatorAvatar.Parent = tabHome
+
+-- ช่อง แนะนำ
+local tabRecommend = Instance.new("Frame")
+tabRecommend.Name = "Recommend"
+tabRecommend.Size = UDim2.new(1, -20, 1, -95)
+tabRecommend.Position = UDim2.new(0, 10, 0, 80)
+tabRecommend.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+tabRecommend.BorderSizePixel = 0
+tabRecommend.Visible = false
+tabRecommend.Parent = main
+Instance.new("UICorner", tabRecommend).CornerRadius = UDim.new(0, 12)
+
+local recommendText = Instance.new("TextLabel")
+recommendText.Size = UDim2.new(1, -20, 1, -20)
+recommendText.Position = UDim2.new(0, 10, 0, 10)
+recommendText.BackgroundTransparency = 1
+recommendText.Text = [[ยินดีต้อนรับสู่ script TOU HUB
+อนาคต จะเพิ่ม script เรื่อยๆ
+
+@@@@@@@   @@@@@@   @@@  @@@  @@@  @@@    @@@ 
+@@@@@@@  @@@@@@@@  @@@  @@@  @@@  @@@   @@@@ 
+  @@!    @@!  @@@  @@!  @@@  @@!  !@@  @@@!! 
+  !@!    !@!  @!@  !@!  @!@  !@!  @!!    !@! 
+  @!!    @!@  !@!  @!@  !@!   !@@!@!     @!@ 
+  !!!    !@!  !!!  !@!  !!!    @!!!      !@! 
+  !!:    !!:  !!!  !!:  !!!   !: :!!     !!: 
+  :!:    :!:  !:!  :!:  !:!  :!:  !:!    :!: 
+   ::    ::::: ::  ::::: ::   ::  :::    ::: 
+   :      : :  :    : :  :    :   ::      :: ]]
+recommendText.TextColor3 = Color3.fromRGB(0, 255, 170)
+recommendText.Font = Enum.Font.Code
+recommendText.TextSize = 14
+recommendText.TextXAlignment = Enum.TextXAlignment.Left
+recommendText.TextYAlignment = Enum.TextYAlignment.Top
+recommendText.TextWrapped = true
+recommendText.Parent = tabRecommend
+
+-- ช่อง Script เมืองไทย2
+local tabThai = Instance.new("Frame")
+tabThai.Name = "ThaiScripts"
+tabThai.Size = UDim2.new(1, -20, 1, -95)
+tabThai.Position = UDim2.new(0, 10, 0, 80)
+tabThai.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+tabThai.BorderSizePixel = 0
+tabThai.Visible = false
+tabThai.Parent = main
+Instance.new("UICorner", tabThai).CornerRadius = UDim.new(0, 12)
+
+-- ปุ่ม Dark admin (ขวาสุด)
+local darkAdminBtn = Instance.new("TextButton")
+darkAdminBtn.Size = UDim2.new(0, 80, 0, 30)
+darkAdminBtn.Position = UDim2.new(1, -100, 0, 50)
+darkAdminBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+darkAdminBtn.Text = "Dark admin"
+darkAdminBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+darkAdminBtn.Font = Enum.Font.SourceSansBold
+darkAdminBtn.TextSize = 14
+darkAdminBtn.Parent = tabThai
+Instance.new("UICorner", darkAdminBtn).CornerRadius = UDim.new(0, 8)
+
+-- ปุ่ม ปรับขนาดตัว (ใหม่! วางข้าง Dark admin ไล่ซ้าย)
+local sizeChangerBtn = Instance.new("TextButton")
+sizeChangerBtn.Size = UDim2.new(0, 80, 0, 30)
+sizeChangerBtn.Position = UDim2.new(1, -200, 0, 50)  -- ซ้าย Dark admin
+sizeChangerBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+sizeChangerBtn.Text = "ปรับขนาดตัว"
+sizeChangerBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+sizeChangerBtn.Font = Enum.Font.SourceSansBold
+sizeChangerBtn.TextSize = 14
+sizeChangerBtn.Parent = tabThai
+Instance.new("UICorner", sizeChangerBtn).CornerRadius = UDim.new(0, 8)
+
+-- GUI Popup สำหรับ Dark admin (เดิม)
+local darkPopup = Instance.new("Frame")
+darkPopup.Size = UDim2.new(0, 400, 0, 250)
+darkPopup.Position = UDim2.new(0.5, -200, 0.5, -125)
+darkPopup.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+darkPopup.BorderSizePixel = 0
+darkPopup.Visible = false
+darkPopup.Parent = gui
+darkPopup.ZIndex = 10
+
+local popupCorner = Instance.new("UICorner", darkPopup)
+popupCorner.CornerRadius = UDim.new(0, 16)
+
+local popupShadow = Instance.new("ImageLabel")
+popupShadow.BackgroundTransparency = 1
+popupShadow.Image = "rbxassetid://1316045217"
+popupShadow.ImageTransparency = 0.4
+popupShadow.Size = UDim2.new(1, 40, 1, 40)
+popupShadow.Position = UDim2.new(0, -20, 0, -20)
+popupShadow.ZIndex = 9
+popupShadow.Parent = darkPopup
+
+local popupTitle = Instance.new("TextLabel")
+popupTitle.Size = UDim2.new(1, 0, 0, 50)
+popupTitle.BackgroundTransparency = 1
+popupTitle.Text = "script: Dark admin"
+popupTitle.TextColor3 = Color3.fromRGB(255, 50, 50)
+popupTitle.Font = Enum.Font.SourceSansBold
+popupTitle.TextSize = 26
+popupTitle.ZIndex = 11
+popupTitle.Parent = darkPopup
+
+local popupDesc = Instance.new("TextLabel")
+popupDesc.Size = UDim2.new(1, -20, 0, 80)
+popupDesc.Position = UDim2.new(0, 10, 0, 60)
+popupDesc.BackgroundTransparency = 1
+popupDesc.Text = "คำอธิบาย: script. คำสั่งแมพ:เมืองไทย2\nมีคำสั่งเยอะโหด"
+popupDesc.TextColor3 = Color3.fromRGB(200, 200, 200)
+popupDesc.Font = Enum.Font.SourceSans
+popupDesc.TextSize = 18
+popupDesc.TextWrapped = true
+popupDesc.TextYAlignment = Enum.TextYAlignment.Top
+popupDesc.ZIndex = 11
+popupDesc.Parent = darkPopup
+
+local popupCreator = Instance.new("TextLabel")
+popupCreator.Size = UDim2.new(1, -20, 0, 30)
+popupCreator.Position = UDim2.new(0, 10, 0, 140)
+popupCreator.BackgroundTransparency = 1
+popupCreator.Text = "ผู้สร้าง: wino444"
+popupCreator.TextColor3 = Color3.fromRGB(0, 255, 170)
+popupCreator.Font = Enum.Font.SourceSansBold
+popupCreator.TextSize = 20
+popupCreator.ZIndex = 11
+popupCreator.Parent = darkPopup
+
+-- ปุ่ม RUN สำหรับ Dark admin
+local runBtnDark = Instance.new("TextButton")
+runBtnDark.Size = UDim2.new(0, 150, 0, 50)
+runBtnDark.Position = UDim2.new(0.5, -160, 1, -70)
+runBtnDark.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
+runBtnDark.Text = "RUN"
+runBtnDark.TextColor3 = Color3.fromRGB(255, 255, 255)
+runBtnDark.Font = Enum.Font.SourceSansBold
+runBtnDark.TextSize = 28
+runBtnDark.ZIndex = 11
+runBtnDark.Parent = darkPopup
+Instance.new("UICorner", runBtnDark).CornerRadius = UDim.new(0, 12)
+
+local runGradientDark = Instance.new("UIGradient")
+runGradientDark.Color = ColorSequence.new{
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 255, 0)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 150, 0))
+}
+runGradientDark.Parent = runBtnDark
+
+runBtnDark.MouseButton1Click:Connect(function()
+    loadstring(game:HttpGet("https://pastebin.com/raw/P7Y6U7UL"))()
+    darkPopup.Visible = false
+end)
+
+-- ปุ่ม ยกเลิก สำหรับ Dark admin
+local cancelBtnDark = Instance.new("TextButton")
+cancelBtnDark.Size = UDim2.new(0, 150, 0, 50)
+cancelBtnDark.Position = UDim2.new(0.5, 10, 1, -70)
+cancelBtnDark.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+cancelBtnDark.Text = "ยกเลิก"
+cancelBtnDark.TextColor3 = Color3.fromRGB(255, 255, 255)
+cancelBtnDark.Font = Enum.Font.SourceSansBold
+cancelBtnDark.TextSize = 28
+cancelBtnDark.ZIndex = 11
+cancelBtnDark.Parent = darkPopup
+Instance.new("UICorner", cancelBtnDark).CornerRadius = UDim.new(0, 12)
+cancelBtnDark.MouseButton1Click:Connect(function()
+    darkPopup.Visible = false
+end)
+
+-- ปุ่มปิด X สำหรับ Dark admin
+local closePopupDark = Instance.new("TextButton")
+closePopupDark.Size = UDim2.new(0, 30, 0, 30)
+closePopupDark.Position = UDim2.new(1, -40, 0, 10)
+closePopupDark.BackgroundTransparency = 1
+closePopupDark.Text = "X"
+closePopupDark.TextColor3 = Color3.fromRGB(255, 100, 100)
+closePopupDark.Font = Enum.Font.SourceSansBold
+closePopupDark.TextSize = 24
+closePopupDark.ZIndex = 11
+closePopupDark.Parent = darkPopup
+closePopupDark.MouseButton1Click:Connect(function()
+    darkPopup.Visible = false
+end)
+
+-- เมื่อกดปุ่ม Dark admin → โชว์ Popup
+darkAdminBtn.MouseButton1Click:Connect(function()
+    darkPopup.Visible = true
+end)
+
+-- GUI Popup สำหรับ ปรับขนาดตัว (ใหม่!)
+local sizePopup = Instance.new("Frame")
+sizePopup.Size = UDim2.new(0, 400, 0, 250)
+sizePopup.Position = UDim2.new(0.5, -200, 0.5, -125)
+sizePopup.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+sizePopup.BorderSizePixel = 0
+sizePopup.Visible = false
+sizePopup.Parent = gui
+sizePopup.ZIndex = 10
+
+local sizePopupCorner = Instance.new("UICorner", sizePopup)
+sizePopupCorner.CornerRadius = UDim.new(0, 16)
+
+local sizePopupShadow = Instance.new("ImageLabel")
+sizePopupShadow.BackgroundTransparency = 1
+sizePopupShadow.Image = "rbxassetid://1316045217"
+sizePopupShadow.ImageTransparency = 0.4
+sizePopupShadow.Size = UDim2.new(1, 40, 1, 40)
+sizePopupShadow.Position = UDim2.new(0, -20, 0, -20)
+sizePopupShadow.ZIndex = 9
+sizePopupShadow.Parent = sizePopup
+
+local sizePopupTitle = Instance.new("TextLabel")
+sizePopupTitle.Size = UDim2.new(1, 0, 0, 50)
+sizePopupTitle.BackgroundTransparency = 1
+sizePopupTitle.Text = "script:ปรับขนาดตัว"
+sizePopupTitle.TextColor3 = Color3.fromRGB(0, 200, 255)
+sizePopupTitle.Font = Enum.Font.SourceSansBold
+sizePopupTitle.TextSize = 26
+sizePopupTitle.ZIndex = 11
+sizePopupTitle.Parent = sizePopup
+
+local sizePopupDesc = Instance.new("TextLabel")
+sizePopupDesc.Size = UDim2.new(1, -20, 0, 80)
+sizePopupDesc.Position = UDim2.new(0, 10, 0, 60)
+sizePopupDesc.BackgroundTransparency = 1
+sizePopupDesc.Text = "คำอธิบาย: script. คำสั่งแมพ:เมืองไทย2\nปรับขนาดความสูงฟรี โดยไม่ต้องเติมเกมพาส😇"
+sizePopupDesc.TextColor3 = Color3.fromRGB(200, 200, 200)
+sizePopupDesc.Font = Enum.Font.SourceSans
+sizePopupDesc.TextSize = 18
+sizePopupDesc.TextWrapped = true
+sizePopupDesc.TextYAlignment = Enum.TextYAlignment.Top
+sizePopupDesc.ZIndex = 11
+sizePopupDesc.Parent = sizePopup
+
+local sizePopupCreator = Instance.new("TextLabel")
+sizePopupCreator.Size = UDim2.new(1, -20, 0, 30)
+sizePopupCreator.Position = UDim2.new(0, 10, 0, 140)
+sizePopupCreator.BackgroundTransparency = 1
+sizePopupCreator.Text = "ผู้สร้าง: TOUx1"
+sizePopupCreator.TextColor3 = Color3.fromRGB(0, 255, 170)
+sizePopupCreator.Font = Enum.Font.SourceSansBold
+sizePopupCreator.TextSize = 20
+sizePopupCreator.ZIndex = 11
+sizePopupCreator.Parent = sizePopup
+
+-- ปุ่ม RUN สำหรับ ปรับขนาดตัว
+local runBtnSize = Instance.new("TextButton")
+runBtnSize.Size = UDim2.new(0, 150, 0, 50)
+runBtnSize.Position = UDim2.new(0.5, -160, 1, -70)
+runBtnSize.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
+runBtnSize.Text = "RUN"
+runBtnSize.TextColor3 = Color3.fromRGB(255, 255, 255)
+runBtnSize.Font = Enum.Font.SourceSansBold
+runBtnSize.TextSize = 28
+runBtnSize.ZIndex = 11
+runBtnSize.Parent = sizePopup
+Instance.new("UICorner", runBtnSize).CornerRadius = UDim.new(0, 12)
+
+local runGradientSize = Instance.new("UIGradient")
+runGradientSize.Color = ColorSequence.new{
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 255, 0)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 150, 0))
+}
+runGradientSize.Parent = runBtnSize
+
+runBtnSize.MouseButton1Click:Connect(function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/TOUx1/Roblox-script/refs/heads/main/Size%20play"))()
+    sizePopup.Visible = false
+end)
+
+-- ปุ่ม ยกเลิก สำหรับ ปรับขนาดตัว
+local cancelBtnSize = Instance.new("TextButton")
+cancelBtnSize.Size = UDim2.new(0, 150, 0, 50)
+cancelBtnSize.Position = UDim2.new(0.5, 10, 1, -70)
+cancelBtnSize.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+cancelBtnSize.Text = "ยกเลิก"
+cancelBtnSize.TextColor3 = Color3.fromRGB(255, 255, 255)
+cancelBtnSize.Font = Enum.Font.SourceSansBold
+cancelBtnSize.TextSize = 28
+cancelBtnSize.ZIndex = 11
+cancelBtnSize.Parent = sizePopup
+Instance.new("UICorner", cancelBtnSize).CornerRadius = UDim.new(0, 12)
+cancelBtnSize.MouseButton1Click:Connect(function()
+    sizePopup.Visible = false
+end)
+
+-- ปุ่มปิด X สำหรับ ปรับขนาดตัว
+local closePopupSize = Instance.new("TextButton")
+closePopupSize.Size = UDim2.new(0, 30, 0, 30)
+closePopupSize.Position = UDim2.new(1, -40, 0, 10)
+closePopupSize.BackgroundTransparency = 1
+closePopupSize.Text = "X"
+closePopupSize.TextColor3 = Color3.fromRGB(255, 100, 100)
+closePopupSize.Font = Enum.Font.SourceSansBold
+closePopupSize.TextSize = 24
+closePopupSize.ZIndex = 11
+closePopupSize.Parent = sizePopup
+closePopupSize.MouseButton1Click:Connect(function()
+    sizePopup.Visible = false
+end)
+
+-- เมื่อกดปุ่ม ปรับขนาดตัว → โชว์ Popup
+sizeChangerBtn.MouseButton1Click:Connect(function()
+    sizePopup.Visible = true
+end)
+
+-- ช่อง Script ทั่วไป
+local tabGlobal = Instance.new("Frame")
+tabGlobal.Name = "GlobalScripts"
+tabGlobal.Size = UDim2.new(1, -20, 1, -95)
+tabGlobal.Position = UDim2.new(0, 10, 0, 80)
+tabGlobal.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+tabGlobal.BorderSizePixel = 0
+tabGlobal.Visible = false
+tabGlobal.Parent = main
+Instance.new("UICorner", tabGlobal).CornerRadius = UDim.new(0, 12)
+
+local globalText = Instance.new("TextLabel")
+globalText.Size = UDim2.new(1, -20, 1, -20)
+globalText.Position = UDim2.new(0, 10, 0, 10)
+globalText.BackgroundTransparency = 1
+globalText.Text = "Script ทั่วไป\n(สคริปต์สากล ระเบิดทุกเกม 🌍💥\nเร็ว ๆ นี้มาเต็ม!)"
+globalText.TextColor3 = Color3.fromRGB(100, 255, 100)
+globalText.Font = Enum.Font.SourceSansBold
+globalText.TextSize = 22
+globalText.TextWrapped = true
+globalText.Parent = tabGlobal
+
+-- ฟังก์ชันสลับแท็บ
+local function switchTab(tab)
+	tabHome.Visible = (tab == "home")
+	tabRecommend.Visible = (tab == "recommend")
+	tabThai.Visible = (tab == "thai")
+	tabGlobal.Visible = (tab == "global")
+	
+	homeBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+	homeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	recommendBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+	recommendBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	thaiBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+	thaiBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	globalBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+	globalBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	
+	if tab == "home" then
+		homeBtn.BackgroundColor3 = Color3.fromRGB(0, 255, 170)
+		homeBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
+	elseif tab == "recommend" then
+		recommendBtn.BackgroundColor3 = Color3.fromRGB(0, 255, 170)
+		recommendBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
+	elseif tab == "thai" then
+		thaiBtn.BackgroundColor3 = Color3.fromRGB(0, 255, 170)
+		thaiBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
+	elseif tab == "global" then
+		globalBtn.BackgroundColor3 = Color3.fromRGB(0, 255, 170)
+		globalBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
+	end
+end
+
+homeBtn.MouseButton1Click:Connect(function() switchTab("home") end)
+recommendBtn.MouseButton1Click:Connect(function() switchTab("recommend") end)
+thaiBtn.MouseButton1Click:Connect(function() switchTab("thai") end)
+globalBtn.MouseButton1Click:Connect(function() switchTab("global") end)
+
+-- ปุ่ม Toggle GUI - ลากได้ + กลางด้านซ้าย
+local toggleBtn = Instance.new("TextButton")
+toggleBtn.Name = "ToggleButton"
+toggleBtn.Size = UDim2.new(0, 150, 0, 45)
+toggleBtn.Position = UDim2.new(0, 20, 0.5, -22.5)
+toggleBtn.BackgroundColor3 = Color3.fromRGB(0, 255, 170)
+toggleBtn.Text = "OPEN TOU HUB"
+toggleBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
+toggleBtn.Font = Enum.Font.SourceSansBold
+toggleBtn.TextSize = 16
+toggleBtn.AutoButtonColor = false
+toggleBtn.Active = true
+toggleBtn.Draggable = true
+toggleBtn.Parent = gui
+
+local btnCorner = Instance.new("UICorner", toggleBtn)
+btnCorner.CornerRadius = UDim.new(0, 12)
+
+-- Toggle Logic
+local isOpen = false
+toggleBtn.MouseButton1Click:Connect(function()
+	isOpen = not isOpen
+	main.Visible = isOpen
+	if isOpen then
+		toggleBtn.Text = "CLOSE TOU HUB"
+		TweenService:Create(main, TweenInfo.new(0.4, Enum.EasingStyle.Quint), {Position = UDim2.new(0.5, -260, 0.5, -210)}):Play()
+	else
+		toggleBtn.Text = "OPEN TOU HUB"
+	end
+end)
+
+-- ระบบลากจอหลัก
+local dragging = false
+local dragStart = nil
+local startPos = nil
+
+top.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = true
+		dragStart = input.Position
+		startPos = main.Position
+	end
+end)
+
+top.InputEnded:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = false
+	end
+end)
+
+UIS.InputChanged:Connect(function(input)
+	if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+		local delta = input.Position - dragStart
+		main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+	end
+end)
+
+print("TOU HUB (Mixed) เพิ่มปุ่มปรับขนาดตัวสำเร็จ 💀🖤 | ช่องเมืองไทย2 โหดยิ่งขึ้น 😇 | ลุยย่อขยายตัวฟรีได้เลย exploiter!")
