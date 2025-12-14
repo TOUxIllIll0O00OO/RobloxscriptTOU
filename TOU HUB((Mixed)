@@ -1,6 +1,6 @@
--- TOU HUB (Mixed) - Ultimate Exploiter GUI TOU HUB V2 Edition 💀🔥🖤
--- LocalScript - เพิ่มปุ่ม "TOU HUB V2" ในช่อง Script เมืองไทย2 + Popup โหด 😈🩸
--- พลังแห่ง TOU HUB V2 ถูกปลดปล่อยแล้ว exploiter!
+-- TOU HUB (Mixed) - Ultimate Exploiter GUI Speed Changer Edition 💀🔥🖤
+-- LocalScript - เพิ่มปุ่ม "ความเร็ว" ในช่อง Script ทั่วไป + Popup โหด 😈🩸
+-- พลังแห่งความเร็วไร้ขีดจำกัดถูกปลดปล่อยแล้ว exploiter!
 
 local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
@@ -277,10 +277,10 @@ moneySpamBtn.TextSize = 14
 moneySpamBtn.Parent = tabThai
 Instance.new("UICorner", moneySpamBtn).CornerRadius = UDim.new(0, 8)
 
--- ปุ่ม TOU HUB V2 (ใหม่! วางไล่ซ้าย)
+-- ปุ่ม TOU HUB V2
 local touV2Btn = Instance.new("TextButton")
 touV2Btn.Size = UDim2.new(0, 80, 0, 30)
-touV2Btn.Position = UDim2.new(1, -400, 0, 50)  -- ซ้าย สแปมเงิน
+touV2Btn.Position = UDim2.new(1, -400, 0, 50)
 touV2Btn.BackgroundColor3 = Color3.fromRGB(255, 170, 0)
 touV2Btn.Text = "TOU HUB V2"
 touV2Btn.TextColor3 = Color3.fromRGB(0, 0, 0)
@@ -288,474 +288,6 @@ touV2Btn.Font = Enum.Font.SourceSansBold
 touV2Btn.TextSize = 14
 touV2Btn.Parent = tabThai
 Instance.new("UICorner", touV2Btn).CornerRadius = UDim.new(0, 8)
-
--- GUI Popup สำหรับ Dark admin
-local darkPopup = Instance.new("Frame")
-darkPopup.Size = UDim2.new(0, 400, 0, 250)
-darkPopup.Position = UDim2.new(0.5, -200, 0.5, -125)
-darkPopup.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-darkPopup.BorderSizePixel = 0
-darkPopup.Visible = false
-darkPopup.Parent = gui
-darkPopup.ZIndex = 10
-
-local popupCorner = Instance.new("UICorner", darkPopup)
-popupCorner.CornerRadius = UDim.new(0, 16)
-
-local popupShadow = Instance.new("ImageLabel")
-popupShadow.BackgroundTransparency = 1
-popupShadow.Image = "rbxassetid://1316045217"
-popupShadow.ImageTransparency = 0.4
-popupShadow.Size = UDim2.new(1, 40, 1, 40)
-popupShadow.Position = UDim2.new(0, -20, 0, -20)
-popupShadow.ZIndex = 9
-popupShadow.Parent = darkPopup
-
-local popupTitle = Instance.new("TextLabel")
-popupTitle.Size = UDim2.new(1, 0, 0, 50)
-popupTitle.BackgroundTransparency = 1
-popupTitle.Text = "script: Dark admin"
-popupTitle.TextColor3 = Color3.fromRGB(255, 50, 50)
-popupTitle.Font = Enum.Font.SourceSansBold
-popupTitle.TextSize = 26
-popupTitle.ZIndex = 11
-popupTitle.Parent = darkPopup
-
-local popupDesc = Instance.new("TextLabel")
-popupDesc.Size = UDim2.new(1, -20, 0, 80)
-popupDesc.Position = UDim2.new(0, 10, 0, 60)
-popupDesc.BackgroundTransparency = 1
-popupDesc.Text = "คำอธิบาย: script. คำสั่งแมพ:เมืองไทย2\nมีคำสั่งเยอะโหด"
-popupDesc.TextColor3 = Color3.fromRGB(200, 200, 200)
-popupDesc.Font = Enum.Font.SourceSans
-popupDesc.TextSize = 18
-popupDesc.TextWrapped = true
-popupDesc.TextYAlignment = Enum.TextYAlignment.Top
-popupDesc.ZIndex = 11
-popupDesc.Parent = darkPopup
-
-local popupCreator = Instance.new("TextLabel")
-popupCreator.Size = UDim2.new(1, -20, 0, 30)
-popupCreator.Position = UDim2.new(0, 10, 0, 140)
-popupCreator.BackgroundTransparency = 1
-popupCreator.Text = "ผู้สร้าง: wino444"
-popupCreator.TextColor3 = Color3.fromRGB(0, 255, 170)
-popupCreator.Font = Enum.Font.SourceSansBold
-popupCreator.TextSize = 20
-popupCreator.ZIndex = 11
-popupCreator.Parent = darkPopup
-
--- ปุ่ม RUN สำหรับ Dark admin
-local runBtnDark = Instance.new("TextButton")
-runBtnDark.Size = UDim2.new(0, 150, 0, 50)
-runBtnDark.Position = UDim2.new(0.5, -160, 1, -70)
-runBtnDark.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
-runBtnDark.Text = "RUN"
-runBtnDark.TextColor3 = Color3.fromRGB(255, 255, 255)
-runBtnDark.Font = Enum.Font.SourceSansBold
-runBtnDark.TextSize = 28
-runBtnDark.ZIndex = 11
-runBtnDark.Parent = darkPopup
-Instance.new("UICorner", runBtnDark).CornerRadius = UDim.new(0, 12)
-
-local runGradientDark = Instance.new("UIGradient")
-runGradientDark.Color = ColorSequence.new{
-	ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 255, 0)),
-	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 150, 0))
-}
-runGradientDark.Parent = runBtnDark
-
-runBtnDark.MouseButton1Click:Connect(function()
-    loadstring(game:HttpGet("https://pastebin.com/raw/P7Y6U7UL"))()
-    darkPopup.Visible = false
-end)
-
--- ปุ่ม ยกเลิก สำหรับ Dark admin
-local cancelBtnDark = Instance.new("TextButton")
-cancelBtnDark.Size = UDim2.new(0, 150, 0, 50)
-cancelBtnDark.Position = UDim2.new(0.5, 10, 1, -70)
-cancelBtnDark.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
-cancelBtnDark.Text = "ยกเลิก"
-cancelBtnDark.TextColor3 = Color3.fromRGB(255, 255, 255)
-cancelBtnDark.Font = Enum.Font.SourceSansBold
-cancelBtnDark.TextSize = 28
-cancelBtnDark.ZIndex = 11
-cancelBtnDark.Parent = darkPopup
-Instance.new("UICorner", cancelBtnDark).CornerRadius = UDim.new(0, 12)
-cancelBtnDark.MouseButton1Click:Connect(function()
-    darkPopup.Visible = false
-end)
-
--- ปุ่มปิด X สำหรับ Dark admin
-local closePopupDark = Instance.new("TextButton")
-closePopupDark.Size = UDim2.new(0, 30, 0, 30)
-closePopupDark.Position = UDim2.new(1, -40, 0, 10)
-closePopupDark.BackgroundTransparency = 1
-closePopupDark.Text = "X"
-closePopupDark.TextColor3 = Color3.fromRGB(255, 100, 100)
-closePopupDark.Font = Enum.Font.SourceSansBold
-closePopupDark.TextSize = 24
-closePopupDark.ZIndex = 11
-closePopupDark.Parent = darkPopup
-closePopupDark.MouseButton1Click:Connect(function()
-    darkPopup.Visible = false
-end)
-
--- เมื่อกดปุ่ม Dark admin → โชว์ Popup
-darkAdminBtn.MouseButton1Click:Connect(function()
-    darkPopup.Visible = true
-end)
-
--- GUI Popup สำหรับ ปรับขนาดตัว
-local sizePopup = Instance.new("Frame")
-sizePopup.Size = UDim2.new(0, 400, 0, 250)
-sizePopup.Position = UDim2.new(0.5, -200, 0.5, -125)
-sizePopup.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-sizePopup.BorderSizePixel = 0
-sizePopup.Visible = false
-sizePopup.Parent = gui
-sizePopup.ZIndex = 10
-
-local sizePopupCorner = Instance.new("UICorner", sizePopup)
-sizePopupCorner.CornerRadius = UDim.new(0, 16)
-
-local sizePopupShadow = Instance.new("ImageLabel")
-sizePopupShadow.BackgroundTransparency = 1
-sizePopupShadow.Image = "rbxassetid://1316045217"
-sizePopupShadow.ImageTransparency = 0.4
-sizePopupShadow.Size = UDim2.new(1, 40, 1, 40)
-sizePopupShadow.Position = UDim2.new(0, -20, 0, -20)
-sizePopupShadow.ZIndex = 9
-sizePopupShadow.Parent = sizePopup
-
-local sizePopupTitle = Instance.new("TextLabel")
-sizePopupTitle.Size = UDim2.new(1, 0, 0, 50)
-sizePopupTitle.BackgroundTransparency = 1
-sizePopupTitle.Text = "script:ปรับขนาดตัว"
-sizePopupTitle.TextColor3 = Color3.fromRGB(0, 200, 255)
-sizePopupTitle.Font = Enum.Font.SourceSansBold
-sizePopupTitle.TextSize = 26
-sizePopupTitle.ZIndex = 11
-sizePopupTitle.Parent = sizePopup
-
-local sizePopupDesc = Instance.new("TextLabel")
-sizePopupDesc.Size = UDim2.new(1, -20, 0, 80)
-sizePopupDesc.Position = UDim2.new(0, 10, 0, 60)
-sizePopupDesc.BackgroundTransparency = 1
-sizePopupDesc.Text = "คำอธิบาย: script. คำสั่งแมพ:เมืองไทย2\nปรับขนาดความสูงฟรี โดยไม่ต้องเติมเกมพาส😇"
-sizePopupDesc.TextColor3 = Color3.fromRGB(200, 200, 200)
-sizePopupDesc.Font = Enum.Font.SourceSans
-sizePopupDesc.TextSize = 18
-sizePopupDesc.TextWrapped = true
-sizePopupDesc.TextYAlignment = Enum.TextYAlignment.Top
-sizePopupDesc.ZIndex = 11
-sizePopupDesc.Parent = sizePopup
-
-local sizePopupCreator = Instance.new("TextLabel")
-sizePopupCreator.Size = UDim2.new(1, -20, 0, 30)
-sizePopupCreator.Position = UDim2.new(0, 10, 0, 140)
-sizePopupCreator.BackgroundTransparency = 1
-sizePopupCreator.Text = "ผู้สร้าง: TOUx1"
-sizePopupCreator.TextColor3 = Color3.fromRGB(0, 255, 170)
-sizePopupCreator.Font = Enum.Font.SourceSansBold
-sizePopupCreator.TextSize = 20
-sizePopupCreator.ZIndex = 11
-sizePopupCreator.Parent = sizePopup
-
--- ปุ่ม RUN สำหรับ ปรับขนาดตัว
-local runBtnSize = Instance.new("TextButton")
-runBtnSize.Size = UDim2.new(0, 150, 0, 50)
-runBtnSize.Position = UDim2.new(0.5, -160, 1, -70)
-runBtnSize.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
-runBtnSize.Text = "RUN"
-runBtnSize.TextColor3 = Color3.fromRGB(255, 255, 255)
-runBtnSize.Font = Enum.Font.SourceSansBold
-runBtnSize.TextSize = 28
-runBtnSize.ZIndex = 11
-runBtnSize.Parent = sizePopup
-Instance.new("UICorner", runBtnSize).CornerRadius = UDim.new(0, 12)
-
-local runGradientSize = Instance.new("UIGradient")
-runGradientSize.Color = ColorSequence.new{
-	ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 255, 0)),
-	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 150, 0))
-}
-runGradientSize.Parent = runBtnSize
-
-runBtnSize.MouseButton1Click:Connect(function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/TOUx1/Roblox-script/refs/heads/main/Size%20play"))()
-    sizePopup.Visible = false
-end)
-
--- ปุ่ม ยกเลิก สำหรับ ปรับขนาดตัว
-local cancelBtnSize = Instance.new("TextButton")
-cancelBtnSize.Size = UDim2.new(0, 150, 0, 50)
-cancelBtnSize.Position = UDim2.new(0.5, 10, 1, -70)
-cancelBtnSize.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
-cancelBtnSize.Text = "ยกเลิก"
-cancelBtnSize.TextColor3 = Color3.fromRGB(255, 255, 255)
-cancelBtnSize.Font = Enum.Font.SourceSansBold
-cancelBtnSize.TextSize = 28
-cancelBtnSize.ZIndex = 11
-cancelBtnSize.Parent = sizePopup
-Instance.new("UICorner", cancelBtnSize).CornerRadius = UDim.new(0, 12)
-cancelBtnSize.MouseButton1Click:Connect(function()
-    sizePopup.Visible = false
-end)
-
--- ปุ่มปิด X สำหรับ ปรับขนาดตัว
-local closePopupSize = Instance.new("TextButton")
-closePopupSize.Size = UDim2.new(0, 30, 0, 30)
-closePopupSize.Position = UDim2.new(1, -40, 0, 10)
-closePopupSize.BackgroundTransparency = 1
-closePopupSize.Text = "X"
-closePopupSize.TextColor3 = Color3.fromRGB(255, 100, 100)
-closePopupSize.Font = Enum.Font.SourceSansBold
-closePopupSize.TextSize = 24
-closePopupSize.ZIndex = 11
-closePopupSize.Parent = sizePopup
-closePopupSize.MouseButton1Click:Connect(function()
-    sizePopup.Visible = false
-end)
-
--- เมื่อกดปุ่ม ปรับขนาดตัว → โชว์ Popup
-sizeChangerBtn.MouseButton1Click:Connect(function()
-    sizePopup.Visible = true
-end)
-
--- GUI Popup สำหรับ สแปมเงิน
-local moneySpamPopup = Instance.new("Frame")
-moneySpamPopup.Size = UDim2.new(0, 400, 0, 250)
-moneySpamPopup.Position = UDim2.new(0.5, -200, 0.5, -125)
-moneySpamPopup.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-moneySpamPopup.BorderSizePixel = 0
-moneySpamPopup.Visible = false
-moneySpamPopup.Parent = gui
-moneySpamPopup.ZIndex = 10
-
-local moneySpamPopupCorner = Instance.new("UICorner", moneySpamPopup)
-moneySpamPopupCorner.CornerRadius = UDim.new(0, 16)
-
-local moneySpamPopupShadow = Instance.new("ImageLabel")
-moneySpamPopupShadow.BackgroundTransparency = 1
-moneySpamPopupShadow.Image = "rbxassetid://1316045217"
-moneySpamPopupShadow.ImageTransparency = 0.4
-moneySpamPopupShadow.Size = UDim2.new(1, 40, 1, 40)
-moneySpamPopupShadow.Position = UDim2.new(0, -20, 0, -20)
-moneySpamPopupShadow.ZIndex = 9
-moneySpamPopupShadow.Parent = moneySpamPopup
-
-local moneySpamPopupTitle = Instance.new("TextLabel")
-moneySpamPopupTitle.Size = UDim2.new(1, 0, 0, 50)
-moneySpamPopupTitle.BackgroundTransparency = 1
-moneySpamPopupTitle.Text = "script:สแปมเงิน"
-moneySpamPopupTitle.TextColor3 = Color3.fromRGB(0, 255, 0)
-moneySpamPopupTitle.Font = Enum.Font.SourceSansBold
-moneySpamPopupTitle.TextSize = 26
-moneySpamPopupTitle.ZIndex = 11
-moneySpamPopupTitle.Parent = moneySpamPopup
-
-local moneySpamPopupDesc = Instance.new("TextLabel")
-moneySpamPopupDesc.Size = UDim2.new(1, -20, 0, 80)
-moneySpamPopupDesc.Position = UDim2.new(0, 10, 0, 60)
-moneySpamPopupDesc.BackgroundTransparency = 1
-moneySpamPopupDesc.Text = "คำอธิบาย: script. สแปมเงิน ยิ่งใส่จำนวนเยอะยิ่งแล็ค\nถ้าสแปมใส่คนเยอะๆ คนจะหลุดไม่ก็ค้าง🤫"
-moneySpamPopupDesc.TextColor3 = Color3.fromRGB(200, 200, 200)
-moneySpamPopupDesc.Font = Enum.Font.SourceSans
-moneySpamPopupDesc.TextSize = 18
-moneySpamPopupDesc.TextWrapped = true
-moneySpamPopupDesc.TextYAlignment = Enum.TextYAlignment.Top
-moneySpamPopupDesc.ZIndex = 11
-moneySpamPopupDesc.Parent = moneySpamPopup
-
-local moneySpamPopupCreator = Instance.new("TextLabel")
-moneySpamPopupCreator.Size = UDim2.new(1, -20, 0, 30)
-moneySpamPopupCreator.Position = UDim2.new(0, 10, 0, 140)
-moneySpamPopupCreator.BackgroundTransparency = 1
-moneySpamPopupCreator.Text = "ผู้สร้าง: TOUx1"
-moneySpamPopupCreator.TextColor3 = Color3.fromRGB(0, 255, 170)
-moneySpamPopupCreator.Font = Enum.Font.SourceSansBold
-moneySpamPopupCreator.TextSize = 20
-moneySpamPopupCreator.ZIndex = 11
-moneySpamPopupCreator.Parent = moneySpamPopup
-
--- ปุ่ม RUN สำหรับ สแปมเงิน
-local runBtnMoney = Instance.new("TextButton")
-runBtnMoney.Size = UDim2.new(0, 150, 0, 50)
-runBtnMoney.Position = UDim2.new(0.5, -160, 1, -70)
-runBtnMoney.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
-runBtnMoney.Text = "RUN"
-runBtnMoney.TextColor3 = Color3.fromRGB(255, 255, 255)
-runBtnMoney.Font = Enum.Font.SourceSansBold
-runBtnMoney.TextSize = 28
-runBtnMoney.ZIndex = 11
-runBtnMoney.Parent = moneySpamPopup
-Instance.new("UICorner", runBtnMoney).CornerRadius = UDim.new(0, 12)
-
-local runGradientMoney = Instance.new("UIGradient")
-runGradientMoney.Color = ColorSequence.new{
-	ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 255, 0)),
-	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 150, 0))
-}
-runGradientMoney.Parent = runBtnMoney
-
-runBtnMoney.MouseButton1Click:Connect(function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/TOUx1/Roblox-script/refs/heads/main/Spam%20money"))()
-    moneySpamPopup.Visible = false
-end)
-
--- ปุ่ม ยกเลิก สำหรับ สแปมเงิน
-local cancelBtnMoney = Instance.new("TextButton")
-cancelBtnMoney.Size = UDim2.new(0, 150, 0, 50)
-cancelBtnMoney.Position = UDim2.new(0.5, 10, 1, -70)
-cancelBtnMoney.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
-cancelBtnMoney.Text = "ยกเลิก"
-cancelBtnMoney.TextColor3 = Color3.fromRGB(255, 255, 255)
-cancelBtnMoney.Font = Enum.Font.SourceSansBold
-cancelBtnMoney.TextSize = 28
-cancelBtnMoney.ZIndex = 11
-cancelBtnMoney.Parent = moneySpamPopup
-Instance.new("UICorner", cancelBtnMoney).CornerRadius = UDim.new(0, 12)
-cancelBtnMoney.MouseButton1Click:Connect(function()
-    moneySpamPopup.Visible = false
-end)
-
--- ปุ่มปิด X สำหรับ สแปมเงิน
-local closePopupMoney = Instance.new("TextButton")
-closePopupMoney.Size = UDim2.new(0, 30, 0, 30)
-closePopupMoney.Position = UDim2.new(1, -40, 0, 10)
-closePopupMoney.BackgroundTransparency = 1
-closePopupMoney.Text = "X"
-closePopupMoney.TextColor3 = Color3.fromRGB(255, 100, 100)
-closePopupMoney.Font = Enum.Font.SourceSansBold
-closePopupMoney.TextSize = 24
-closePopupMoney.ZIndex = 11
-closePopupMoney.Parent = moneySpamPopup
-closePopupMoney.MouseButton1Click:Connect(function()
-    moneySpamPopup.Visible = false
-end)
-
--- เมื่อกดปุ่ม สแปมเงิน → โชว์ Popup
-moneySpamBtn.MouseButton1Click:Connect(function()
-    moneySpamPopup.Visible = true
-end)
-
--- GUI Popup สำหรับ TOU HUB V2 (ใหม่!)
-local touV2Popup = Instance.new("Frame")
-touV2Popup.Size = UDim2.new(0, 400, 0, 250)
-touV2Popup.Position = UDim2.new(0.5, -200, 0.5, -125)
-touV2Popup.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-touV2Popup.BorderSizePixel = 0
-touV2Popup.Visible = false
-touV2Popup.Parent = gui
-touV2Popup.ZIndex = 10
-
-local touV2PopupCorner = Instance.new("UICorner", touV2Popup)
-touV2PopupCorner.CornerRadius = UDim.new(0, 16)
-
-local touV2PopupShadow = Instance.new("ImageLabel")
-touV2PopupShadow.BackgroundTransparency = 1
-touV2PopupShadow.Image = "rbxassetid://1316045217"
-touV2PopupShadow.ImageTransparency = 0.4
-touV2PopupShadow.Size = UDim2.new(1, 40, 1, 40)
-touV2PopupShadow.Position = UDim2.new(0, -20, 0, -20)
-touV2PopupShadow.ZIndex = 9
-touV2PopupShadow.Parent = touV2Popup
-
-local touV2PopupTitle = Instance.new("TextLabel")
-touV2PopupTitle.Size = UDim2.new(1, 0, 0, 50)
-touV2PopupTitle.BackgroundTransparency = 1
-touV2PopupTitle.Text = "script:TOU HUBV2"
-touV2PopupTitle.TextColor3 = Color3.fromRGB(255, 170, 0)
-touV2PopupTitle.Font = Enum.Font.SourceSansBold
-touV2PopupTitle.TextSize = 26
-touV2PopupTitle.ZIndex = 11
-touV2PopupTitle.Parent = touV2Popup
-
-local touV2PopupDesc = Instance.new("TextLabel")
-touV2PopupDesc.Size = UDim2.new(1, -20, 0, 80)
-touV2PopupDesc.Position = UDim2.new(0, 10, 0, 60)
-touV2PopupDesc.BackgroundTransparency = 1
-touV2PopupDesc.Text = "คำอธิบาย: script. แมพเมืองไทย2 มีฟามเงิน,เปลี่ยนสีชื่อเท่ๆ\n,เปลี่ยนสีลำโพงติดหลัง,วาปไปจุดต่างฯลฯ"
-touV2PopupDesc.TextColor3 = Color3.fromRGB(200, 200, 200)
-touV2PopupDesc.Font = Enum.Font.SourceSans
-touV2PopupDesc.TextSize = 18
-touV2PopupDesc.TextWrapped = true
-touV2PopupDesc.TextYAlignment = Enum.TextYAlignment.Top
-touV2PopupDesc.ZIndex = 11
-touV2PopupDesc.Parent = touV2Popup
-
-local touV2PopupCreator = Instance.new("TextLabel")
-touV2PopupCreator.Size = UDim2.new(1, -20, 0, 30)
-touV2PopupCreator.Position = UDim2.new(0, 10, 0, 140)
-touV2PopupCreator.BackgroundTransparency = 1
-touV2PopupCreator.Text = "ผู้สร้าง: TOUx1"
-touV2PopupCreator.TextColor3 = Color3.fromRGB(0, 255, 170)
-touV2PopupCreator.Font = Enum.Font.SourceSansBold
-touV2PopupCreator.TextSize = 20
-touV2PopupCreator.ZIndex = 11
-touV2PopupCreator.Parent = touV2Popup
-
--- ปุ่ม RUN สำหรับ TOU HUB V2
-local runBtnV2 = Instance.new("TextButton")
-runBtnV2.Size = UDim2.new(0, 150, 0, 50)
-runBtnV2.Position = UDim2.new(0.5, -160, 1, -70)
-runBtnV2.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
-runBtnV2.Text = "RUN"
-runBtnV2.TextColor3 = Color3.fromRGB(255, 255, 255)
-runBtnV2.Font = Enum.Font.SourceSansBold
-runBtnV2.TextSize = 28
-runBtnV2.ZIndex = 11
-runBtnV2.Parent = touV2Popup
-Instance.new("UICorner", runBtnV2).CornerRadius = UDim.new(0, 12)
-
-local runGradientV2 = Instance.new("UIGradient")
-runGradientV2.Color = ColorSequence.new{
-	ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 255, 0)),
-	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 150, 0))
-}
-runGradientV2.Parent = runBtnV2
-
-runBtnV2.MouseButton1Click:Connect(function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/TOUx1/Roblox-script/refs/heads/main/TOU%20HUB%20V2"))()
-    touV2Popup.Visible = false
-end)
-
--- ปุ่ม ยกเลิก สำหรับ TOU HUB V2
-local cancelBtnV2 = Instance.new("TextButton")
-cancelBtnV2.Size = UDim2.new(0, 150, 0, 50)
-cancelBtnV2.Position = UDim2.new(0.5, 10, 1, -70)
-cancelBtnV2.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
-cancelBtnV2.Text = "ยกเลิก"
-cancelBtnV2.TextColor3 = Color3.fromRGB(255, 255, 255)
-cancelBtnV2.Font = Enum.Font.SourceSansBold
-cancelBtnV2.TextSize = 28
-cancelBtnV2.ZIndex = 11
-cancelBtnV2.Parent = touV2Popup
-Instance.new("UICorner", cancelBtnV2).CornerRadius = UDim.new(0, 12)
-cancelBtnV2.MouseButton1Click:Connect(function()
-    touV2Popup.Visible = false
-end)
-
--- ปุ่มปิด X สำหรับ TOU HUB V2
-local closePopupV2 = Instance.new("TextButton")
-closePopupV2.Size = UDim2.new(0, 30, 0, 30)
-closePopupV2.Position = UDim2.new(1, -40, 0, 10)
-closePopupV2.BackgroundTransparency = 1
-closePopupV2.Text = "X"
-closePopupV2.TextColor3 = Color3.fromRGB(255, 100, 100)
-closePopupV2.Font = Enum.Font.SourceSansBold
-closePopupV2.TextSize = 24
-closePopupV2.ZIndex = 11
-closePopupV2.Parent = touV2Popup
-closePopupV2.MouseButton1Click:Connect(function()
-    touV2Popup.Visible = false
-end)
-
--- เมื่อกดปุ่ม TOU HUB V2 → โชว์ Popup
-touV2Btn.MouseButton1Click:Connect(function()
-    touV2Popup.Visible = true
-end)
 
 -- ช่อง Script ทั่วไป
 local tabGlobal = Instance.new("Frame")
@@ -768,16 +300,134 @@ tabGlobal.Visible = false
 tabGlobal.Parent = main
 Instance.new("UICorner", tabGlobal).CornerRadius = UDim.new(0, 12)
 
-local globalText = Instance.new("TextLabel")
-globalText.Size = UDim2.new(1, -20, 1, -20)
-globalText.Position = UDim2.new(0, 10, 0, 10)
-globalText.BackgroundTransparency = 1
-globalText.Text = "Script ทั่วไป\n(สคริปต์สากล ระเบิดทุกเกม 🌍💥\nเร็ว ๆ นี้มาเต็ม!)"
-globalText.TextColor3 = Color3.fromRGB(100, 255, 100)
-globalText.Font = Enum.Font.SourceSansBold
-globalText.TextSize = 22
-globalText.TextWrapped = true
-globalText.Parent = tabGlobal
+-- ปุ่ม ความเร็ว (ใหม่! วางขวาสุดในช่อง Script ทั่วไป)
+local speedBtn = Instance.new("TextButton")
+speedBtn.Size = UDim2.new(0, 80, 0, 30)
+speedBtn.Position = UDim2.new(1, -100, 0, 50)
+speedBtn.BackgroundColor3 = Color3.fromRGB(255, 100, 0)
+speedBtn.Text = "ความเร็ว"
+speedBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+speedBtn.Font = Enum.Font.SourceSansBold
+speedBtn.TextSize = 14
+speedBtn.Parent = tabGlobal
+Instance.new("UICorner", speedBtn).CornerRadius = UDim.new(0, 8)
+
+-- GUI Popup สำหรับ ความเร็ว (ใหม่!)
+local speedPopup = Instance.new("Frame")
+speedPopup.Size = UDim2.new(0, 400, 0, 250)
+speedPopup.Position = UDim2.new(0.5, -200, 0.5, -125)
+speedPopup.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+speedPopup.BorderSizePixel = 0
+speedPopup.Visible = false
+speedPopup.Parent = gui
+speedPopup.ZIndex = 10
+
+local speedPopupCorner = Instance.new("UICorner", speedPopup)
+speedPopupCorner.CornerRadius = UDim.new(0, 16)
+
+local speedPopupShadow = Instance.new("ImageLabel")
+speedPopupShadow.BackgroundTransparency = 1
+speedPopupShadow.Image = "rbxassetid://1316045217"
+speedPopupShadow.ImageTransparency = 0.4
+speedPopupShadow.Size = UDim2.new(1, 40, 1, 40)
+speedPopupShadow.Position = UDim2.new(0, -20, 0, -20)
+speedPopupShadow.ZIndex = 9
+speedPopupShadow.Parent = speedPopup
+
+local speedPopupTitle = Instance.new("TextLabel")
+speedPopupTitle.Size = UDim2.new(1, 0, 0, 50)
+speedPopupTitle.BackgroundTransparency = 1
+speedPopupTitle.Text = "script:ปรับความเร็ว"
+speedPopupTitle.TextColor3 = Color3.fromRGB(255, 100, 0)
+speedPopupTitle.Font = Enum.Font.SourceSansBold
+speedPopupTitle.TextSize = 26
+speedPopupTitle.ZIndex = 11
+speedPopupTitle.Parent = speedPopup
+
+local speedPopupDesc = Instance.new("TextLabel")
+speedPopupDesc.Size = UDim2.new(1, -20, 0, 80)
+speedPopupDesc.Position = UDim2.new(0, 10, 0, 60)
+speedPopupDesc.BackgroundTransparency = 1
+speedPopupDesc.Text = "คำอธิบาย: script. ปรับความเร็วได้ตามใจชอบ"
+speedPopupDesc.TextColor3 = Color3.fromRGB(200, 200, 200)
+speedPopupDesc.Font = Enum.Font.SourceSans
+speedPopupDesc.TextSize = 18
+speedPopupDesc.TextWrapped = true
+speedPopupDesc.TextYAlignment = Enum.TextYAlignment.Top
+speedPopupDesc.ZIndex = 11
+speedPopupDesc.Parent = speedPopup
+
+local speedPopupCreator = Instance.new("TextLabel")
+speedPopupCreator.Size = UDim2.new(1, -20, 0, 30)
+speedPopupCreator.Position = UDim2.new(0, 10, 0, 140)
+speedPopupCreator.BackgroundTransparency = 1
+speedPopupCreator.Text = "ผู้สร้าง: TOUx1"
+speedPopupCreator.TextColor3 = Color3.fromRGB(0, 255, 170)
+speedPopupCreator.Font = Enum.Font.SourceSansBold
+speedPopupCreator.TextSize = 20
+speedPopupCreator.ZIndex = 11
+speedPopupCreator.Parent = speedPopup
+
+-- ปุ่ม RUN สำหรับ ความเร็ว
+local runBtnSpeed = Instance.new("TextButton")
+runBtnSpeed.Size = UDim2.new(0, 150, 0, 50)
+runBtnSpeed.Position = UDim2.new(0.5, -160, 1, -70)
+runBtnSpeed.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
+runBtnSpeed.Text = "RUN"
+runBtnSpeed.TextColor3 = Color3.fromRGB(255, 255, 255)
+runBtnSpeed.Font = Enum.Font.SourceSansBold
+runBtnSpeed.TextSize = 28
+runBtnSpeed.ZIndex = 11
+runBtnSpeed.Parent = speedPopup
+Instance.new("UICorner", runBtnSpeed).CornerRadius = UDim.new(0, 12)
+
+local runGradientSpeed = Instance.new("UIGradient")
+runGradientSpeed.Color = ColorSequence.new{
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 255, 0)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 150, 0))
+}
+runGradientSpeed.Parent = runBtnSpeed
+
+runBtnSpeed.MouseButton1Click:Connect(function()
+    loadstring(game:HttpGet("https://pastefy.app/cCNFO7iL/raw"))()
+    speedPopup.Visible = false
+end)
+
+-- ปุ่ม ยกเลิก สำหรับ ความเร็ว
+local cancelBtnSpeed = Instance.new("TextButton")
+cancelBtnSpeed.Size = UDim2.new(0, 150, 0, 50)
+cancelBtnSpeed.Position = UDim2.new(0.5, 10, 1, -70)
+cancelBtnSpeed.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+cancelBtnSpeed.Text = "ยกเลิก"
+cancelBtnSpeed.TextColor3 = Color3.fromRGB(255, 255, 255)
+cancelBtnSpeed.Font = Enum.Font.SourceSansBold
+cancelBtnSpeed.TextSize = 28
+cancelBtnSpeed.ZIndex = 11
+cancelBtnSpeed.Parent = speedPopup
+Instance.new("UICorner", cancelBtnSpeed).CornerRadius = UDim.new(0, 12)
+cancelBtnSpeed.MouseButton1Click:Connect(function()
+    speedPopup.Visible = false
+end)
+
+-- ปุ่มปิด X สำหรับ ความเร็ว
+local closePopupSpeed = Instance.new("TextButton")
+closePopupSpeed.Size = UDim2.new(0, 30, 0, 30)
+closePopupSpeed.Position = UDim2.new(1, -40, 0, 10)
+closePopupSpeed.BackgroundTransparency = 1
+closePopupSpeed.Text = "X"
+closePopupSpeed.TextColor3 = Color3.fromRGB(255, 100, 100)
+closePopupSpeed.Font = Enum.Font.SourceSansBold
+closePopupSpeed.TextSize = 24
+closePopupSpeed.ZIndex = 11
+closePopupSpeed.Parent = speedPopup
+closePopupSpeed.MouseButton1Click:Connect(function()
+    speedPopup.Visible = false
+end)
+
+-- เมื่อกดปุ่ม ความเร็ว → โชว์ Popup
+speedBtn.MouseButton1Click:Connect(function()
+    speedPopup.Visible = true
+end)
 
 -- ฟังก์ชันสลับแท็บ
 local function switchTab(tab)
@@ -872,4 +522,4 @@ UIS.InputChanged:Connect(function(input)
 	end
 end)
 
-print("TOU HUB (Mixed) เพิ่มปุ่ม TOU HUB V2 สำเร็จ 💀🖤 | ช่องเมืองไทย2 เต็มไปด้วยฟีเจอร์เท่ ๆ แล้ว | ลุยฟาร์มเงินเปลี่ยนสีวาร์ปกันเลย exploiter!")
+print("TOU HUB (Mixed) เพิ่มปุ่มความเร็วสำเร็จ 💀🖤 | ช่อง Script ทั่วไป โหดยิ่งขึ้น ⚡ | ลุยวิ่งเร็วเกินมนุษย์ได้เลย exploiter!")
