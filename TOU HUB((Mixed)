@@ -1,6 +1,6 @@
--- TOU HUB (Mixed) - Ultimate Exploiter GUI Money Spam Edition 💀🔥🖤
--- LocalScript - เพิ่มปุ่ม "สแปมเงิน" ในช่อง Script เมืองไทย2 + Popup โหด 🤫🩸
--- พลังแห่งเงินทองต้องห้ามถูกปลดปล่อยแล้ว exploiter!
+-- TOU HUB (Mixed) - Ultimate Exploiter GUI TOU HUB V2 Edition 💀🔥🖤
+-- LocalScript - เพิ่มปุ่ม "TOU HUB V2" ในช่อง Script เมืองไทย2 + Popup โหด 😈🩸
+-- พลังแห่ง TOU HUB V2 ถูกปลดปล่อยแล้ว exploiter!
 
 local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
@@ -253,7 +253,7 @@ darkAdminBtn.TextSize = 14
 darkAdminBtn.Parent = tabThai
 Instance.new("UICorner", darkAdminBtn).CornerRadius = UDim.new(0, 8)
 
--- ปุ่ม ปรับขนาดตัว (ข้าง Dark admin)
+-- ปุ่ม ปรับขนาดตัว
 local sizeChangerBtn = Instance.new("TextButton")
 sizeChangerBtn.Size = UDim2.new(0, 80, 0, 30)
 sizeChangerBtn.Position = UDim2.new(1, -200, 0, 50)
@@ -265,10 +265,10 @@ sizeChangerBtn.TextSize = 14
 sizeChangerBtn.Parent = tabThai
 Instance.new("UICorner", sizeChangerBtn).CornerRadius = UDim.new(0, 8)
 
--- ปุ่ม สแปมเงิน (ใหม่! วางข้าง ปรับขนาดตัว ไล่ซ้าย)
+-- ปุ่ม สแปมเงิน
 local moneySpamBtn = Instance.new("TextButton")
 moneySpamBtn.Size = UDim2.new(0, 80, 0, 30)
-moneySpamBtn.Position = UDim2.new(1, -300, 0, 50)  -- ซ้าย ปรับขนาดตัว
+moneySpamBtn.Position = UDim2.new(1, -300, 0, 50)
 moneySpamBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
 moneySpamBtn.Text = "สแปมเงิน"
 moneySpamBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -277,7 +277,19 @@ moneySpamBtn.TextSize = 14
 moneySpamBtn.Parent = tabThai
 Instance.new("UICorner", moneySpamBtn).CornerRadius = UDim.new(0, 8)
 
--- GUI Popup สำหรับ Dark admin (เดิม)
+-- ปุ่ม TOU HUB V2 (ใหม่! วางไล่ซ้าย)
+local touV2Btn = Instance.new("TextButton")
+touV2Btn.Size = UDim2.new(0, 80, 0, 30)
+touV2Btn.Position = UDim2.new(1, -400, 0, 50)  -- ซ้าย สแปมเงิน
+touV2Btn.BackgroundColor3 = Color3.fromRGB(255, 170, 0)
+touV2Btn.Text = "TOU HUB V2"
+touV2Btn.TextColor3 = Color3.fromRGB(0, 0, 0)
+touV2Btn.Font = Enum.Font.SourceSansBold
+touV2Btn.TextSize = 14
+touV2Btn.Parent = tabThai
+Instance.new("UICorner", touV2Btn).CornerRadius = UDim.new(0, 8)
+
+-- GUI Popup สำหรับ Dark admin
 local darkPopup = Instance.new("Frame")
 darkPopup.Size = UDim2.new(0, 400, 0, 250)
 darkPopup.Position = UDim2.new(0.5, -200, 0.5, -125)
@@ -511,7 +523,7 @@ sizeChangerBtn.MouseButton1Click:Connect(function()
     sizePopup.Visible = true
 end)
 
--- GUI Popup สำหรับ สแปมเงิน (ใหม่!)
+-- GUI Popup สำหรับ สแปมเงิน
 local moneySpamPopup = Instance.new("Frame")
 moneySpamPopup.Size = UDim2.new(0, 400, 0, 250)
 moneySpamPopup.Position = UDim2.new(0.5, -200, 0.5, -125)
@@ -626,6 +638,123 @@ end)
 -- เมื่อกดปุ่ม สแปมเงิน → โชว์ Popup
 moneySpamBtn.MouseButton1Click:Connect(function()
     moneySpamPopup.Visible = true
+end)
+
+-- GUI Popup สำหรับ TOU HUB V2 (ใหม่!)
+local touV2Popup = Instance.new("Frame")
+touV2Popup.Size = UDim2.new(0, 400, 0, 250)
+touV2Popup.Position = UDim2.new(0.5, -200, 0.5, -125)
+touV2Popup.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+touV2Popup.BorderSizePixel = 0
+touV2Popup.Visible = false
+touV2Popup.Parent = gui
+touV2Popup.ZIndex = 10
+
+local touV2PopupCorner = Instance.new("UICorner", touV2Popup)
+touV2PopupCorner.CornerRadius = UDim.new(0, 16)
+
+local touV2PopupShadow = Instance.new("ImageLabel")
+touV2PopupShadow.BackgroundTransparency = 1
+touV2PopupShadow.Image = "rbxassetid://1316045217"
+touV2PopupShadow.ImageTransparency = 0.4
+touV2PopupShadow.Size = UDim2.new(1, 40, 1, 40)
+touV2PopupShadow.Position = UDim2.new(0, -20, 0, -20)
+touV2PopupShadow.ZIndex = 9
+touV2PopupShadow.Parent = touV2Popup
+
+local touV2PopupTitle = Instance.new("TextLabel")
+touV2PopupTitle.Size = UDim2.new(1, 0, 0, 50)
+touV2PopupTitle.BackgroundTransparency = 1
+touV2PopupTitle.Text = "script:TOU HUBV2"
+touV2PopupTitle.TextColor3 = Color3.fromRGB(255, 170, 0)
+touV2PopupTitle.Font = Enum.Font.SourceSansBold
+touV2PopupTitle.TextSize = 26
+touV2PopupTitle.ZIndex = 11
+touV2PopupTitle.Parent = touV2Popup
+
+local touV2PopupDesc = Instance.new("TextLabel")
+touV2PopupDesc.Size = UDim2.new(1, -20, 0, 80)
+touV2PopupDesc.Position = UDim2.new(0, 10, 0, 60)
+touV2PopupDesc.BackgroundTransparency = 1
+touV2PopupDesc.Text = "คำอธิบาย: script. แมพเมืองไทย2 มีฟามเงิน,เปลี่ยนสีชื่อเท่ๆ\n,เปลี่ยนสีลำโพงติดหลัง,วาปไปจุดต่างฯลฯ"
+touV2PopupDesc.TextColor3 = Color3.fromRGB(200, 200, 200)
+touV2PopupDesc.Font = Enum.Font.SourceSans
+touV2PopupDesc.TextSize = 18
+touV2PopupDesc.TextWrapped = true
+touV2PopupDesc.TextYAlignment = Enum.TextYAlignment.Top
+touV2PopupDesc.ZIndex = 11
+touV2PopupDesc.Parent = touV2Popup
+
+local touV2PopupCreator = Instance.new("TextLabel")
+touV2PopupCreator.Size = UDim2.new(1, -20, 0, 30)
+touV2PopupCreator.Position = UDim2.new(0, 10, 0, 140)
+touV2PopupCreator.BackgroundTransparency = 1
+touV2PopupCreator.Text = "ผู้สร้าง: TOUx1"
+touV2PopupCreator.TextColor3 = Color3.fromRGB(0, 255, 170)
+touV2PopupCreator.Font = Enum.Font.SourceSansBold
+touV2PopupCreator.TextSize = 20
+touV2PopupCreator.ZIndex = 11
+touV2PopupCreator.Parent = touV2Popup
+
+-- ปุ่ม RUN สำหรับ TOU HUB V2
+local runBtnV2 = Instance.new("TextButton")
+runBtnV2.Size = UDim2.new(0, 150, 0, 50)
+runBtnV2.Position = UDim2.new(0.5, -160, 1, -70)
+runBtnV2.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
+runBtnV2.Text = "RUN"
+runBtnV2.TextColor3 = Color3.fromRGB(255, 255, 255)
+runBtnV2.Font = Enum.Font.SourceSansBold
+runBtnV2.TextSize = 28
+runBtnV2.ZIndex = 11
+runBtnV2.Parent = touV2Popup
+Instance.new("UICorner", runBtnV2).CornerRadius = UDim.new(0, 12)
+
+local runGradientV2 = Instance.new("UIGradient")
+runGradientV2.Color = ColorSequence.new{
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 255, 0)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 150, 0))
+}
+runGradientV2.Parent = runBtnV2
+
+runBtnV2.MouseButton1Click:Connect(function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/TOUx1/Roblox-script/refs/heads/main/TOU%20HUB%20V2"))()
+    touV2Popup.Visible = false
+end)
+
+-- ปุ่ม ยกเลิก สำหรับ TOU HUB V2
+local cancelBtnV2 = Instance.new("TextButton")
+cancelBtnV2.Size = UDim2.new(0, 150, 0, 50)
+cancelBtnV2.Position = UDim2.new(0.5, 10, 1, -70)
+cancelBtnV2.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+cancelBtnV2.Text = "ยกเลิก"
+cancelBtnV2.TextColor3 = Color3.fromRGB(255, 255, 255)
+cancelBtnV2.Font = Enum.Font.SourceSansBold
+cancelBtnV2.TextSize = 28
+cancelBtnV2.ZIndex = 11
+cancelBtnV2.Parent = touV2Popup
+Instance.new("UICorner", cancelBtnV2).CornerRadius = UDim.new(0, 12)
+cancelBtnV2.MouseButton1Click:Connect(function()
+    touV2Popup.Visible = false
+end)
+
+-- ปุ่มปิด X สำหรับ TOU HUB V2
+local closePopupV2 = Instance.new("TextButton")
+closePopupV2.Size = UDim2.new(0, 30, 0, 30)
+closePopupV2.Position = UDim2.new(1, -40, 0, 10)
+closePopupV2.BackgroundTransparency = 1
+closePopupV2.Text = "X"
+closePopupV2.TextColor3 = Color3.fromRGB(255, 100, 100)
+closePopupV2.Font = Enum.Font.SourceSansBold
+closePopupV2.TextSize = 24
+closePopupV2.ZIndex = 11
+closePopupV2.Parent = touV2Popup
+closePopupV2.MouseButton1Click:Connect(function()
+    touV2Popup.Visible = false
+end)
+
+-- เมื่อกดปุ่ม TOU HUB V2 → โชว์ Popup
+touV2Btn.MouseButton1Click:Connect(function()
+    touV2Popup.Visible = true
 end)
 
 -- ช่อง Script ทั่วไป
@@ -743,4 +872,4 @@ UIS.InputChanged:Connect(function(input)
 	end
 end)
 
-print("TOU HUB (Mixed) เพิ่มปุ่มสแปมเงินสำเร็จ 💀🖤 | ช่องเมืองไทย2 โหดยิ่งขึ้น 🤫💰 | ลุยสแปมให้เซิร์ฟเวอร์พังทลายได้เลย exploiter!")
+print("TOU HUB (Mixed) เพิ่มปุ่ม TOU HUB V2 สำเร็จ 💀🖤 | ช่องเมืองไทย2 เต็มไปด้วยฟีเจอร์เท่ ๆ แล้ว | ลุยฟาร์มเงินเปลี่ยนสีวาร์ปกันเลย exploiter!")ac
