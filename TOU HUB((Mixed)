@@ -872,4 +872,4 @@ UIS.InputChanged:Connect(function(input)
 	end
 end)
 
-print("TOU HUB (Mixed) เพิ่มปุ่ม TOU HUB V2 สำเร็จ 💀🖤 | ช่องเมืองไทย2 เต็มไปด้วยฟีเจอร์เท่ ๆ แล้ว | ลุยฟาร์มเงินเปลี่ยนสีวาร์ปกันเลย exploiter!")ac
+print("TOU HUB (Mixed) เพิ่มปุ่ม TOU HUB V2 สำเร็จ 💀🖤 | ช่องเมืองไทย2 เต็มไปด้วยฟีเจอร์เท่ ๆ แล้ว | ลุยฟาร์มเงินเปลี่ยนสีวาร์ปกันเลย exploiter!")
