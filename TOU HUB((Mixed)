@@ -1,6 +1,6 @@
--- TOU HUB (Mixed) - Ultimate Exploiter GUI Jump Power Edition 💀🔥🖤
--- LocalScript - รวมทุกฟีเจอร์เต็มยาวโหด ๆ + เพิ่มปุ่ม "กระโดด" ในช่อง Script ทั่วไป 😈🩸
--- พลังแห่งการทะยานฟ้าถูกปลดปล่อยแล้ว exploiter!
+-- TOU HUB (Mixed) - Ultimate Exploiter GUI All Features Full Long Edition 💀🔥🖤
+-- LocalScript - รวมทุกฟีเจอร์เต็มยาวโหด ๆ ทุกระบบพร้อมรัน 😡🩸
+-- พลังแห่ง exploiter เต็มสูบ ยาวเดือดตามคำราม exploiter!
 
 local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
@@ -291,6 +291,17 @@ jumpBtn.Font = Enum.Font.SourceSansBold
 jumpBtn.TextSize = 14
 jumpBtn.Parent = tabGlobal
 Instance.new("UICorner", jumpBtn).CornerRadius = UDim.new(0, 8)
+
+local infiniteJumpBtn = Instance.new("TextButton")
+infiniteJumpBtn.Size = UDim2.new(0, 80, 0, 30)
+infiniteJumpBtn.Position = UDim2.new(1, -300, 0, 50)
+infiniteJumpBtn.BackgroundColor3 = Color3.fromRGB(200, 255, 0)
+infiniteJumpBtn.Text = "ไม่จำกัดกระโดด"
+infiniteJumpBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
+infiniteJumpBtn.Font = Enum.Font.SourceSansBold
+infiniteJumpBtn.TextSize = 14
+infiniteJumpBtn.Parent = tabGlobal
+Instance.new("UICorner", infiniteJumpBtn).CornerRadius = UDim.new(0, 8)
 
 -- Popup Dark admin
 local darkPopup = Instance.new("Frame")
@@ -852,7 +863,7 @@ speedBtn.MouseButton1Click:Connect(function()
     speedPopup.Visible = true
 end)
 
--- Popup กระโดด (ใหม่!)
+-- Popup กระโดด
 local jumpPopup = Instance.new("Frame")
 jumpPopup.Size = UDim2.new(0, 400, 0, 250)
 jumpPopup.Position = UDim2.new(0.5, -200, 0.5, -125)
@@ -964,6 +975,118 @@ jumpBtn.MouseButton1Click:Connect(function()
     jumpPopup.Visible = true
 end)
 
+-- Popup ไม่จำกัดกระโดด
+local infiniteJumpPopup = Instance.new("Frame")
+infiniteJumpPopup.Size = UDim2.new(0, 400, 0, 250)
+infiniteJumpPopup.Position = UDim2.new(0.5, -200, 0.5, -125)
+infiniteJumpPopup.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+infiniteJumpPopup.Visible = false
+infiniteJumpPopup.Parent = gui
+infiniteJumpPopup.ZIndex = 10
+
+local infiniteJumpPopupCorner = Instance.new("UICorner", infiniteJumpPopup)
+infiniteJumpPopupCorner.CornerRadius = UDim.new(0, 16)
+
+local infiniteJumpPopupShadow = Instance.new("ImageLabel")
+infiniteJumpPopupShadow.BackgroundTransparency = 1
+infiniteJumpPopupShadow.Image = "rbxassetid://1316045217"
+infiniteJumpPopupShadow.ImageTransparency = 0.4
+infiniteJumpPopupShadow.Size = UDim2.new(1, 40, 1, 40)
+infiniteJumpPopupShadow.Position = UDim2.new(0, -20, 0, -20)
+infiniteJumpPopupShadow.ZIndex = 9
+infiniteJumpPopupShadow.Parent = infiniteJumpPopup
+
+local infiniteJumpPopupTitle = Instance.new("TextLabel")
+infiniteJumpPopupTitle.Size = UDim2.new(1, 0, 0, 50)
+infiniteJumpPopupTitle.BackgroundTransparency = 1
+infiniteJumpPopupTitle.Text = "script:การกระโดด ไม่จำกัด"
+infiniteJumpPopupTitle.TextColor3 = Color3.fromRGB(200, 255, 0)
+infiniteJumpPopupTitle.Font = Enum.Font.SourceSansBold
+infiniteJumpPopupTitle.TextSize = 26
+infiniteJumpPopupTitle.ZIndex = 11
+infiniteJumpPopupTitle.Parent = infiniteJumpPopup
+
+local infiniteJumpPopupDesc = Instance.new("TextLabel")
+infiniteJumpPopupDesc.Size = UDim2.new(1, -20, 0, 80)
+infiniteJumpPopupDesc.Position = UDim2.new(0, 10, 0, 60)
+infiniteJumpPopupDesc.BackgroundTransparency = 1
+infiniteJumpPopupDesc.Text = "คำอธิบาย: script. การกระโดดได้ตามใจชอบ"
+infiniteJumpPopupDesc.TextColor3 = Color3.fromRGB(200, 200, 200)
+infiniteJumpPopupDesc.Font = Enum.Font.SourceSans
+infiniteJumpPopupDesc.TextSize = 18
+infiniteJumpPopupDesc.TextWrapped = true
+infiniteJumpPopupDesc.TextYAlignment = Enum.TextYAlignment.Top
+infiniteJumpPopupDesc.ZIndex = 11
+infiniteJumpPopupDesc.Parent = infiniteJumpPopup
+
+local infiniteJumpPopupCreator = Instance.new("TextLabel")
+infiniteJumpPopupCreator.Size = UDim2.new(1, -20, 0, 30)
+infiniteJumpPopupCreator.Position = UDim2.new(0, 10, 0, 140)
+infiniteJumpPopupCreator.BackgroundTransparency = 1
+infiniteJumpPopupCreator.Text = "ผู้สร้าง: TOUx1"
+infiniteJumpPopupCreator.TextColor3 = Color3.fromRGB(0, 255, 170)
+infiniteJumpPopupCreator.Font = Enum.Font.SourceSansBold
+infiniteJumpPopupCreator.TextSize = 20
+infiniteJumpPopupCreator.ZIndex = 11
+infiniteJumpPopupCreator.Parent = infiniteJumpPopup
+
+local runBtnInfiniteJump = Instance.new("TextButton")
+runBtnInfiniteJump.Size = UDim2.new(0, 150, 0, 50)
+runBtnInfiniteJump.Position = UDim2.new(0.5, -160, 1, -70)
+runBtnInfiniteJump.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
+runBtnInfiniteJump.Text = "RUN"
+runBtnInfiniteJump.TextColor3 = Color3.fromRGB(255, 255, 255)
+runBtnInfiniteJump.Font = Enum.Font.SourceSansBold
+runBtnInfiniteJump.TextSize = 28
+runBtnInfiniteJump.ZIndex = 11
+runBtnInfiniteJump.Parent = infiniteJumpPopup
+Instance.new("UICorner", runBtnInfiniteJump).CornerRadius = UDim.new(0, 12)
+
+local runGradientInfiniteJump = Instance.new("UIGradient")
+runGradientInfiniteJump.Color = ColorSequence.new{
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 255, 0)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 150, 0))
+}
+runGradientInfiniteJump.Parent = runBtnInfiniteJump
+
+runBtnInfiniteJump.MouseButton1Click:Connect(function()
+    loadstring(game:HttpGet("https://pastefy.app/OtfK65dQ/raw"))()
+    infiniteJumpPopup.Visible = false
+end)
+
+local cancelBtnInfiniteJump = Instance.new("TextButton")
+cancelBtnInfiniteJump.Size = UDim2.new(0, 150, 0, 50)
+cancelBtnInfiniteJump.Position = UDim2.new(0.5, 10, 1, -70)
+cancelBtnInfiniteJump.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+cancelBtnInfiniteJump.Text = "ยกเลิก"
+cancelBtnInfiniteJump.TextColor3 = Color3.fromRGB(255, 255, 255)
+cancelBtnInfiniteJump.Font = Enum.Font.SourceSansBold
+cancelBtnInfiniteJump.TextSize = 28
+cancelBtnInfiniteJump.ZIndex = 11
+cancelBtnInfiniteJump.Parent = infiniteJumpPopup
+Instance.new("UICorner", cancelBtnInfiniteJump).CornerRadius = UDim.new(0, 12)
+cancelBtnInfiniteJump.MouseButton1Click:Connect(function()
+    infiniteJumpPopup.Visible = false
+end)
+
+local closePopupInfiniteJump = Instance.new("TextButton")
+closePopupInfiniteJump.Size = UDim2.new(0, 30, 0, 30)
+closePopupInfiniteJump.Position = UDim2.new(1, -40, 0, 10)
+closePopupInfiniteJump.BackgroundTransparency = 1
+closePopupInfiniteJump.Text = "X"
+closePopupInfiniteJump.TextColor3 = Color3.fromRGB(255, 100, 100)
+closePopupInfiniteJump.Font = Enum.Font.SourceSansBold
+closePopupInfiniteJump.TextSize = 24
+closePopupInfiniteJump.ZIndex = 11
+closePopupInfiniteJump.Parent = infiniteJumpPopup
+closePopupInfiniteJump.MouseButton1Click:Connect(function()
+    infiniteJumpPopup.Visible = false
+end)
+
+infiniteJumpBtn.MouseButton1Click:Connect(function()
+    infiniteJumpPopup.Visible = true
+end)
+
 local function switchTab(tab)
     tabHome.Visible = (tab == "home")
     tabRecommend.Visible = (tab == "recommend")
@@ -1045,4 +1168,4 @@ UIS.InputChanged:Connect(function(input)
     end
 end)
 
-print("TOU HUB (Mixed) เพิ่มปุ่มกระโดดสำเร็จ 💀🖤 | ช่อง Script ทั่วไป โหดยิ่งขึ้น | ลุยกระโดดทะลุฟ้าได้เลย exploiter!")
+print("TOU HUB (Mixed) รวมทุกฟีเจอร์เต็มยาวเดือดสำเร็จ 💀🖤 | ทุกระบบพร้อมรันโหด ๆ | พลังมืดครบถ้วนแล้ว exploiter!")
