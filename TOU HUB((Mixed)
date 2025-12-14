@@ -1,6 +1,6 @@
--- TOU HUB (Mixed) - Ultimate Exploiter GUI All Features Full Length Edition 💀🔥🖤
--- LocalScript - รวมทุกฟีเจอร์เต็มยาวโหด ๆ ทุกระบบพร้อมรัน 😡🩸
--- พลังแห่ง exploiter เต็มสูบ ไม่ตัด ไม่สรุป ลุยเดือดพล่านได้เลย exploiter!
+-- TOU HUB (Mixed) - Ultimate Exploiter GUI Jump Power Edition 💀🔥🖤
+-- LocalScript - รวมทุกฟีเจอร์เต็มยาวโหด ๆ + เพิ่มปุ่ม "กระโดด" ในช่อง Script ทั่วไป 😈🩸
+-- พลังแห่งการทะยานฟ้าถูกปลดปล่อยแล้ว exploiter!
 
 local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
@@ -280,6 +280,17 @@ speedBtn.Font = Enum.Font.SourceSansBold
 speedBtn.TextSize = 14
 speedBtn.Parent = tabGlobal
 Instance.new("UICorner", speedBtn).CornerRadius = UDim.new(0, 8)
+
+local jumpBtn = Instance.new("TextButton")
+jumpBtn.Size = UDim2.new(0, 80, 0, 30)
+jumpBtn.Position = UDim2.new(1, -200, 0, 50)
+jumpBtn.BackgroundColor3 = Color3.fromRGB(100, 255, 100)
+jumpBtn.Text = "กระโดด"
+jumpBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
+jumpBtn.Font = Enum.Font.SourceSansBold
+jumpBtn.TextSize = 14
+jumpBtn.Parent = tabGlobal
+Instance.new("UICorner", jumpBtn).CornerRadius = UDim.new(0, 8)
 
 -- Popup Dark admin
 local darkPopup = Instance.new("Frame")
@@ -841,6 +852,118 @@ speedBtn.MouseButton1Click:Connect(function()
     speedPopup.Visible = true
 end)
 
+-- Popup กระโดด (ใหม่!)
+local jumpPopup = Instance.new("Frame")
+jumpPopup.Size = UDim2.new(0, 400, 0, 250)
+jumpPopup.Position = UDim2.new(0.5, -200, 0.5, -125)
+jumpPopup.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+jumpPopup.Visible = false
+jumpPopup.Parent = gui
+jumpPopup.ZIndex = 10
+
+local jumpPopupCorner = Instance.new("UICorner", jumpPopup)
+jumpPopupCorner.CornerRadius = UDim.new(0, 16)
+
+local jumpPopupShadow = Instance.new("ImageLabel")
+jumpPopupShadow.BackgroundTransparency = 1
+jumpPopupShadow.Image = "rbxassetid://1316045217"
+jumpPopupShadow.ImageTransparency = 0.4
+jumpPopupShadow.Size = UDim2.new(1, 40, 1, 40)
+jumpPopupShadow.Position = UDim2.new(0, -20, 0, -20)
+jumpPopupShadow.ZIndex = 9
+jumpPopupShadow.Parent = jumpPopup
+
+local jumpPopupTitle = Instance.new("TextLabel")
+jumpPopupTitle.Size = UDim2.new(1, 0, 0, 50)
+jumpPopupTitle.BackgroundTransparency = 1
+jumpPopupTitle.Text = "script:ปรับการกระโดด"
+jumpPopupTitle.TextColor3 = Color3.fromRGB(100, 255, 100)
+jumpPopupTitle.Font = Enum.Font.SourceSansBold
+jumpPopupTitle.TextSize = 26
+jumpPopupTitle.ZIndex = 11
+jumpPopupTitle.Parent = jumpPopup
+
+local jumpPopupDesc = Instance.new("TextLabel")
+jumpPopupDesc.Size = UDim2.new(1, -20, 0, 80)
+jumpPopupDesc.Position = UDim2.new(0, 10, 0, 60)
+jumpPopupDesc.BackgroundTransparency = 1
+jumpPopupDesc.Text = "คำอธิบาย: script. ปรับการกระโดดได้ตามใจชอบ"
+jumpPopupDesc.TextColor3 = Color3.fromRGB(200, 200, 200)
+jumpPopupDesc.Font = Enum.Font.SourceSans
+jumpPopupDesc.TextSize = 18
+jumpPopupDesc.TextWrapped = true
+jumpPopupDesc.TextYAlignment = Enum.TextYAlignment.Top
+jumpPopupDesc.ZIndex = 11
+jumpPopupDesc.Parent = jumpPopup
+
+local jumpPopupCreator = Instance.new("TextLabel")
+jumpPopupCreator.Size = UDim2.new(1, -20, 0, 30)
+jumpPopupCreator.Position = UDim2.new(0, 10, 0, 140)
+jumpPopupCreator.BackgroundTransparency = 1
+jumpPopupCreator.Text = "ผู้สร้าง: TOUx1"
+jumpPopupCreator.TextColor3 = Color3.fromRGB(0, 255, 170)
+jumpPopupCreator.Font = Enum.Font.SourceSansBold
+jumpPopupCreator.TextSize = 20
+jumpPopupCreator.ZIndex = 11
+jumpPopupCreator.Parent = jumpPopup
+
+local runBtnJump = Instance.new("TextButton")
+runBtnJump.Size = UDim2.new(0, 150, 0, 50)
+runBtnJump.Position = UDim2.new(0.5, -160, 1, -70)
+runBtnJump.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
+runBtnJump.Text = "RUN"
+runBtnJump.TextColor3 = Color3.fromRGB(255, 255, 255)
+runBtnJump.Font = Enum.Font.SourceSansBold
+runBtnJump.TextSize = 28
+runBtnJump.ZIndex = 11
+runBtnJump.Parent = jumpPopup
+Instance.new("UICorner", runBtnJump).CornerRadius = UDim.new(0, 12)
+
+local runGradientJump = Instance.new("UIGradient")
+runGradientJump.Color = ColorSequence.new{
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 255, 0)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 150, 0))
+}
+runGradientJump.Parent = runBtnJump
+
+runBtnJump.MouseButton1Click:Connect(function()
+    loadstring(game:HttpGet("https://pastefy.app/bv5KayX6/raw"))()
+    jumpPopup.Visible = false
+end)
+
+local cancelBtnJump = Instance.new("TextButton")
+cancelBtnJump.Size = UDim2.new(0, 150, 0, 50)
+cancelBtnJump.Position = UDim2.new(0.5, 10, 1, -70)
+cancelBtnJump.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+cancelBtnJump.Text = "ยกเลิก"
+cancelBtnJump.TextColor3 = Color3.fromRGB(255, 255, 255)
+cancelBtnJump.Font = Enum.Font.SourceSansBold
+cancelBtnJump.TextSize = 28
+cancelBtnJump.ZIndex = 11
+cancelBtnJump.Parent = jumpPopup
+Instance.new("UICorner", cancelBtnJump).CornerRadius = UDim.new(0, 12)
+cancelBtnJump.MouseButton1Click:Connect(function()
+    jumpPopup.Visible = false
+end)
+
+local closePopupJump = Instance.new("TextButton")
+closePopupJump.Size = UDim2.new(0, 30, 0, 30)
+closePopupJump.Position = UDim2.new(1, -40, 0, 10)
+closePopupJump.BackgroundTransparency = 1
+closePopupJump.Text = "X"
+closePopupJump.TextColor3 = Color3.fromRGB(255, 100, 100)
+closePopupJump.Font = Enum.Font.SourceSansBold
+closePopupJump.TextSize = 24
+closePopupJump.ZIndex = 11
+closePopupJump.Parent = jumpPopup
+closePopupJump.MouseButton1Click:Connect(function()
+    jumpPopup.Visible = false
+end)
+
+jumpBtn.MouseButton1Click:Connect(function()
+    jumpPopup.Visible = true
+end)
+
 local function switchTab(tab)
     tabHome.Visible = (tab == "home")
     tabRecommend.Visible = (tab == "recommend")
@@ -922,4 +1045,4 @@ UIS.InputChanged:Connect(function(input)
     end
 end)
 
-print("TOU HUB (Mixed) รวมทุกฟีเจอร์เต็มยาวโหดสำเร็จ 💀🖤 | ทุกระบบรันได้แน่นอน | พลังมืดครบถ้วนแล้ว exploiter!")
+print("TOU HUB (Mixed) เพิ่มปุ่มกระโดดสำเร็จ 💀🖤 | ช่อง Script ทั่วไป โหดยิ่งขึ้น | ลุยกระโดดทะลุฟ้าได้เลย exploiter!")
