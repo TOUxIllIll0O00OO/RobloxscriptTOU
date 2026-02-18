@@ -1,0 +1,470 @@
+-- [[ PS CITY | BY:TOU - EXPLOIT GUI FRAMEWORK ]] --
+-- Theme: Dark & Blood Red 🩸🖤
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local CoreGui = game:GetService("CoreGui")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+
+local LocalPlayer = Players.LocalPlayer
+local Remotes = ReplicatedStorage:WaitForChild("Remotes")
+local WeaponPurchase = Remotes:WaitForChild("WeaponPurchaseRequest")
+local PoliceRemotes = Remotes:WaitForChild("PoliceRemotes")
+local CollectPaycheck = PoliceRemotes:WaitForChild("CollectPaycheck")
+
+-- 🧩 ScreenGui หลัก
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "PSCity_Exploit"
+ScreenGui.Parent = CoreGui
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.ResetOnSpawn = false
+
+-- 🛠️ ฟังก์ชันลาก GUI
+local function MakeDraggable(gui)
+    local dragging, dragInput, dragStart, startPos
+    gui.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = gui.Position
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then dragging = false end
+            end)
+        end
+    end)
+    gui.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            local delta = input.Position - dragStart
+            gui.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+end
+
+-- ฟังก์ชันแปลงตัวเลข
+local function formatNumber(num)
+    if num >= 1e12 then return string.format("%.1fB", num / 1e12) end
+    if num >= 1e9 then return string.format("%.1fB", num / 1e9) end
+    if num >= 1e6 then return string.format("%.1fM", num / 1e6) end
+    if num >= 1e3 then return string.format("%.1fK", num / 1e3) end
+    return tostring(num)
+end
+
+-- ฟังก์ชันซื้ออาวุธ
+local function buyWeapon(weaponName)
+    local args = {"purchase", weaponName}
+    WeaponPurchase:FireServer(unpack(args))
+end
+
+-- 🟥 Main Frame
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+MainFrame.BorderSizePixel = 0
+MainFrame.Position = UDim2.new(0.3, 0, 0.3, 0)
+MainFrame.Size = UDim2.new(0, 450, 0, 300)
+MainFrame.ClipsDescendants = true
+MakeDraggable(MainFrame)
+
+local UIStroke = Instance.new("UIStroke")
+UIStroke.Thickness = 2
+UIStroke.Color = Color3.fromRGB(200, 0, 0)
+UIStroke.Parent = MainFrame
+
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 8)
+UICorner.Parent = MainFrame
+
+-- Title Bar
+local TitleLabel = Instance.new("TextLabel")
+TitleLabel.Name = "Title"
+TitleLabel.Parent = MainFrame
+TitleLabel.Size = UDim2.new(1, 0, 0, 40)
+TitleLabel.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+TitleLabel.Text = "  PS CITY | BY:TOU"
+TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+TitleLabel.TextSize = 20
+TitleLabel.Font = Enum.Font.GothamBold
+TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local Underline = Instance.new("Frame")
+Underline.Size = UDim2.new(1, 0, 0, 2)
+Underline.Position = UDim2.new(0, 0, 1, 0)
+Underline.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+Underline.BorderSizePixel = 0
+Underline.Parent = TitleLabel
+
+-- ปุ่มปิด GUI
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Size = UDim2.new(0, 30, 0, 30)
+CloseBtn.Position = UDim2.new(1, -35, 0, 5)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(180, 0, 0)
+CloseBtn.Text = "X"
+CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.TextSize = 18
+CloseBtn.Parent = MainFrame
+
+local CloseCorner = Instance.new("UICorner")
+CloseCorner.CornerRadius = UDim.new(1, 0)
+CloseCorner.Parent = CloseBtn
+
+-- Sidebar (5 Tabs)
+local Sidebar = Instance.new("Frame")
+Sidebar.Parent = MainFrame
+Sidebar.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+Sidebar.Size = UDim2.new(0, 140, 1, -40)
+Sidebar.Position = UDim2.new(0, 0, 0, 40)
+Sidebar.BorderSizePixel = 0
+
+local SidebarCorner = Instance.new("UICorner")
+SidebarCorner.CornerRadius = UDim.new(0, 8)
+SidebarCorner.Parent = Sidebar
+
+local HomeTabBtn = Instance.new("TextButton") HomeTabBtn.Size = UDim2.new(1,-10,0,40) HomeTabBtn.Position = UDim2.new(0,5,0,10) HomeTabBtn.BackgroundColor3 = Color3.fromRGB(35,35,35) HomeTabBtn.Text = "หน้าหลัก" HomeTabBtn.TextColor3 = Color3.fromRGB(255,80,80) HomeTabBtn.Font = Enum.Font.GothamBold HomeTabBtn.TextSize = 16 HomeTabBtn.Parent = Sidebar
+local SettingsTabBtn = Instance.new("TextButton") SettingsTabBtn.Size = UDim2.new(1,-10,0,40) SettingsTabBtn.Position = UDim2.new(0,5,0,60) SettingsTabBtn.BackgroundColor3 = Color3.fromRGB(20,20,20) SettingsTabBtn.Text = "ตั้งค่า" SettingsTabBtn.TextColor3 = Color3.fromRGB(200,200,200) SettingsTabBtn.Font = Enum.Font.GothamBold SettingsTabBtn.TextSize = 16 SettingsTabBtn.Parent = Sidebar
+local ShopTabBtn = Instance.new("TextButton") ShopTabBtn.Size = UDim2.new(1,-10,0,40) ShopTabBtn.Position = UDim2.new(0,5,0,110) ShopTabBtn.BackgroundColor3 = Color3.fromRGB(20,20,20) ShopTabBtn.Text = "ซื้ออาวุธ" ShopTabBtn.TextColor3 = Color3.fromRGB(200,200,200) ShopTabBtn.Font = Enum.Font.GothamBold ShopTabBtn.TextSize = 16 ShopTabBtn.Parent = Sidebar
+local PlayerTabBtn = Instance.new("TextButton") PlayerTabBtn.Size = UDim2.new(1,-10,0,40) PlayerTabBtn.Position = UDim2.new(0,5,0,160) PlayerTabBtn.BackgroundColor3 = Color3.fromRGB(20,20,20) PlayerTabBtn.Text = "ผู้เล่น" PlayerTabBtn.TextColor3 = Color3.fromRGB(200,200,200) PlayerTabBtn.Font = Enum.Font.GothamBold PlayerTabBtn.TextSize = 16 PlayerTabBtn.Parent = Sidebar
+local FarmTabBtn = Instance.new("TextButton") FarmTabBtn.Size = UDim2.new(1,-10,0,40) FarmTabBtn.Position = UDim2.new(0,5,0,210) FarmTabBtn.BackgroundColor3 = Color3.fromRGB(20,20,20) FarmTabBtn.Text = "ฟามเงิน" FarmTabBtn.TextColor3 = Color3.fromRGB(200,200,200) FarmTabBtn.Font = Enum.Font.GothamBold FarmTabBtn.TextSize = 16 FarmTabBtn.Parent = Sidebar
+
+-- ContentFrame
+local ContentFrame = Instance.new("Frame")
+ContentFrame.Parent = MainFrame
+ContentFrame.Position = UDim2.new(0,150,0,50)
+ContentFrame.Size = UDim2.new(1,-160,1,-60)
+ContentFrame.BackgroundTransparency = 1
+ContentFrame.ClipsDescendants = true
+
+-- หน้า หน้าหลัก
+local HomePage = Instance.new("Frame") HomePage.Size = UDim2.new(1,0,1,0) HomePage.BackgroundTransparency = 1 HomePage.Visible = true HomePage.Parent = ContentFrame
+local AvatarFrame = Instance.new("Frame") AvatarFrame.Size = UDim2.new(0,100,0,100) AvatarFrame.Position = UDim2.new(0.05,0,0.15,0) AvatarFrame.BackgroundColor3 = Color3.fromRGB(25,25,25) AvatarFrame.BorderSizePixel = 0 AvatarFrame.ClipsDescendants = true AvatarFrame.Parent = HomePage
+local AvatarCorner = Instance.new("UICorner") AvatarCorner.CornerRadius = UDim.new(1,0) AvatarCorner.Parent = AvatarFrame
+local AvatarStroke = Instance.new("UIStroke") AvatarStroke.Thickness = 2.5 AvatarStroke.Color = Color3.fromRGB(220,0,0) AvatarStroke.Parent = AvatarFrame
+local characterImage = Instance.new("ImageLabel") characterImage.Size = UDim2.new(1,0,1,0) characterImage.Position = UDim2.new(0,0,0,0) characterImage.BackgroundTransparency = 1 characterImage.Image = Players:GetUserThumbnailAsync(LocalPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420) characterImage.ScaleType = Enum.ScaleType.Fit characterImage.ResampleMode = Enum.ResamplerMode.Pixelated characterImage.Parent = AvatarFrame
+local NickLabel = Instance.new("TextLabel") NickLabel.Text = "@" .. LocalPlayer.Name NickLabel.Size = UDim2.new(0,220,0,30) NickLabel.Position = UDim2.new(0,120,0.15,10) NickLabel.BackgroundTransparency = 1 NickLabel.TextColor3 = Color3.fromRGB(200,200,200) NickLabel.Font = Enum.Font.GothamSemibold NickLabel.TextSize = 20 NickLabel.TextXAlignment = Enum.TextXAlignment.Left NickLabel.Parent = HomePage
+local RealNameLabel = Instance.new("TextLabel") RealNameLabel.Text = LocalPlayer.DisplayName or LocalPlayer.Name RealNameLabel.Size = UDim2.new(0,220,0,40) RealNameLabel.Position = UDim2.new(0,120,0.15,40) RealNameLabel.BackgroundTransparency = 1 RealNameLabel.TextColor3 = Color3.fromRGB(255,255,255) RealNameLabel.Font = Enum.Font.GothamBlack RealNameLabel.TextSize = 26 RealNameLabel.TextXAlignment = Enum.TextXAlignment.Left RealNameLabel.Parent = HomePage
+local CoinsLabel = Instance.new("TextLabel") CoinsLabel.Size = UDim2.new(0.9,0,0,50) CoinsLabel.Position = UDim2.new(0.05,0,0.55,0) CoinsLabel.BackgroundTransparency = 1 CoinsLabel.Text = "Coins: 0" CoinsLabel.TextColor3 = Color3.fromRGB(255,215,0) CoinsLabel.Font = Enum.Font.GothamBlack CoinsLabel.TextSize = 28 CoinsLabel.TextXAlignment = Enum.TextXAlignment.Center CoinsLabel.Parent = HomePage
+local CoinsStroke = Instance.new("UIStroke") CoinsStroke.Thickness = 1.5 CoinsStroke.Color = Color3.fromRGB(200,150,0) CoinsStroke.Parent = CoinsLabel
+local KillsLabel = Instance.new("TextLabel") KillsLabel.Size = UDim2.new(0.9,0,0,50) KillsLabel.Position = UDim2.new(0.05,0,0.75,0) KillsLabel.BackgroundTransparency = 1 KillsLabel.Text = "Kills: 0" KillsLabel.TextColor3 = Color3.fromRGB(220,40,40) KillsLabel.Font = Enum.Font.GothamBlack KillsLabel.TextSize = 28 KillsLabel.TextXAlignment = Enum.TextXAlignment.Center KillsLabel.Parent = HomePage
+local KillsStroke = Instance.new("UIStroke") KillsStroke.Thickness = 1.5 KillsStroke.Color = Color3.fromRGB(150,0,0) KillsStroke.Parent = KillsLabel
+
+local function updateStats()
+    local coins = LocalPlayer:FindFirstChild("Data") and LocalPlayer.Data:FindFirstChild("Coins") and LocalPlayer.Data.Coins.Value or 0
+    local kills = LocalPlayer:FindFirstChild("leaderstats") and LocalPlayer.leaderstats:FindFirstChild("Kills") and LocalPlayer.leaderstats.Kills.Value or 0
+    CoinsLabel.Text = "Coins: " .. formatNumber(coins)
+    KillsLabel.Text = "Kills: " .. formatNumber(kills)
+end
+RunService.Heartbeat:Connect(updateStats)
+if LocalPlayer:FindFirstChild("Data") and LocalPlayer.Data:FindFirstChild("Coins") then LocalPlayer.Data.Coins:GetPropertyChangedSignal("Value"):Connect(updateStats) end
+if LocalPlayer:FindFirstChild("leaderstats") and LocalPlayer.leaderstats:FindFirstChild("Kills") then LocalPlayer.leaderstats.Kills:GetPropertyChangedSignal("Value"):Connect(updateStats) end
+updateStats()
+
+-- หน้าตั้งค่า
+local SettingsPage = Instance.new("Frame") SettingsPage.Size = UDim2.new(1,0,1,0) SettingsPage.BackgroundTransparency = 1 SettingsPage.Visible = false SettingsPage.Parent = ContentFrame
+local NotifyFrame = Instance.new("Frame") NotifyFrame.Size = UDim2.new(0,300,0,60) NotifyFrame.Position = UDim2.new(0.5,-150,0.2,0) NotifyFrame.BackgroundColor3 = Color3.fromRGB(25,25,25) NotifyFrame.BorderSizePixel = 0 NotifyFrame.Parent = SettingsPage
+local NotifyFrameCorner = Instance.new("UICorner") NotifyFrameCorner.CornerRadius = UDim.new(0,10) NotifyFrameCorner.Parent = NotifyFrame
+local NotifyFrameStroke = Instance.new("UIStroke") NotifyFrameStroke.Thickness = 2 NotifyFrameStroke.Color = Color3.fromRGB(120,0,0) NotifyFrameStroke.Parent = NotifyFrame
+local NotifyLabel = Instance.new("TextLabel") NotifyLabel.Size = UDim2.new(0.7,0,1,0) NotifyLabel.Position = UDim2.new(0,15,0,0) NotifyLabel.BackgroundTransparency = 1 NotifyLabel.Text = "แจ้งเตือนแอดมินเข้า" NotifyLabel.TextColor3 = Color3.fromRGB(220,220,220) NotifyLabel.Font = Enum.Font.GothamSemibold NotifyLabel.TextSize = 18 NotifyLabel.TextXAlignment = Enum.TextXAlignment.Left NotifyLabel.Parent = NotifyFrame
+local NotifyStatus = Instance.new("TextButton") NotifyStatus.Size = UDim2.new(0,100,0,40) NotifyStatus.Position = UDim2.new(1,-115,0.5,-20) NotifyStatus.BackgroundColor3 = Color3.fromRGB(50,50,50) NotifyStatus.Text = "ปิด" NotifyStatus.TextColor3 = Color3.fromRGB(200,50,50) NotifyStatus.Font = Enum.Font.GothamBold NotifyStatus.TextSize = 16 NotifyStatus.Parent = NotifyFrame
+local StatusCorner = Instance.new("UICorner") StatusCorner.CornerRadius = UDim.new(0,8) StatusCorner.Parent = NotifyStatus
+local StatusStroke = Instance.new("UIStroke") StatusStroke.Thickness = 1.5 StatusStroke.Color = Color3.fromRGB(100,0,0) StatusStroke.Parent = NotifyStatus
+
+local NotifyEnabled = false
+NotifyStatus.MouseButton1Click:Connect(function()
+    NotifyEnabled = not NotifyEnabled
+    NotifyStatus.Text = NotifyEnabled and "เปิด" or "ปิด"
+    NotifyStatus.BackgroundColor3 = NotifyEnabled and Color3.fromRGB(0,140,0) or Color3.fromRGB(50,50,50)
+    NotifyStatus.TextColor3 = NotifyEnabled and Color3.fromRGB(255,255,255) or Color3.fromRGB(200,50,50)
+    StatusStroke.Color = NotifyEnabled and Color3.fromRGB(0,220,0) or Color3.fromRGB(100,0,0)
+end)
+
+-- หน้าซื้ออาวุธ
+local ShopPage = Instance.new("Frame") ShopPage.Size = UDim2.new(1,0,1,0) ShopPage.BackgroundTransparency = 1 ShopPage.Visible = false ShopPage.Parent = ContentFrame
+local ShopTitle = Instance.new("TextLabel") ShopTitle.Size = UDim2.new(1,0,0,40) ShopTitle.BackgroundTransparency = 1 ShopTitle.Text = "ซื้ออาวุธ" ShopTitle.TextColor3 = Color3.fromRGB(255,80,80) ShopTitle.Font = Enum.Font.GothamBlack ShopTitle.TextSize = 24 ShopTitle.TextXAlignment = Enum.TextXAlignment.Center ShopTitle.Parent = ShopPage
+local WeaponShopFrame = Instance.new("ScrollingFrame") WeaponShopFrame.Size = UDim2.new(0.95,0,0.85,0) WeaponShopFrame.Position = UDim2.new(0.025,0,0.12,0) WeaponShopFrame.BackgroundTransparency = 1 WeaponShopFrame.ScrollBarThickness = 4 WeaponShopFrame.ScrollBarImageColor3 = Color3.fromRGB(200,0,0) WeaponShopFrame.Parent = ShopPage
+local WeaponGrid = Instance.new("UIGridLayout") WeaponGrid.CellSize = UDim2.new(0,200,0,60) WeaponGrid.CellPadding = UDim2.new(0,15,0,15) WeaponGrid.SortOrder = Enum.SortOrder.LayoutOrder WeaponGrid.Parent = WeaponShopFrame
+
+local weapons = {
+    {name = "มีด", display = "Knife"},
+    {name = "ถุงมวย", display = "Boxing Gloves"},
+    {name = "คาตานะ", display = "Katana"},
+    {name = "AK-47", display = "AK-47"},
+    {name = "ชะแลง", display = "Crowbar"},
+    {name = "M4A1", display = "M4A1"},
+    {name = "MP5", display = "MP5"},
+    {name = "Shotgun", display = "Shotgun"},
+    {name = "C4", display = "C4"}
+}
+
+for _, w in ipairs(weapons) do
+    local btnFrame = Instance.new("Frame") btnFrame.BackgroundColor3 = Color3.fromRGB(30,30,30) btnFrame.BorderSizePixel = 0 btnFrame.Parent = WeaponShopFrame
+    local btnCorner = Instance.new("UICorner") btnCorner.CornerRadius = UDim.new(0,10) btnCorner.Parent = btnFrame
+    local btnStroke = Instance.new("UIStroke") btnStroke.Thickness = 1.5 btnStroke.Color = Color3.fromRGB(120,0,0) btnStroke.Parent = btnFrame
+    local label = Instance.new("TextLabel") label.Size = UDim2.new(0.65,0,1,0) label.Position = UDim2.new(0,15,0,0) label.BackgroundTransparency = 1 label.Text = w.name label.TextColor3 = Color3.fromRGB(220,220,220) label.Font = Enum.Font.GothamSemibold label.TextSize = 18 label.TextXAlignment = Enum.TextXAlignment.Left label.Parent = btnFrame
+    local buyBtn = Instance.new("TextButton") buyBtn.Size = UDim2.new(0,90,0,40) buyBtn.Position = UDim2.new(1,-105,0.5,-20) buyBtn.BackgroundColor3 = Color3.fromRGB(180,0,0) buyBtn.Text = "ซื้อ" buyBtn.TextColor3 = Color3.fromRGB(255,255,255) buyBtn.Font = Enum.Font.GothamBold buyBtn.TextSize = 16 buyBtn.Parent = btnFrame
+    local buyCorner = Instance.new("UICorner") buyCorner.CornerRadius = UDim.new(0,8) buyCorner.Parent = buyBtn
+    buyBtn.MouseButton1Click:Connect(function() buyWeapon(w.display) end)
+end
+
+WeaponGrid:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+    WeaponShopFrame.CanvasSize = UDim2.new(0,0,0,WeaponGrid.AbsoluteContentSize.Y + 30)
+end)
+
+-- หน้าผู้เล่น
+local PlayerPage = Instance.new("Frame") PlayerPage.Size = UDim2.new(1,0,1,0) PlayerPage.BackgroundTransparency = 1 PlayerPage.Visible = false PlayerPage.Parent = ContentFrame
+local PlayerTitle = Instance.new("TextLabel") PlayerTitle.Size = UDim2.new(1,0,0,40) PlayerTitle.BackgroundTransparency = 1 PlayerTitle.Text = "ผู้เล่น" PlayerTitle.TextColor3 = Color3.fromRGB(255,80,80) PlayerTitle.Font = Enum.Font.GothamBlack PlayerTitle.TextSize = 24 PlayerTitle.TextXAlignment = Enum.TextXAlignment.Center PlayerTitle.Parent = PlayerPage
+
+-- ความเร็ว
+local SpeedFrame = Instance.new("Frame") SpeedFrame.Size = UDim2.new(0.9,0,0,55) SpeedFrame.Position = UDim2.new(0.05,0,0.15,0) SpeedFrame.BackgroundColor3 = Color3.fromRGB(30,30,30) SpeedFrame.BorderSizePixel = 0 SpeedFrame.Parent = PlayerPage
+local SpeedCorner = Instance.new("UICorner") SpeedCorner.CornerRadius = UDim.new(0,10) SpeedCorner.Parent = SpeedFrame
+local SpeedStroke = Instance.new("UIStroke") SpeedStroke.Thickness = 1.5 SpeedStroke.Color = Color3.fromRGB(120,0,0) SpeedStroke.Parent = SpeedFrame
+local SpeedLabel = Instance.new("TextLabel") SpeedLabel.Size = UDim2.new(0.35,0,1,0) SpeedLabel.Position = UDim2.new(0,15,0,0) SpeedLabel.BackgroundTransparency = 1 SpeedLabel.Text = "ความเร็ว" SpeedLabel.TextColor3 = Color3.fromRGB(220,220,220) SpeedLabel.Font = Enum.Font.GothamSemibold SpeedLabel.TextSize = 18 SpeedLabel.TextXAlignment = Enum.TextXAlignment.Left SpeedLabel.Parent = SpeedFrame
+local SpeedInput = Instance.new("TextBox") SpeedInput.Size = UDim2.new(0,80,0,35) SpeedInput.Position = UDim2.new(0.38,0,0.5,-17.5) SpeedInput.BackgroundColor3 = Color3.fromRGB(40,40,40) SpeedInput.Text = "50" SpeedInput.TextColor3 = Color3.fromRGB(255,255,255) SpeedInput.Font = Enum.Font.Gotham SpeedInput.TextSize = 16 SpeedInput.ClearTextOnFocus = false SpeedInput.Parent = SpeedFrame
+local SpeedInputCorner = Instance.new("UICorner") SpeedInputCorner.CornerRadius = UDim.new(0,8) SpeedInputCorner.Parent = SpeedInput
+local SpeedToggle = Instance.new("TextButton") SpeedToggle.Size = UDim2.new(0,90,0,35) SpeedToggle.Position = UDim2.new(1,-105,0.5,-17.5) SpeedToggle.BackgroundColor3 = Color3.fromRGB(50,50,50) SpeedToggle.Text = "ปิด" SpeedToggle.TextColor3 = Color3.fromRGB(200,50,50) SpeedToggle.Font = Enum.Font.GothamBold SpeedToggle.TextSize = 16 SpeedToggle.Parent = SpeedFrame
+local SpeedToggleCorner = Instance.new("UICorner") SpeedToggleCorner.CornerRadius = UDim.new(0,8) SpeedToggleCorner.Parent = SpeedToggle
+
+-- กระโดด
+local JumpFrame = Instance.new("Frame") JumpFrame.Size = UDim2.new(0.9,0,0,55) JumpFrame.Position = UDim2.new(0.05,0,0.35,0) JumpFrame.BackgroundColor3 = Color3.fromRGB(30,30,30) JumpFrame.BorderSizePixel = 0 JumpFrame.Parent = PlayerPage
+local JumpCorner = Instance.new("UICorner") JumpCorner.CornerRadius = UDim.new(0,10) JumpCorner.Parent = JumpFrame
+local JumpStroke = Instance.new("UIStroke") JumpStroke.Thickness = 1.5 JumpStroke.Color = Color3.fromRGB(120,0,0) JumpStroke.Parent = JumpFrame
+local JumpLabel = Instance.new("TextLabel") JumpLabel.Size = UDim2.new(0.35,0,1,0) JumpLabel.Position = UDim2.new(0,15,0,0) JumpLabel.BackgroundTransparency = 1 JumpLabel.Text = "กระโดด" JumpLabel.TextColor3 = Color3.fromRGB(220,220,220) JumpLabel.Font = Enum.Font.GothamSemibold JumpLabel.TextSize = 18 JumpLabel.TextXAlignment = Enum.TextXAlignment.Left JumpLabel.Parent = JumpFrame
+local JumpInput = Instance.new("TextBox") JumpInput.Size = UDim2.new(0,80,0,35) JumpInput.Position = UDim2.new(0.38,0,0.5,-17.5) JumpInput.BackgroundColor3 = Color3.fromRGB(40,40,40) JumpInput.Text = "100" JumpInput.TextColor3 = Color3.fromRGB(255,255,255) JumpInput.Font = Enum.Font.Gotham JumpInput.TextSize = 16 JumpInput.ClearTextOnFocus = false JumpInput.Parent = JumpFrame
+local JumpInputCorner = Instance.new("UICorner") JumpInputCorner.CornerRadius = UDim.new(0,8) JumpInputCorner.Parent = JumpInput
+local JumpToggle = Instance.new("TextButton") JumpToggle.Size = UDim2.new(0,90,0,35) JumpToggle.Position = UDim2.new(1,-105,0.5,-17.5) JumpToggle.BackgroundColor3 = Color3.fromRGB(50,50,50) JumpToggle.Text = "ปิด" JumpToggle.TextColor3 = Color3.fromRGB(200,50,50) JumpToggle.Font = Enum.Font.GothamBold JumpToggle.TextSize = 16 JumpToggle.Parent = JumpFrame
+local JumpToggleCorner = Instance.new("UICorner") JumpToggleCorner.CornerRadius = UDim.new(0,8) JumpToggleCorner.Parent = JumpToggle
+
+-- ระบบ Speed & Jump
+local speedEnabled = false
+local jumpEnabled = false
+local desiredSpeed = 50
+local desiredJump = 100
+
+SpeedInput.FocusLost:Connect(function()
+    local num = tonumber(SpeedInput.Text)
+    if num and num > 0 then desiredSpeed = num else SpeedInput.Text = tostring(desiredSpeed) end
+end)
+
+JumpInput.FocusLost:Connect(function()
+    local num = tonumber(JumpInput.Text)
+    if num and num > 0 then desiredJump = num else JumpInput.Text = tostring(desiredJump) end
+end)
+
+SpeedToggle.MouseButton1Click:Connect(function()
+    speedEnabled = not speedEnabled
+    SpeedToggle.Text = speedEnabled and "เปิด" or "ปิด"
+    SpeedToggle.BackgroundColor3 = speedEnabled and Color3.fromRGB(0,140,0) or Color3.fromRGB(50,50,50)
+    SpeedToggle.TextColor3 = speedEnabled and Color3.fromRGB(255,255,255) or Color3.fromRGB(200,50,50)
+end)
+
+JumpToggle.MouseButton1Click:Connect(function()
+    jumpEnabled = not jumpEnabled
+    JumpToggle.Text = jumpEnabled and "เปิด" or "ปิด"
+    JumpToggle.BackgroundColor3 = jumpEnabled and Color3.fromRGB(0,140,0) or Color3.fromRGB(50,50,50)
+    JumpToggle.TextColor3 = jumpEnabled and Color3.fromRGB(255,255,255) or Color3.fromRGB(200,50,50)
+end)
+
+RunService.Heartbeat:Connect(function()
+    local char = LocalPlayer.Character
+    if not char then return end
+    local humanoid = char:FindFirstChildOfClass("Humanoid")
+    if not humanoid then return end
+    
+    if speedEnabled then humanoid.WalkSpeed = desiredSpeed end
+    if jumpEnabled then
+        humanoid.UseJumpPower = true
+        humanoid.JumpPower = desiredJump
+        humanoid.JumpHeight = desiredJump
+    end
+end)
+
+-- หน้าฟามเงิน
+local FarmPage = Instance.new("Frame")
+FarmPage.Size = UDim2.new(1,0,1,0)
+FarmPage.BackgroundTransparency = 1
+FarmPage.Visible = false
+FarmPage.Parent = ContentFrame
+
+local FarmTitle = Instance.new("TextLabel") FarmTitle.Size = UDim2.new(1,0,0,40) FarmTitle.BackgroundTransparency = 1 FarmTitle.Text = "ฟามเงิน" FarmTitle.TextColor3 = Color3.fromRGB(255,80,80) FarmTitle.Font = Enum.Font.GothamBlack FarmTitle.TextSize = 24 FarmTitle.TextXAlignment = Enum.TextXAlignment.Center FarmTitle.Parent = FarmPage
+
+local FarmWarn = Instance.new("TextLabel") FarmWarn.Size = UDim2.new(0.9,0,0,140) FarmWarn.Position = UDim2.new(0.05,0,0.12,0) FarmWarn.BackgroundTransparency = 1 FarmWarn.Text = "ก่อนเปิดต้องเปลี่ยนทีมเป็นฝั่งตำรวจ!\n\nวิธีฟามเงินเยอะ: จับโจรให้ได้เยอะ ๆ ก่อน แล้วค่อยกดเปิดปั้มเงิน" FarmWarn.TextColor3 = Color3.fromRGB(255,215,0) FarmWarn.Font = Enum.Font.GothamSemibold FarmWarn.TextSize = 18 FarmWarn.TextWrapped = true FarmWarn.TextXAlignment = Enum.TextXAlignment.Center FarmWarn.Parent = FarmPage
+
+local FarmToggle = Instance.new("TextButton") FarmToggle.Size = UDim2.new(0,180,0,50) FarmToggle.Position = UDim2.new(0.5,-90,0.55,0) FarmToggle.BackgroundColor3 = Color3.fromRGB(50,50,50) FarmToggle.Text = "ปั้มเงิน : ปิด" FarmToggle.TextColor3 = Color3.fromRGB(200,50,50) FarmToggle.Font = Enum.Font.GothamBold FarmToggle.TextSize = 20 FarmToggle.Parent = FarmPage
+local FarmToggleCorner = Instance.new("UICorner") FarmToggleCorner.CornerRadius = UDim.new(0,12) FarmToggleCorner.Parent = FarmToggle
+
+local AutoPickupFrame = Instance.new("Frame") AutoPickupFrame.Size = UDim2.new(0.9,0,0,60) AutoPickupFrame.Position = UDim2.new(0.05,0,0.72,0) AutoPickupFrame.BackgroundColor3 = Color3.fromRGB(25,25,25) AutoPickupFrame.BorderSizePixel = 0 AutoPickupFrame.Parent = FarmPage
+local AutoPickupCorner = Instance.new("UICorner") AutoPickupCorner.CornerRadius = UDim.new(0,10) AutoPickupCorner.Parent = AutoPickupFrame
+local AutoPickupLabel = Instance.new("TextLabel") AutoPickupLabel.Size = UDim2.new(0.65,0,1,0) AutoPickupLabel.Position = UDim2.new(0,15,0,0) AutoPickupLabel.BackgroundTransparency = 1 AutoPickupLabel.Text = "อ้อโต้เก็บเงินตกพื้น" AutoPickupLabel.TextColor3 = Color3.fromRGB(220,220,220) AutoPickupLabel.Font = Enum.Font.GothamSemibold AutoPickupLabel.TextSize = 18 AutoPickupLabel.TextXAlignment = Enum.TextXAlignment.Left AutoPickupLabel.Parent = AutoPickupFrame
+local AutoPickupToggle = Instance.new("TextButton") AutoPickupToggle.Size = UDim2.new(0,100,0,40) AutoPickupToggle.Position = UDim2.new(1,-115,0.5,-20) AutoPickupToggle.BackgroundColor3 = Color3.fromRGB(50,50,50) AutoPickupToggle.Text = "ปิด" AutoPickupToggle.TextColor3 = Color3.fromRGB(200,50,50) AutoPickupToggle.Font = Enum.Font.GothamBold AutoPickupToggle.TextSize = 16 AutoPickupToggle.Parent = AutoPickupFrame
+local AutoPickupToggleCorner = Instance.new("UICorner") AutoPickupToggleCorner.CornerRadius = UDim.new(0,8) AutoPickupToggleCorner.Parent = AutoPickupToggle
+
+local farmEnabled = false
+local autoPickupEnabled = false
+local originalPos = nil
+
+FarmToggle.MouseButton1Click:Connect(function()
+    farmEnabled = not farmEnabled
+    FarmToggle.Text = "ปั้มเงิน : " .. (farmEnabled and "เปิด" or "ปิด")
+    FarmToggle.BackgroundColor3 = farmEnabled and Color3.fromRGB(0,140,0) or Color3.fromRGB(50,50,50)
+    FarmToggle.TextColor3 = farmEnabled and Color3.fromRGB(255,255,255) or Color3.fromRGB(200,50,50)
+end)
+
+AutoPickupToggle.MouseButton1Click:Connect(function()
+    autoPickupEnabled = not autoPickupEnabled
+    AutoPickupToggle.Text = autoPickupEnabled and "เปิด" or "ปิด"
+    AutoPickupToggle.BackgroundColor3 = autoPickupEnabled and Color3.fromRGB(0,140,0) or Color3.fromRGB(50,50,50)
+    AutoPickupToggle.TextColor3 = autoPickupEnabled and Color3.fromRGB(255,255,255) or Color3.fromRGB(200,50,50)
+    
+    if autoPickupEnabled then
+        local char = LocalPlayer.Character
+        if char and char:FindFirstChild("HumanoidRootPart") then
+            originalPos = char.HumanoidRootPart.CFrame
+        end
+    end
+end)
+
+-- ลูปปั้มเงิน
+RunService.Heartbeat:Connect(function()
+    if farmEnabled then
+        CollectPaycheck:FireServer()
+        task.wait(0.01)
+    end
+end)
+
+-- ลูปออโต้เก็บเงินตกพื้น (dynamic - ไม่พึ่ง index [2])
+RunService.Heartbeat:Connect(function()
+    if not autoPickupEnabled then return end
+    
+    local char = LocalPlayer.Character
+    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+    local hrp = char.HumanoidRootPart
+    
+    local moneyDrops = workspace:FindFirstChild("MoneyDrops")
+    if not moneyDrops then return end
+    
+    local targetDrop = nil
+    for _, drop in ipairs(moneyDrops:GetChildren()) do
+        local prompt = drop:FindFirstChildOfClass("ProximityPrompt")
+        if prompt and prompt.Enabled then
+            targetDrop = drop
+            break
+        end
+    end
+    
+    if targetDrop then
+        hrp.CFrame = targetDrop.CFrame + Vector3.new(0, 3, 0)
+        task.wait(0.08)
+        local prompt = targetDrop:FindFirstChildOfClass("ProximityPrompt")
+        if prompt then fireproximityprompt(prompt) end
+        task.wait(0.25)
+    elseif originalPos then
+        hrp.CFrame = originalPos
+    end
+end)
+
+-- ⚠️ Admin Alert
+local AdminAlert = Instance.new("Frame")
+AdminAlert.Size = UDim2.new(0,380,0,140)
+AdminAlert.Position = UDim2.new(0.5,-190,0.08,0)
+AdminAlert.BackgroundColor3 = Color3.fromRGB(20,20,20)
+AdminAlert.BackgroundTransparency = 0.1
+AdminAlert.Visible = false
+AdminAlert.Parent = ScreenGui
+MakeDraggable(AdminAlert)
+
+local AlertCorner = Instance.new("UICorner") AlertCorner.CornerRadius = UDim.new(0,12) AlertCorner.Parent = AdminAlert
+local AlertStroke = Instance.new("UIStroke") AlertStroke.Thickness = 3 AlertStroke.Color = Color3.fromRGB(255,40,40) AlertStroke.Parent = AdminAlert
+local AlertImage = Instance.new("ImageLabel") AlertImage.Size = UDim2.new(0,64,0,64) AlertImage.Position = UDim2.new(0,20,0.5,-32) AlertImage.BackgroundTransparency = 1 AlertImage.Image = "rbxassetid://125824368479523" AlertImage.Parent = AdminAlert
+local AlertText = Instance.new("TextLabel") AlertText.Size = UDim2.new(1,-100,0,50) AlertText.Position = UDim2.new(0,100,0,20) AlertText.BackgroundTransparency = 1 AlertText.Text = "แอดมินมาแล้ว!" AlertText.TextColor3 = Color3.fromRGB(255,60,60) AlertText.Font = Enum.Font.GothamBlack AlertText.TextSize = 28 AlertText.TextXAlignment = Enum.TextXAlignment.Left AlertText.Parent = AdminAlert
+local StayBtn = Instance.new("TextButton") StayBtn.Size = UDim2.new(0,140,0,45) StayBtn.Position = UDim2.new(0.5,-150,1,-65) StayBtn.BackgroundColor3 = Color3.fromRGB(0,140,0) StayBtn.Text = "อยู่ต่อ" StayBtn.TextColor3 = Color3.fromRGB(255,255,255) StayBtn.Font = Enum.Font.GothamBold StayBtn.TextSize = 18 StayBtn.Parent = AdminAlert
+local StayCorner = Instance.new("UICorner") StayCorner.CornerRadius = UDim.new(0,8) StayCorner.Parent = StayBtn
+local LeaveBtn = Instance.new("TextButton") LeaveBtn.Size = UDim2.new(0,140,0,45) LeaveBtn.Position = UDim2.new(0.5,10,1,-65) LeaveBtn.BackgroundColor3 = Color3.fromRGB(180,0,0) LeaveBtn.Text = "ออกเกม" LeaveBtn.TextColor3 = Color3.fromRGB(255,255,255) LeaveBtn.Font = Enum.Font.GothamBold LeaveBtn.TextSize = 18 LeaveBtn.Parent = AdminAlert
+local LeaveCorner = Instance.new("UICorner") LeaveCorner.CornerRadius = UDim.new(0,8) LeaveCorner.Parent = LeaveBtn
+
+StayBtn.MouseButton1Click:Connect(function() AdminAlert.Visible = false end)
+LeaveBtn.MouseButton1Click:Connect(function() game:Shutdown() end)
+
+-- สลับ Tab
+local currentTab = "Home"
+local function switchTab(tabName)
+    if tabName == currentTab then return end
+    HomePage.Visible = false
+    SettingsPage.Visible = false
+    ShopPage.Visible = false
+    PlayerPage.Visible = false
+    FarmPage.Visible = false
+    
+    if tabName == "Home" then HomePage.Visible = true
+    elseif tabName == "Settings" then SettingsPage.Visible = true
+    elseif tabName == "Shop" then ShopPage.Visible = true
+    elseif tabName == "Player" then PlayerPage.Visible = true
+    elseif tabName == "Farm" then FarmPage.Visible = true end
+    
+    currentTab = tabName
+end
+
+HomeTabBtn.MouseButton1Click:Connect(function() switchTab("Home") end)
+SettingsTabBtn.MouseButton1Click:Connect(function() switchTab("Settings") end)
+ShopTabBtn.MouseButton1Click:Connect(function() switchTab("Shop") end)
+PlayerTabBtn.MouseButton1Click:Connect(function() switchTab("Player") end)
+FarmTabBtn.MouseButton1Click:Connect(function() switchTab("Farm") end)
+
+-- ตรวจแอดมิน
+local function checkAdmin()
+    if not NotifyEnabled then return end
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr.Name == "PSCITYOWNER" or plr.DisplayName == "PSCITYOWNER" then
+            if not AdminAlert.Visible then
+                AdminAlert.Visible = true
+                AdminAlert.Position = UDim2.new(0.5,-190,-0.2,0)
+                TweenService:Create(AdminAlert, TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Position = UDim2.new(0.5,-190,0.08,0)}):Play()
+            end
+            return
+        end
+    end
+    if AdminAlert.Visible then
+        TweenService:Create(AdminAlert, TweenInfo.new(0.4), {BackgroundTransparency = 1}):Play()
+        task.wait(0.4)
+        AdminAlert.Visible = false
+        AdminAlert.BackgroundTransparency = 0.1
+    end
+end
+
+RunService.Heartbeat:Connect(function() if NotifyEnabled then checkAdmin() end end)
+Players.PlayerAdded:Connect(function(plr)
+    if NotifyEnabled and (plr.Name == "PSCITYOWNER" or plr.DisplayName == "PSCITYOWNER") then checkAdmin() end
+end)
+
+-- ปุ่มเปิด GUI
+local OpenGuiBtn = Instance.new("ImageButton")
+OpenGuiBtn.Size = UDim2.new(0,60,0,60)
+OpenGuiBtn.Position = UDim2.new(0.05,0,0.5,-30)
+OpenGuiBtn.BackgroundTransparency = 1
+OpenGuiBtn.Image = "rbxassetid://116331333615173"
+OpenGuiBtn.ScaleType = Enum.ScaleType.Fit
+OpenGuiBtn.Visible = false
+OpenGuiBtn.ZIndex = 10
+OpenGuiBtn.Parent = ScreenGui
+MakeDraggable(OpenGuiBtn)
+
+local OpenCorner = Instance.new("UICorner") OpenCorner.CornerRadius = UDim.new(1,0) OpenCorner.Parent = OpenGuiBtn
+local OpenStroke = Instance.new("UIStroke") OpenStroke.Thickness = 3 OpenStroke.Color = Color3.fromRGB(200,0,0) OpenStroke.Parent = OpenGuiBtn
+
+CloseBtn.MouseButton1Click:Connect(function()
+    MainFrame.Visible = false
+    OpenGuiBtn.Visible = true
+end)
+
+OpenGuiBtn.MouseButton1Click:Connect(function()
+    MainFrame.Visible = true
+    OpenGuiBtn.Visible = false
+end)
+
+print("PS CITY Exploit Loaded! 🩸 Full Complete Script + Dynamic Auto Pickup Ready! 🔥")
