@@ -1114,3 +1114,192 @@ AutoArrestButton.MouseButton1Click:Connect(function()
     AutoArrestButton.BackgroundColor3 = autoArrestEnabled and Color3.fromRGB(50,200,50) or Color3.fromRGB(80,80,90)
     autoArrest()
 end)
+
+-- Event ปุ่มเปิดเพลง
+MusicInput.FocusLost:Connect(function()
+    musicID = MusicInput.Text
+end)
+
+MusicToggle.MouseButton1Click:Connect(function()
+    musicEnabled = not musicEnabled
+    MusicToggle.Text = musicEnabled and "เปิด" or "ปิด"
+    MusicToggle.BackgroundColor3 = musicEnabled and Color3.fromRGB(0,140,0) or Color3.fromRGB(50,50,50)
+    MusicToggle.TextColor3 = musicEnabled and Color3.fromRGB(255,255,255) or Color3.fromRGB(200,50,50)
+    
+    if musicLoop then
+        musicLoop:Disconnect()
+        musicLoop = nil
+    end
+    
+    if musicEnabled and musicID ~= "" then
+        musicLoop = RunService.Heartbeat:Connect(function()
+            pcall(function()
+                local cars = workspace:FindFirstChild("Cars")
+                if cars then
+                    local lambo63 = cars:FindFirstChild("Lamborghini Aventador SVJ 63")
+                    if lambo63 and lambo63:FindFirstChild("DriveSound") then
+                        local args = {"updateSound", "Rev", "rbxassetid://"..musicID, 1, 10}
+                        lambo63.DriveSound:FireServer(unpack(args))
+                    end
+                    
+                    local camry = cars:FindFirstChild("White Toyota Camry")
+                    if camry and camry:FindFirstChild("DriveSound") then
+                        local args = {"updateSound", "Rev", "rbxassetid://"..musicID, 1, 10}
+                        camry.DriveSound:FireServer(unpack(args))
+                    end
+                    
+                    local lambo = cars:FindFirstChild("Lamborghini Aventador SVJ ")
+                    if lambo and lambo:FindFirstChild("DriveSound") then
+                        local args = {"updateSound", "Rev", "rbxassetid://"..musicID, 1, 10}
+                        lambo.DriveSound:FireServer(unpack(args))
+                    end
+                end
+                wait(0.01)
+            end)
+        end)
+    end
+end)
+
+-- Event คลิกตาย
+Mouse.Button1Down:Connect(function()
+    if not killClickEnabled then return end
+    task.spawn(function()
+        pcall(function()
+            local target = Mouse.Target
+            if target and target.Parent then
+                local targetPlayer = Players:GetPlayerFromCharacter(target.Parent)
+                if targetPlayer and targetPlayer ~= LocalPlayer then
+                    if not equipMP5() then return end
+                    
+                    local character = LocalPlayer.Character
+                    if not character or not character:FindFirstChild("HumanoidRootPart") then return end
+                    local originalPosition = character.HumanoidRootPart.CFrame
+                    
+                    local humanoid = targetPlayer.Character:FindFirstChild("Humanoid")
+                    local hrp = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
+                    
+                    if humanoid and hrp then
+                        while humanoid.Health > 15 do
+                            shootMP5(targetPlayer)
+                            wait(0.1)
+                        end
+                        
+                        wait(0.2)
+                        
+                        if humanoid.Health <= 15 and humanoid.Health > 0 then
+                            character.HumanoidRootPart.CFrame = hrp.CFrame + Vector3.new(0, 2, 0)
+                            wait(0.15)
+                            
+                            executePlayer(targetPlayer)
+                            wait(0.15)
+                            
+                            character.HumanoidRootPart.CFrame = originalPosition
+                        end
+                    end
+                    
+                    wait(0.2)
+                    unequipMP5()
+                end
+            end
+        end)
+    end)
+end)
+
+-- ลูปออโต้เก็บเงิน
+RunService.Heartbeat:Connect(function()
+    if not autoFarmMoneyEnabled then return end
+    pcall(function()
+        local character = LocalPlayer.Character
+        if not character or not character:FindFirstChild("HumanoidRootPart") then return end
+        
+        local hrp = character.HumanoidRootPart
+        
+        local moneyDrops = workspace:FindFirstChild("MoneyDrops")
+        if not moneyDrops then return end
+        
+        for _, moneyDrop in pairs(moneyDrops:GetChildren()) do
+            if moneyDrop:IsA("Model") and moneyDrop:FindFirstChild("Money") then
+                local moneyPart = moneyDrop:FindFirstChild("Money")
+                if moneyPart and moneyPart:FindFirstChild("ProximityPrompt") then
+                    local proximityPrompt = moneyPart.ProximityPrompt
+                    
+                    local originalPosition = hrp.CFrame
+                    
+                    hrp.CFrame = moneyPart.CFrame
+                    wait(0.15)
+                    
+                    fireproximityprompt(proximityPrompt)
+                    wait(0.15)
+                    
+                    hrp.CFrame = originalPosition
+                    wait(0.1)
+                end
+            end
+        end
+        
+        wait(0.5)
+    end)
+end)
+
+-- สลับ Tab
+local currentTab = "Home"
+local function switchTab(tabName)
+    if tabName == currentTab then return end
+    HomePage.Visible = false
+    JobPage.Visible = false
+    GriefPage.Visible = false
+    ShopPage.Visible = false
+    PlayerPage.Visible = false
+    FarmPage.Visible = false
+    
+    HomeTabBtn.BackgroundColor3 = Color3.fromRGB(20,20,20) HomeTabBtn.TextColor3 = Color3.fromRGB(200,200,200)
+    JobTabBtn.BackgroundColor3 = Color3.fromRGB(20,20,20) JobTabBtn.TextColor3 = Color3.fromRGB(200,200,200)
+    GriefTabBtn.BackgroundColor3 = Color3.fromRGB(20,20,20) GriefTabBtn.TextColor3 = Color3.fromRGB(200,200,200)
+    ShopTabBtn.BackgroundColor3 = Color3.fromRGB(20,20,20) ShopTabBtn.TextColor3 = Color3.fromRGB(200,200,200)
+    PlayerTabBtn.BackgroundColor3 = Color3.fromRGB(20,20,20) PlayerTabBtn.TextColor3 = Color3.fromRGB(200,200,200)
+    FarmTabBtn.BackgroundColor3 = Color3.fromRGB(20,20,20) FarmTabBtn.TextColor3 = Color3.fromRGB(200,200,200)
+    
+    if tabName == "Home" then HomePage.Visible = true HomeTabBtn.BackgroundColor3 = Color3.fromRGB(35,35,35) HomeTabBtn.TextColor3 = Color3.fromRGB(255,80,80)
+    elseif tabName == "Job" then JobPage.Visible = true JobTabBtn.BackgroundColor3 = Color3.fromRGB(35,35,35) JobTabBtn.TextColor3 = Color3.fromRGB(255,80,80)
+    elseif tabName == "Grief" then GriefPage.Visible = true GriefTabBtn.BackgroundColor3 = Color3.fromRGB(35,35,35) GriefTabBtn.TextColor3 = Color3.fromRGB(255,80,80)
+    elseif tabName == "Shop" then ShopPage.Visible = true ShopTabBtn.BackgroundColor3 = Color3.fromRGB(35,35,35) ShopTabBtn.TextColor3 = Color3.fromRGB(255,80,80)
+    elseif tabName == "Player" then PlayerPage.Visible = true PlayerTabBtn.BackgroundColor3 = Color3.fromRGB(35,35,35) PlayerTabBtn.TextColor3 = Color3.fromRGB(255,80,80)
+    elseif tabName == "Farm" then FarmPage.Visible = true FarmTabBtn.BackgroundColor3 = Color3.fromRGB(35,35,35) FarmTabBtn.TextColor3 = Color3.fromRGB(255,80,80)
+    end
+    
+    currentTab = tabName
+end
+
+HomeTabBtn.MouseButton1Click:Connect(function() switchTab("Home") end)
+JobTabBtn.MouseButton1Click:Connect(function() switchTab("Job") end)
+GriefTabBtn.MouseButton1Click:Connect(function() switchTab("Grief") end)
+ShopTabBtn.MouseButton1Click:Connect(function() switchTab("Shop") end)
+PlayerTabBtn.MouseButton1Click:Connect(function() switchTab("Player") end)
+FarmTabBtn.MouseButton1Click:Connect(function() switchTab("Farm") end)
+
+-- ปุ่มเปิด GUI
+local OpenGuiBtn = Instance.new("ImageButton")
+OpenGuiBtn.Size = UDim2.new(0,60,0,60)
+OpenGuiBtn.Position = UDim2.new(0.05,0,0.5,-30)
+OpenGuiBtn.BackgroundTransparency = 1
+OpenGuiBtn.Image = "rbxassetid://116331333615173"
+OpenGuiBtn.ScaleType = Enum.ScaleType.Fit
+OpenGuiBtn.Visible = false
+OpenGuiBtn.ZIndex = 10
+OpenGuiBtn.Parent = ScreenGui
+MakeDraggable(OpenGuiBtn)
+
+local OpenCorner = Instance.new("UICorner") OpenCorner.CornerRadius = UDim.new(1,0) OpenCorner.Parent = OpenGuiBtn
+local OpenStroke = Instance.new("UIStroke") OpenStroke.Thickness = 3 OpenStroke.Color = Color3.fromRGB(200,0,0) OpenStroke.Parent = OpenGuiBtn
+
+CloseBtn.MouseButton1Click:Connect(function()
+    MainFrame.Visible = false
+    OpenGuiBtn.Visible = true
+end)
+
+OpenGuiBtn.MouseButton1Click:Connect(function()
+    MainFrame.Visible = true
+    OpenGuiBtn.Visible = false
+end)
+
+print("🔥 PS CITY Complete Script by TOU - Loaded! 😈")
