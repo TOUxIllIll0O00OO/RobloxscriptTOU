@@ -804,3 +804,313 @@ local function infiniteAmmo()
 end
 
 -- ฟังก์ชัน ESP วงกลม
+local function createESPCircle()
+    pcall(function()
+        if espCircle then
+            espCircle:Remove()
+        end
+        
+        espCircle = Drawing.new("Circle")
+        espCircle.Color = Color3.fromRGB(255, 0, 0)
+        espCircle.Thickness = 3
+        espCircle.NumSides = 100
+        espCircle.Radius = 100
+        espCircle.Filled = false
+        espCircle.Transparency = 1
+        espCircle.Visible = false
+        espCircle.ZIndex = 999
+    end)
+end
+
+createESPCircle()
+
+local function updateESP()
+    pcall(function()
+        if not espEnabled or not espCircle then 
+            if espCircle then 
+                espCircle.Visible = false 
+            end
+            return 
+        end
+        
+        local character = LocalPlayer.Character
+        if not character or not character:FindFirstChild("HumanoidRootPart") then 
+            espCircle.Visible = false
+            return 
+        end
+        
+        local hrp = character.HumanoidRootPart
+        local camera = workspace.CurrentCamera
+        
+        -- คำนวณตำแหน่งบนหน้าจอ
+        local hrpPosition = hrp.Position
+        local screenPos, onScreen = camera:WorldToViewportPoint(hrpPosition)
+        
+        if onScreen then
+            -- คำนวณขนาดวงกลมตามระยะห่าง
+            local distance = (camera.CFrame.Position - hrpPosition).Magnitude
+            local scale = 1 / distance * 1000
+            local radius = killAuraRange * scale
+            
+            espCircle.Position = Vector2.new(screenPos.X, screenPos.Y)
+            espCircle.Radius = math.clamp(radius, 50, 500)
+            espCircle.Visible = true
+            espCircle.Color = Color3.fromRGB(255, 0, 0)
+            espCircle.Thickness = 3
+        else
+            espCircle.Visible = false
+        end
+    end)
+end
+
+-- ฟังก์ชันฆ่าคนรอบๆ
+local function killAura()
+    if killAuraLoop then
+        killAuraLoop:Disconnect()
+        killAuraLoop = nil
+    end
+    
+    if killAuraEnabled then
+        killAuraLoop = RunService.Heartbeat:Connect(function()
+            pcall(function()
+                local character = LocalPlayer.Character
+                if not character or not character:FindFirstChild("HumanoidRootPart") then return end
+                
+                local hrp = character.HumanoidRootPart
+                
+                local foundTarget = false
+                for _, player in pairs(Players:GetPlayers()) do
+                    if player ~= LocalPlayer and player.Character then
+                        local targetHRP = player.Character:FindFirstChild("HumanoidRootPart")
+                        local targetHumanoid = player.Character:FindFirstChild("Humanoid")
+                        
+                        if targetHRP and targetHumanoid and targetHumanoid.Health > 0 then
+                            local distance = (hrp.Position - targetHRP.Position).Magnitude
+                            
+                            if distance <= killAuraRange then
+                                foundTarget = true
+                                
+                                if not character:FindFirstChild("MP5") then
+                                    equipMP5()
+                                end
+                                
+                                if targetHumanoid.Health > 15 then
+                                    shootMP5(player)
+                                elseif targetHumanoid.Health <= 15 and targetHumanoid.Health > 0 then
+                                    local originalPos = hrp.CFrame
+                                    hrp.CFrame = targetHRP.CFrame + Vector3.new(0, 2, 0)
+                                    wait(0.1)
+                                    executePlayer(player)
+                                    wait(0.1)
+                                    hrp.CFrame = originalPos
+                                end
+                                
+                                break
+                            end
+                        end
+                    end
+                end
+                
+                if not foundTarget then
+                    unequipMP5()
+                end
+            end)
+        end)
+    end
+end
+
+-- ฟังก์ชันออโต้จับโจร (แก้ใหม่)
+local function autoArrest()
+    if autoArrestLoop then
+        autoArrestLoop:Disconnect()
+        autoArrestLoop = nil
+    end
+    
+    if autoArrestEnabled then
+        autoArrestLoop = RunService.Heartbeat:Connect(function()
+            pcall(function()
+                local character = LocalPlayer.Character
+                if not character or not character:FindFirstChild("HumanoidRootPart") then return end
+                
+                local hrp = character.HumanoidRootPart
+                local backpack = LocalPlayer.Backpack
+                
+                -- ค้นหา Wanted Players
+                for _, player in pairs(Players:GetPlayers()) do
+                    if player ~= LocalPlayer and player.Character then
+                        -- เช็คว่าเป็นโจรหรือไม่
+                        local targetChar = player.Character
+                        local targetHRP = targetChar:FindFirstChild("HumanoidRootPart")
+                        local targetHumanoid = targetChar:FindFirstChild("Humanoid")
+                        
+                        -- หา Wanted tag หรือ Criminal status
+                        local isWanted = false
+                        
+                        -- วิธีที่ 1: เช็คจาก GUI
+                        local policeGui = LocalPlayer.PlayerGui:FindFirstChild("PoliceGui")
+                        if policeGui then
+                            local arrestGui = policeGui:FindFirstChild("PoliceArrestGui")
+                            if arrestGui then
+                                local wantedFrame = arrestGui:FindFirstChild("WantedListFrame")
+                                if wantedFrame then
+                                    local scrollFrame = wantedFrame:FindFirstChild("ScrollFrame")
+                                    if scrollFrame then
+                                        for _, child in pairs(scrollFrame:GetChildren()) do
+                                            if child.Name == player.Name then
+                                                isWanted = true
+                                                break
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                        
+                        -- วิธีที่ 2: เช็คจาก Character Model
+                        if not isWanted then
+                            for _, child in pairs(targetChar:GetChildren()) do
+                                if child.Name == "Criminal" or child.Name == "Wanted" then
+                                    isWanted = true
+                                    break
+                                end
+                            end
+                        end
+                        
+                        if isWanted and targetHRP and targetHumanoid and targetHumanoid.Health > 0 then
+                            -- ถือ Handcuff
+                            local handcuff = backpack:FindFirstChild("Handcuff")
+                            if handcuff then
+                                character.Humanoid:EquipTool(handcuff)
+                                wait(0.3)
+                            end
+                            
+                            -- เช็คว่าถืออยู่
+                            local heldHandcuff = character:FindFirstChild("Handcuff")
+                            if heldHandcuff then
+                                -- บันทึกตำแหน่งเดิม
+                                local originalPos = hrp.CFrame
+                                
+                                -- วาปไป (ใกล้ๆ หน่อย)
+                                hrp.CFrame = targetHRP.CFrame * CFrame.new(0, 0, 3)
+                                wait(0.5)
+                                
+                                -- หา ProximityPrompt ทุกตัวในตัวละคร
+                                local arrested = false
+                                for _, descendant in pairs(targetChar:GetDescendants()) do
+                                    if descendant:IsA("ProximityPrompt") then
+                                        -- เช็คว่าเป็น Prompt จับหรือไม่
+                                        if descendant.ActionText and (
+                                            descendant.ActionText:lower():find("arrest") or 
+                                            descendant.ActionText:lower():find("จับ") or
+                                            descendant.ActionText:lower():find("cuff")
+                                        ) then
+                                            -- ลอง fire หลายๆ ครั้ง
+                                            for i = 1, 5 do
+                                                fireproximityprompt(descendant, 0)
+                                                wait(0.1)
+                                            end
+                                            arrested = true
+                                            break
+                                        end
+                                    end
+                                end
+                                
+                                -- ถ้าไม่เจอ fire ทุก prompt
+                                if not arrested then
+                                    for _, descendant in pairs(targetChar:GetDescendants()) do
+                                        if descendant:IsA("ProximityPrompt") then
+                                            for i = 1, 3 do
+                                                fireproximityprompt(descendant, 0)
+                                                wait(0.1)
+                                            end
+                                        end
+                                    end
+                                end
+                                
+                                wait(0.8)
+                                
+                                -- วาปกลับ
+                                if character and character:FindFirstChild("HumanoidRootPart") then
+                                    character.HumanoidRootPart.CFrame = originalPos
+                                end
+                                
+                                wait(2)
+                                break
+                            end
+                        end
+                    end
+                end
+                
+                wait(0.5)
+            end)
+        end)
+    end
+end
+
+-- เพิ่ม RunService สำหรับ ESP (แก้ใหม่)
+RunService.RenderStepped:Connect(function()
+    updateESP()
+end)
+
+-- 🎮 Event ปุ่ม
+KillAllButton.MouseButton1Click:Connect(function() 
+    killAllPlayers()
+end)
+
+ClickKillButton.MouseButton1Click:Connect(function()
+    killClickEnabled = not killClickEnabled
+    ClickKillButton.Text = "คลิกตาย: " .. (killClickEnabled and "เปิด" or "ปิด")
+    ClickKillButton.BackgroundColor3 = killClickEnabled and Color3.fromRGB(50,200,50) or Color3.fromRGB(80,80,90)
+end)
+
+InfiniteAmmoButton.MouseButton1Click:Connect(function()
+    infiniteAmmoEnabled = not infiniteAmmoEnabled
+    InfiniteAmmoButton.Text = "กระสุน MP5 ไม่จำกัด: " .. (infiniteAmmoEnabled and "เปิด" or "ปิด")
+    InfiniteAmmoButton.BackgroundColor3 = infiniteAmmoEnabled and Color3.fromRGB(50,200,50) or Color3.fromRGB(80,80,90)
+    infiniteAmmo()
+end)
+
+-- Event ESP Toggle (แก้ใหม่)
+ESPToggle.MouseButton1Click:Connect(function()
+    espEnabled = not espEnabled
+    ESPToggle.Text = "ESP:" .. (espEnabled and "เปิด" or "ปิด")
+    ESPToggle.BackgroundColor3 = espEnabled and Color3.fromRGB(0,140,0) or Color3.fromRGB(50,50,50)
+    ESPToggle.TextColor3 = espEnabled and Color3.fromRGB(255,255,255) or Color3.fromRGB(200,50,50)
+    
+    if espEnabled then
+        if not espCircle then
+            createESPCircle()
+        end
+        espCircle.Visible = true
+    else
+        if espCircle then
+            espCircle.Visible = false
+        end
+    end
+end)
+
+-- Event ฆ่าคนรอบๆ
+KillAuraInput.FocusLost:Connect(function()
+    local num = tonumber(KillAuraInput.Text)
+    if num and num > 0 then 
+        killAuraRange = num 
+    else 
+        KillAuraInput.Text = tostring(killAuraRange) 
+    end
+end)
+
+KillAuraToggle.MouseButton1Click:Connect(function()
+    killAuraEnabled = not killAuraEnabled
+    KillAuraToggle.Text = killAuraEnabled and "เปิด" or "ปิด"
+    KillAuraToggle.BackgroundColor3 = killAuraEnabled and Color3.fromRGB(0,140,0) or Color3.fromRGB(50,50,50)
+    KillAuraToggle.TextColor3 = killAuraEnabled and Color3.fromRGB(255,255,255) or Color3.fromRGB(200,50,50)
+    killAura()
+end)
+
+-- Event ออโต้จับโจร
+AutoArrestButton.MouseButton1Click:Connect(function()
+    autoArrestEnabled = not autoArrestEnabled
+    AutoArrestButton.Text = "ออโต้จับโจร: " .. (autoArrestEnabled and "เปิด" or "ปิด")
+    AutoArrestButton.BackgroundColor3 = autoArrestEnabled and Color3.fromRGB(50,200,50) or Color3.fromRGB(80,80,90)
+    autoArrest()
+end)
