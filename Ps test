@@ -1,1 +1,1723 @@
+-- [[ PS CITY | BY:TOU - COMPLETE EXPLOIT GUI ]] --
+-- Theme: Dark & Blood Red 🩸🖤
 
+print("🔄 PS City Script Starting...")
+
+local success, errMsg = pcall(function()
+    local Players = game:GetService("Players")
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    local CoreGui = game:GetService("CoreGui")
+    local TweenService = game:GetService("TweenService")
+    local UserInputService = game:GetService("UserInputService")
+    local RunService = game:GetService("RunService")
+    
+    print("✅ Services loaded!")
+    
+    local LocalPlayer = Players.LocalPlayer
+    local Mouse = LocalPlayer:GetMouse()
+    
+    -- ตรวจสอบ Remotes
+    local Remotes = ReplicatedStorage:FindFirstChild("Remotes")
+    local WeaponPurchase, PoliceRemotes, CollectPaycheck, KnockEvent, WeaponsSystem
+    
+    if Remotes then
+        WeaponPurchase = Remotes:FindFirstChild("WeaponPurchaseRequest")
+        PoliceRemotes = Remotes:FindFirstChild("PoliceRemotes")
+        CollectPaycheck = PoliceRemotes and PoliceRemotes:FindFirstChild("CollectPaycheck")
+        KnockEvent = Remotes:FindFirstChild("KnockEvent")
+        WeaponsSystem = ReplicatedStorage:FindFirstChild("WeaponsSystem")
+        print("✅ Remotes found!")
+    else
+        print("⚠️ Remotes not found - some features may not work")
+    end
+    
+    -- ตัวแปรสถานะ
+    local killClickEnabled = false
+    local infiniteAmmoEnabled = false
+    local autoFarmMoneyEnabled = false
+    local speedEnabled = false
+    local jumpEnabled = false
+    local farmEnabled = false
+    local musicEnabled = false
+    local killAuraEnabled = false
+    local espEnabled = false
+    local autoArrestEnabled = false
+    local farmKillsEnabled = false
+    local infiniteAmmoLoop = nil
+    local farmMoneyLoop = nil
+    local musicLoop = nil
+    local killAuraLoop = nil
+    local autoArrestLoop = nil
+    local farmKillsLoop = nil
+    local desiredSpeed = 50
+    local desiredJump = 100
+    local musicID = ""
+    local killAuraRange = 30
+    local selectedPlayer = nil
+    local espCircle = nil
+    
+    -- Notification
+    local function showNotification()
+        pcall(function()
+            local NotifGui = Instance.new("ScreenGui")
+            NotifGui.Name = "TempNotif"
+            NotifGui.ResetOnSpawn = false
+            NotifGui.Parent = CoreGui
+    
+            local NotifFrame = Instance.new("Frame")
+            NotifFrame.Size = UDim2.new(0, 280, 0, 80)
+            NotifFrame.Position = UDim2.new(1, 0, 0, 20)
+            NotifFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+            NotifFrame.BorderSizePixel = 0
+            NotifFrame.Parent = NotifGui
+    
+            local NotifCorner = Instance.new("UICorner")
+            NotifCorner.CornerRadius = UDim.new(0, 10)
+            NotifCorner.Parent = NotifFrame
+    
+            local NotifTitle = Instance.new("TextLabel")
+            NotifTitle.Size = UDim2.new(1, -20, 0, 35)
+            NotifTitle.Position = UDim2.new(0, 10, 0, 10)
+            NotifTitle.BackgroundTransparency = 1
+            NotifTitle.Text = "✅ PS City Loaded!"
+            NotifTitle.TextColor3 = Color3.fromRGB(0, 255, 0)
+            NotifTitle.Font = Enum.Font.GothamBold
+            NotifTitle.TextSize = 18
+            NotifTitle.TextXAlignment = Enum.TextXAlignment.Left
+            NotifTitle.Parent = NotifFrame
+    
+            local NotifDesc = Instance.new("TextLabel")
+            NotifDesc.Size = UDim2.new(1, -20, 0, 25)
+            NotifDesc.Position = UDim2.new(0, 10, 0, 45)
+            NotifDesc.BackgroundTransparency = 1
+            NotifDesc.Text = "BY:TOU 😈"
+            NotifDesc.TextColor3 = Color3.fromRGB(200, 200, 200)
+            NotifDesc.Font = Enum.Font.Gotham
+            NotifDesc.TextSize = 14
+            NotifDesc.TextXAlignment = Enum.TextXAlignment.Left
+            NotifDesc.Parent = NotifFrame
+    
+            TweenService:Create(NotifFrame, TweenInfo.new(0.5), {Position = UDim2.new(1, -300, 0, 20)}):Play()
+            task.wait(3)
+            TweenService:Create(NotifFrame, TweenInfo.new(0.5), {Position = UDim2.new(1, 0, 0, 20)}):Play()
+            task.wait(0.5)
+            NotifGui:Destroy()
+        end)
+    end
+    
+    showNotification()
+    
+    -- ScreenGui หลัก
+    local ScreenGui = Instance.new("ScreenGui")
+    ScreenGui.Name = "PSCity_" .. math.random(1000, 9999)
+    ScreenGui.Parent = CoreGui
+    ScreenGui.ResetOnSpawn = false
+    
+    print("✅ ScreenGui created!")
+    
+    -- ฟังก์ชันลาก GUI
+    local function MakeDraggable(gui)
+        local dragging, dragInput, dragStart, startPos
+        gui.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                dragging = true
+                dragStart = input.Position
+                startPos = gui.Position
+                input.Changed:Connect(function()
+                    if input.UserInputState == Enum.UserInputState.End then dragging = false end
+                end)
+            end
+        end)
+        gui.InputChanged:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseMovement then
+                dragInput = input
+            end
+        end)
+        UserInputService.InputChanged:Connect(function(input)
+            if input == dragInput and dragging then
+                local delta = input.Position - dragStart
+                gui.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+            end
+        end)
+    end
+    
+    -- ฟังก์ชันแปลงตัวเลข
+    local function formatNumber(num)
+        if num >= 1e9 then return string.format("%.1fB", num / 1e9) end
+        if num >= 1e6 then return string.format("%.1fM", num / 1e6) end
+        if num >= 1e3 then return string.format("%.1fK", num / 1e3) end
+        return tostring(num)
+    end
+    
+    -- ฟังก์ชันซื้ออาวุธ
+    local function buyWeapon(weaponName)
+        if WeaponPurchase then
+            WeaponPurchase:FireServer("purchase", weaponName)
+        end
+    end
+    
+    -- Main Frame
+    local MainFrame = Instance.new("Frame")
+    MainFrame.Name = "MainFrame"
+    MainFrame.Parent = ScreenGui
+    MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+    MainFrame.BorderSizePixel = 0
+    MainFrame.Position = UDim2.new(0.3, 0, 0.3, 0)
+    MainFrame.Size = UDim2.new(0, 450, 0, 320)
+    MainFrame.ClipsDescendants = true
+    MakeDraggable(MainFrame)
+    
+    local UIStroke = Instance.new("UIStroke")
+    UIStroke.Thickness = 2
+    UIStroke.Color = Color3.fromRGB(200, 0, 0)
+    UIStroke.Parent = MainFrame
+    
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 8)
+    UICorner.Parent = MainFrame
+    
+    -- Title Bar
+    local TitleLabel = Instance.new("TextLabel")
+    TitleLabel.Parent = MainFrame
+    TitleLabel.Size = UDim2.new(1, 0, 0, 40)
+    TitleLabel.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    TitleLabel.Text = "  PS CITY | BY:TOU"
+    TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    TitleLabel.TextSize = 20
+    TitleLabel.Font = Enum.Font.GothamBold
+    TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    
+    local Underline = Instance.new("Frame")
+    Underline.Size = UDim2.new(1, 0, 0, 2)
+    Underline.Position = UDim2.new(0, 0, 1, 0)
+    Underline.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+    Underline.BorderSizePixel = 0
+    Underline.Parent = TitleLabel
+    
+    -- ปุ่มปิด
+    local CloseBtn = Instance.new("TextButton")
+    CloseBtn.Size = UDim2.new(0, 30, 0, 30)
+    CloseBtn.Position = UDim2.new(1, -35, 0, 5)
+    CloseBtn.BackgroundColor3 = Color3.fromRGB(180, 0, 0)
+    CloseBtn.Text = "X"
+    CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    CloseBtn.Font = Enum.Font.GothamBold
+    CloseBtn.TextSize = 18
+    CloseBtn.Parent = MainFrame
+    
+    local CloseCorner = Instance.new("UICorner")
+    CloseCorner.CornerRadius = UDim.new(1, 0)
+    CloseCorner.Parent = CloseBtn
+    
+    -- Sidebar
+    local Sidebar = Instance.new("Frame")
+    Sidebar.Parent = MainFrame
+    Sidebar.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    Sidebar.Size = UDim2.new(0, 140, 1, -40)
+    Sidebar.Position = UDim2.new(0, 0, 0, 40)
+    Sidebar.BorderSizePixel = 0
+    
+    local SidebarCorner = Instance.new("UICorner")
+    SidebarCorner.CornerRadius = UDim.new(0, 8)
+    SidebarCorner.Parent = Sidebar
+    
+    -- Tab Buttons
+    local function createTabBtn(text, yPos)
+        local btn = Instance.new("TextButton")
+        btn.Size = UDim2.new(1, -10, 0, 35)
+        btn.Position = UDim2.new(0, 5, 0, yPos)
+        btn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+        btn.Text = text
+        btn.TextColor3 = Color3.fromRGB(200, 200, 200)
+        btn.Font = Enum.Font.GothamBold
+        btn.TextSize = 14
+        btn.Parent = Sidebar
+        return btn
+    end
+    
+    local HomeTabBtn = createTabBtn("หน้าหลัก", 8)
+    local JobTabBtn = createTabBtn("เลือกอาชีพ", 48)
+    local GriefTabBtn = createTabBtn("เกรียนคน", 88)
+    local ShopTabBtn = createTabBtn("ซื้ออาวุธ", 128)
+    local PlayerTabBtn = createTabBtn("ผู้เล่น", 168)
+    local FarmTabBtn = createTabBtn("ฟามเงิน", 208)
+    
+    HomeTabBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    HomeTabBtn.TextColor3 = Color3.fromRGB(255, 80, 80)
+    
+    -- ContentFrame
+    local ContentFrame = Instance.new("ScrollingFrame")
+    ContentFrame.Parent = MainFrame
+    ContentFrame.Position = UDim2.new(0, 150, 0, 50)
+    ContentFrame.Size = UDim2.new(1, -160, 1, -60)
+    ContentFrame.BackgroundTransparency = 1
+    ContentFrame.ScrollBarThickness = 6
+    ContentFrame.ScrollBarImageColor3 = Color3.fromRGB(200, 0, 0)
+    ContentFrame.BorderSizePixel = 0
+    ContentFrame.CanvasSize = UDim2.new(0, 0, 0, 600)
+    
+    -- ฟังก์ชันสร้างปุ่ม
+    local function createButton(parent, name, text, position, color)
+        local button = Instance.new("TextButton")
+        button.Name = name
+        button.Size = UDim2.new(0.9, 0, 0, 40)
+        button.Position = position
+        button.BackgroundColor3 = color
+        button.Text = text
+        button.TextColor3 = Color3.fromRGB(255, 255, 255)
+        button.Font = Enum.Font.GothamBold
+        button.TextSize = 14
+        button.BorderSizePixel = 0
+        button.Parent = parent
+    
+        local corner = Instance.new("UICorner")
+        corner.CornerRadius = UDim.new(0, 8)
+        corner.Parent = button
+    
+        return button
+    end
+    
+    -- 🏠 หน้าหลัก
+    local HomePage = Instance.new("Frame")
+    HomePage.Size = UDim2.new(1, 0, 0, 600)
+    HomePage.BackgroundTransparency = 1
+    HomePage.Visible = true
+    HomePage.Parent = ContentFrame
+    
+    local HomeTitle = Instance.new("TextLabel")
+    HomeTitle.Size = UDim2.new(1, 0, 0, 60)
+    HomeTitle.BackgroundTransparency = 1
+    HomeTitle.Text = "🏠 ยินดีต้อนรับ"
+    HomeTitle.TextColor3 = Color3.fromRGB(255, 80, 80)
+    HomeTitle.Font = Enum.Font.GothamBlack
+    HomeTitle.TextSize = 24
+    HomeTitle.Parent = HomePage
+    
+    local PlayerInfo = Instance.new("TextLabel")
+    PlayerInfo.Size = UDim2.new(0.9, 0, 0, 100)
+    PlayerInfo.Position = UDim2.new(0.05, 0, 0, 70)
+    PlayerInfo.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    PlayerInfo.Text = "ผู้เล่น: " .. LocalPlayer.Name .. "\n\nScript โหลดสำเร็จ! ✅\nเลือกแท็บด้านซ้ายเพื่อเริ่มใช้งาน"
+    PlayerInfo.TextColor3 = Color3.fromRGB(200, 200, 200)
+    PlayerInfo.Font = Enum.Font.Gotham
+    PlayerInfo.TextSize = 14
+    PlayerInfo.TextWrapped = true
+    PlayerInfo.Parent = HomePage
+    
+    local InfoCorner = Instance.new("UICorner")
+    InfoCorner.CornerRadius = UDim.new(0, 8)
+    InfoCorner.Parent = PlayerInfo
+    
+    local CoinsLabel = Instance.new("TextLabel")
+    CoinsLabel.Size = UDim2.new(0.9, 0, 0, 45)
+    CoinsLabel.Position = UDim2.new(0.05, 0, 0, 180)
+    CoinsLabel.BackgroundTransparency = 1
+    CoinsLabel.Text = "💰 Coins: กำลังโหลด..."
+    CoinsLabel.TextColor3 = Color3.fromRGB(255, 215, 0)
+    CoinsLabel.Font = Enum.Font.GothamBold
+    CoinsLabel.TextSize = 18
+    CoinsLabel.Parent = HomePage
+    
+    local KillsLabel = Instance.new("TextLabel")
+    KillsLabel.Size = UDim2.new(0.9, 0, 0, 45)
+    KillsLabel.Position = UDim2.new(0.05, 0, 0, 230)
+    KillsLabel.BackgroundTransparency = 1
+    KillsLabel.Text = "💀 Kills: กำลังโหลด..."
+    KillsLabel.TextColor3 = Color3.fromRGB(220, 40, 40)
+    KillsLabel.Font = Enum.Font.GothamBold
+    KillsLabel.TextSize = 18
+    KillsLabel.Parent = HomePage
+    
+    -- อัพเดทสถิติ
+    task.spawn(function()
+        while task.wait(1) do
+            pcall(function()
+                local coins = LocalPlayer:FindFirstChild("Data") and LocalPlayer.Data:FindFirstChild("Coins") and LocalPlayer.Data.Coins.Value or 0
+                local kills = LocalPlayer:FindFirstChild("leaderstats") and LocalPlayer.leaderstats:FindFirstChild("Kills") and LocalPlayer.leaderstats.Kills.Value or 0
+                CoinsLabel.Text = "💰 Coins: " .. formatNumber(coins)
+                KillsLabel.Text = "💀 Kills: " .. formatNumber(kills)
+            end)
+        end
+    end)
+    
+    -- 💼 หน้าเลือกอาชีพ
+    local JobPage = Instance.new("Frame")
+    JobPage.Size = UDim2.new(1, 0, 0, 600)
+    JobPage.BackgroundTransparency = 1
+    JobPage.Visible = false
+    JobPage.Parent = ContentFrame
+    
+    local JobTitle = Instance.new("TextLabel")
+    JobTitle.Size = UDim2.new(1, 0, 0, 35)
+    JobTitle.BackgroundTransparency = 1
+    JobTitle.Text = "💼 เลือกอาชีพ"
+    JobTitle.TextColor3 = Color3.fromRGB(255, 80, 80)
+    JobTitle.Font = Enum.Font.GothamBlack
+    JobTitle.TextSize = 20
+    JobTitle.TextXAlignment = Enum.TextXAlignment.Center
+    JobTitle.Parent = JobPage
+    
+    local PoliceJobBtn = createButton(JobPage, "Police", "👮 อาชีพตำรวจ", UDim2.new(0.05, 0, 0, 45), Color3.fromRGB(0, 100, 200))
+    local CafeJobBtn = createButton(JobPage, "Cafe", "☕ อาชีพร้านขายกาแฟ", UDim2.new(0.05, 0, 0, 95), Color3.fromRGB(139, 69, 19))
+    local Job711Btn = createButton(JobPage, "711", "🏪 อาชีพ 7-11", UDim2.new(0.05, 0, 0, 145), Color3.fromRGB(0, 150, 0))
+    
+    PoliceJobBtn.MouseButton1Click:Connect(function()
+        pcall(function()
+            if PoliceRemotes then
+                PoliceRemotes:FindFirstChild("JoinPolice"):FireServer()
+            end
+        end)
+    end)
+    
+    CafeJobBtn.MouseButton1Click:Connect(function()
+        pcall(function()
+            if Remotes then
+                Remotes:FindFirstChild("PSCafeRemotes"):FindFirstChild("JoinPSCafe"):FireServer()
+            end
+        end)
+    end)
+    
+    Job711Btn.MouseButton1Click:Connect(function()
+        pcall(function()
+            if Remotes then
+                Remotes:FindFirstChild("Job711Remotes"):FindFirstChild("Join711"):FireServer()
+            end
+        end)
+    end)
+    
+    -- 🔪 หน้าเกรียนคน
+    local GriefPage = Instance.new("Frame")
+    GriefPage.Size = UDim2.new(1, 0, 0, 600)
+    GriefPage.BackgroundTransparency = 1
+    GriefPage.Visible = false
+    GriefPage.Parent = ContentFrame
+    
+    -- เพิ่ม CanvasSize ให้เลื่อนได้
+    ContentFrame.CanvasSize = UDim2.new(0, 0, 0, 1200)
+    
+    local GriefTitle = Instance.new("TextLabel")
+    GriefTitle.Size = UDim2.new(1, 0, 0, 35)
+    GriefTitle.BackgroundTransparency = 1
+    GriefTitle.Text = "🔪 เกรียนคน"
+    GriefTitle.TextColor3 = Color3.fromRGB(255, 80, 80)
+    GriefTitle.Font = Enum.Font.GothamBlack
+    GriefTitle.TextSize = 20
+    GriefTitle.TextXAlignment = Enum.TextXAlignment.Center
+    GriefTitle.Parent = GriefPage
+    
+    local KillAllButton = createButton(GriefPage, "KillAll", "ฆ่าทั้งหมด", UDim2.new(0.05, 0, 0, 45), Color3.fromRGB(220, 50, 50))
+    local ClickKillButton = createButton(GriefPage, "ClickKill", "คลิกตาย: ปิด", UDim2.new(0.05, 0, 0, 95), Color3.fromRGB(80, 80, 90))
+    local InfiniteAmmoButton = createButton(GriefPage, "InfiniteAmmo", "กระสุน MP5 ไม่จำกัด: ปิด", UDim2.new(0.05, 0, 0, 145), Color3.fromRGB(80, 80, 90))
+    
+    -- Kill Aura Frame
+    local KillAuraFrame = Instance.new("Frame")
+    KillAuraFrame.Size = UDim2.new(0.9, 0, 0, 100)
+    KillAuraFrame.Position = UDim2.new(0.05, 0, 0, 195)
+    KillAuraFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    KillAuraFrame.BorderSizePixel = 0
+    KillAuraFrame.Parent = GriefPage
+    
+    local KillAuraCorner = Instance.new("UICorner")
+    KillAuraCorner.CornerRadius = UDim.new(0, 8)
+    KillAuraCorner.Parent = KillAuraFrame
+    
+    local KillAuraLabel = Instance.new("TextLabel")
+    KillAuraLabel.Size = UDim2.new(1, -20, 0, 25)
+    KillAuraLabel.Position = UDim2.new(0, 10, 0, 5)
+    KillAuraLabel.BackgroundTransparency = 1
+    KillAuraLabel.Text = "🎯 ฆ่าคนรอบๆ"
+    KillAuraLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
+    KillAuraLabel.Font = Enum.Font.GothamSemibold
+    KillAuraLabel.TextSize = 14
+    KillAuraLabel.TextXAlignment = Enum.TextXAlignment.Left
+    KillAuraLabel.Parent = KillAuraFrame
+    
+    local KillAuraInput = Instance.new("TextBox")
+    KillAuraInput.Size = UDim2.new(0.35, 0, 0, 30)
+    KillAuraInput.Position = UDim2.new(0.05, 0, 0, 35)
+    KillAuraInput.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    KillAuraInput.PlaceholderText = "ระยะ"
+    KillAuraInput.Text = "30"
+    KillAuraInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+    KillAuraInput.Font = Enum.Font.Gotham
+    KillAuraInput.TextSize = 14
+    KillAuraInput.ClearTextOnFocus = false
+    KillAuraInput.Parent = KillAuraFrame
+    
+    local KillAuraInputCorner = Instance.new("UICorner")
+    KillAuraInputCorner.CornerRadius = UDim.new(0, 6)
+    KillAuraInputCorner.Parent = KillAuraInput
+    
+    local ESPToggle = Instance.new("TextButton")
+    ESPToggle.Size = UDim2.new(0, 70, 0, 30)
+    ESPToggle.Position = UDim2.new(0.45, 0, 0, 35)
+    ESPToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    ESPToggle.Text = "ESP:ปิด"
+    ESPToggle.TextColor3 = Color3.fromRGB(200, 50, 50)
+    ESPToggle.Font = Enum.Font.GothamBold
+    ESPToggle.TextSize = 12
+    ESPToggle.Parent = KillAuraFrame
+    
+    local ESPToggleCorner = Instance.new("UICorner")
+    ESPToggleCorner.CornerRadius = UDim.new(0, 6)
+    ESPToggleCorner.Parent = ESPToggle
+    
+    local KillAuraToggle = Instance.new("TextButton")
+    KillAuraToggle.Size = UDim2.new(0, 70, 0, 30)
+    KillAuraToggle.Position = UDim2.new(1, -80, 0, 35)
+    KillAuraToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    KillAuraToggle.Text = "ปิด"
+    KillAuraToggle.TextColor3 = Color3.fromRGB(200, 50, 50)
+    KillAuraToggle.Font = Enum.Font.GothamBold
+    KillAuraToggle.TextSize = 13
+    KillAuraToggle.Parent = KillAuraFrame
+    
+    local KillAuraToggleCorner = Instance.new("UICorner")
+    KillAuraToggleCorner.CornerRadius = UDim.new(0, 6)
+    KillAuraToggleCorner.Parent = KillAuraToggle
+    
+    local KillAuraHint = Instance.new("TextLabel")
+    KillAuraHint.Size = UDim2.new(1, -20, 0, 20)
+    KillAuraHint.Position = UDim2.new(0, 10, 0, 75)
+    KillAuraHint.BackgroundTransparency = 1
+    KillAuraHint.Text = "ยิงอัตโนมัติคนที่เข้าใกล้"
+    KillAuraHint.TextColor3 = Color3.fromRGB(150, 150, 150)
+    KillAuraHint.Font = Enum.Font.Gotham
+    KillAuraHint.TextSize = 11
+    KillAuraHint.TextXAlignment = Enum.TextXAlignment.Left
+    KillAuraHint.Parent = KillAuraFrame
+    
+    local AutoArrestButton = createButton(GriefPage, "AutoArrest", "ออโต้จับโจร: ปิด", UDim2.new(0.05, 0, 0, 305), Color3.fromRGB(80, 80, 90))
+    
+    -- Farm Kills Frame
+    local FarmKillsFrame = Instance.new("Frame")
+    FarmKillsFrame.Size = UDim2.new(0.9, 0, 0, 110)
+    FarmKillsFrame.Position = UDim2.new(0.05, 0, 0, 355)
+    FarmKillsFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    FarmKillsFrame.BorderSizePixel = 0
+    FarmKillsFrame.Parent = GriefPage
+    
+    local FarmKillsCorner = Instance.new("UICorner")
+    FarmKillsCorner.CornerRadius = UDim.new(0, 8)
+    FarmKillsCorner.Parent = FarmKillsFrame
+    
+    local FarmKillsLabel = Instance.new("TextLabel")
+    FarmKillsLabel.Size = UDim2.new(1, -20, 0, 25)
+    FarmKillsLabel.Position = UDim2.new(0, 10, 0, 5)
+    FarmKillsLabel.BackgroundTransparency = 1
+    FarmKillsLabel.Text = "💀 ปั้มจำนวนฆ่า"
+    FarmKillsLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
+    FarmKillsLabel.Font = Enum.Font.GothamSemibold
+    FarmKillsLabel.TextSize = 14
+    FarmKillsLabel.TextXAlignment = Enum.TextXAlignment.Left
+    FarmKillsLabel.Parent = FarmKillsFrame
+    
+    local PlayerDropdown = Instance.new("TextButton")
+    PlayerDropdown.Size = UDim2.new(0.6, 0, 0, 35)
+    PlayerDropdown.Position = UDim2.new(0.05, 0, 0, 35)
+    PlayerDropdown.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    PlayerDropdown.Text = "เลือกคน"
+    PlayerDropdown.TextColor3 = Color3.fromRGB(255, 255, 255)
+    PlayerDropdown.Font = Enum.Font.Gotham
+    PlayerDropdown.TextSize = 13
+    PlayerDropdown.Parent = FarmKillsFrame
+    
+    local PlayerDropdownCorner = Instance.new("UICorner")
+    PlayerDropdownCorner.CornerRadius = UDim.new(0, 6)
+    PlayerDropdownCorner.Parent = PlayerDropdown
+    
+    local FarmKillsToggle = Instance.new("TextButton")
+    FarmKillsToggle.Size = UDim2.new(0, 90, 0, 35)
+    FarmKillsToggle.Position = UDim2.new(1, -105, 0, 35)
+    FarmKillsToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    FarmKillsToggle.Text = "ปิด"
+    FarmKillsToggle.TextColor3 = Color3.fromRGB(200, 50, 50)
+    FarmKillsToggle.Font = Enum.Font.GothamBold
+    FarmKillsToggle.TextSize = 13
+    FarmKillsToggle.Parent = FarmKillsFrame
+    
+    local FarmKillsToggleCorner = Instance.new("UICorner")
+    FarmKillsToggleCorner.CornerRadius = UDim.new(0, 6)
+    FarmKillsToggleCorner.Parent = FarmKillsToggle
+    
+    local FarmKillsHint = Instance.new("TextLabel")
+    FarmKillsHint.Size = UDim2.new(1, -20, 0, 30)
+    FarmKillsHint.Position = UDim2.new(0, 10, 0, 75)
+    FarmKillsHint.BackgroundTransparency = 1
+    FarmKillsHint.Text = "ยิงคนที่เลือกให้เหลือเลือดน้อยแล้วซุป\nเพื่อฟามจำนวนฆ่า"
+    FarmKillsHint.TextColor3 = Color3.fromRGB(150, 150, 150)
+    FarmKillsHint.Font = Enum.Font.Gotham
+    FarmKillsHint.TextSize = 10
+    FarmKillsHint.TextXAlignment = Enum.TextXAlignment.Left
+    FarmKillsHint.TextYAlignment = Enum.TextYAlignment.Top
+    FarmKillsHint.Parent = FarmKillsFrame
+    
+    -- Player List Dropdown
+    local PlayerListFrame = Instance.new("ScrollingFrame")
+    PlayerListFrame.Size = UDim2.new(0.6, 0, 0, 150)
+    PlayerListFrame.Position = UDim2.new(0.05, 0, 0, 75)
+    PlayerListFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    PlayerListFrame.BorderSizePixel = 0
+    PlayerListFrame.Visible = false
+    PlayerListFrame.ScrollBarThickness = 4
+    PlayerListFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+    PlayerListFrame.ZIndex = 10
+    PlayerListFrame.Parent = FarmKillsFrame
+    
+    local PlayerListCorner = Instance.new("UICorner")
+    PlayerListCorner.CornerRadius = UDim.new(0, 6)
+    PlayerListCorner.Parent = PlayerListFrame
+    
+    local PlayerListLayout = Instance.new("UIListLayout")
+    PlayerListLayout.SortOrder = Enum.SortOrder.Name
+    PlayerListLayout.Padding = UDim.new(0, 2)
+    PlayerListLayout.Parent = PlayerListFrame
+    
+    -- Music Frame
+    local MusicFrame = Instance.new("Frame")
+    MusicFrame.Size = UDim2.new(0.9, 0, 0, 100)
+    MusicFrame.Position = UDim2.new(0.05, 0, 0, 475)
+    MusicFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    MusicFrame.BorderSizePixel = 0
+    MusicFrame.Parent = GriefPage
+    
+    local MusicCorner = Instance.new("UICorner")
+    MusicCorner.CornerRadius = UDim.new(0, 8)
+    MusicCorner.Parent = MusicFrame
+    
+    local MusicLabel = Instance.new("TextLabel")
+    MusicLabel.Size = UDim2.new(1, -20, 0, 25)
+    MusicLabel.Position = UDim2.new(0, 10, 0, 5)
+    MusicLabel.BackgroundTransparency = 1
+    MusicLabel.Text = "🎵 เปิดเพลง"
+    MusicLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
+    MusicLabel.Font = Enum.Font.GothamSemibold
+    MusicLabel.TextSize = 14
+    MusicLabel.TextXAlignment = Enum.TextXAlignment.Left
+    MusicLabel.Parent = MusicFrame
+    
+    local MusicInput = Instance.new("TextBox")
+    MusicInput.Size = UDim2.new(0.6, 0, 0, 30)
+    MusicInput.Position = UDim2.new(0.05, 0, 0, 35)
+    MusicInput.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    MusicInput.PlaceholderText = "ใส่ ID เพลง"
+    MusicInput.Text = ""
+    MusicInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+    MusicInput.Font = Enum.Font.Gotham
+    MusicInput.TextSize = 14
+    MusicInput.ClearTextOnFocus = false
+    MusicInput.Parent = MusicFrame
+    
+    local MusicInputCorner = Instance.new("UICorner")
+    MusicInputCorner.CornerRadius = UDim.new(0, 6)
+    MusicInputCorner.Parent = MusicInput
+    
+    local MusicToggle = Instance.new("TextButton")
+    MusicToggle.Size = UDim2.new(0, 90, 0, 30)
+    MusicToggle.Position = UDim2.new(1, -105, 0, 35)
+    MusicToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    MusicToggle.Text = "ปิด"
+    MusicToggle.TextColor3 = Color3.fromRGB(200, 50, 50)
+    MusicToggle.Font = Enum.Font.GothamBold
+    MusicToggle.TextSize = 13
+    MusicToggle.Parent = MusicFrame
+    
+    local MusicToggleCorner = Instance.new("UICorner")
+    MusicToggleCorner.CornerRadius = UDim.new(0, 6)
+    MusicToggleCorner.Parent = MusicToggle
+    
+    local MusicHint = Instance.new("TextLabel")
+    MusicHint.Size = UDim2.new(1, -20, 0, 20)
+    MusicHint.Position = UDim2.new(0, 10, 0, 75)
+    MusicHint.BackgroundTransparency = 1
+    MusicHint.Text = "ใส่ ID แล้วกดเปิดเพื่อเล่นเพลงในรถ"
+    MusicHint.TextColor3 = Color3.fromRGB(150, 150, 150)
+    MusicHint.Font = Enum.Font.Gotham
+    MusicHint.TextSize = 11
+    MusicHint.TextXAlignment = Enum.TextXAlignment.Left
+    MusicHint.Parent = MusicFrame
+    
+    -- 🛒 หน้าซื้ออาวุธ
+    local ShopPage = Instance.new("Frame")
+    ShopPage.Size = UDim2.new(1, 0, 0, 600)
+    ShopPage.BackgroundTransparency = 1
+    ShopPage.Visible = false
+    ShopPage.Parent = ContentFrame
+    
+    local ShopTitle = Instance.new("TextLabel")
+    ShopTitle.Size = UDim2.new(1, 0, 0, 35)
+    ShopTitle.BackgroundTransparency = 1
+    ShopTitle.Text = "🛒 ซื้ออาวุธ"
+    ShopTitle.TextColor3 = Color3.fromRGB(255, 80, 80)
+    ShopTitle.Font = Enum.Font.GothamBlack
+    ShopTitle.TextSize = 20
+    ShopTitle.TextXAlignment = Enum.TextXAlignment.Center
+    ShopTitle.Parent = ShopPage
+    
+    local WeaponShopFrame = Instance.new("Frame")
+    WeaponShopFrame.Size = UDim2.new(0.95, 0, 0, 550)
+    WeaponShopFrame.Position = UDim2.new(0.025, 0, 0, 45)
+    WeaponShopFrame.BackgroundTransparency = 1
+    WeaponShopFrame.Parent = ShopPage
+    
+    local WeaponGrid = Instance.new("UIGridLayout")
+    WeaponGrid.CellSize = UDim2.new(0, 130, 0, 50)
+    WeaponGrid.CellPadding = UDim2.new(0, 8, 0, 8)
+    WeaponGrid.SortOrder = Enum.SortOrder.LayoutOrder
+    WeaponGrid.Parent = WeaponShopFrame
+    
+    local weapons = {
+        {name = "มีด", display = "Knife"}, {name = "ถุงมวย", display = "Boxing Gloves"}, {name = "คาตานะ", display = "Katana"},
+        {name = "AK-47", display = "AK-47"}, {name = "ชะแลง", display = "Crowbar"}, {name = "M4A1", display = "M4A1"},
+        {name = "MP5", display = "MP5"}, {name = "Shotgun", display = "Shotgun"}, {name = "C4", display = "C4"}
+    }
+    
+    for _, w in ipairs(weapons) do
+        local btnFrame = Instance.new("Frame")
+        btnFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+        btnFrame.BorderSizePixel = 0
+        btnFrame.Parent = WeaponShopFrame
+        
+        local btnCorner = Instance.new("UICorner")
+        btnCorner.CornerRadius = UDim.new(0, 8)
+        btnCorner.Parent = btnFrame
+        
+        local buyBtn = Instance.new("TextButton")
+        buyBtn.Size = UDim2.new(1, 0, 1, 0)
+        buyBtn.BackgroundTransparency = 1
+        buyBtn.Text = w.name
+        buyBtn.TextColor3 = Color3.fromRGB(220, 220, 220)
+        buyBtn.Font = Enum.Font.GothamBold
+        buyBtn.TextSize = 13
+        buyBtn.Parent = btnFrame
+        
+        buyBtn.MouseButton1Click:Connect(function()
+            buyWeapon(w.display)
+        end)
+    end
+    
+    -- 👤 หน้าผู้เล่น
+    local PlayerPage = Instance.new("Frame")
+    PlayerPage.Size = UDim2.new(1, 0, 0, 600)
+    PlayerPage.BackgroundTransparency = 1
+    PlayerPage.Visible = false
+    PlayerPage.Parent = ContentFrame
+    
+    local PlayerTitle = Instance.new("TextLabel")
+    PlayerTitle.Size = UDim2.new(1, 0, 0, 35)
+    PlayerTitle.BackgroundTransparency = 1
+    PlayerTitle.Text = "👤 ผู้เล่น"
+    PlayerTitle.TextColor3 = Color3.fromRGB(255, 80, 80)
+    PlayerTitle.Font = Enum.Font.GothamBlack
+    PlayerTitle.TextSize = 20
+    PlayerTitle.TextXAlignment = Enum.TextXAlignment.Center
+    PlayerTitle.Parent = PlayerPage
+    
+    -- Speed Control
+    local SpeedFrame = Instance.new("Frame")
+    SpeedFrame.Size = UDim2.new(0.9, 0, 0, 50)
+    SpeedFrame.Position = UDim2.new(0.05, 0, 0, 45)
+    SpeedFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    SpeedFrame.BorderSizePixel = 0
+    SpeedFrame.Parent = PlayerPage
+    
+    local SpeedCorner = Instance.new("UICorner")
+    SpeedCorner.CornerRadius = UDim.new(0, 8)
+    SpeedCorner.Parent = SpeedFrame
+    
+    local SpeedLabel = Instance.new("TextLabel")
+    SpeedLabel.Size = UDim2.new(0.3, 0, 1, 0)
+    SpeedLabel.Position = UDim2.new(0, 10, 0, 0)
+    SpeedLabel.BackgroundTransparency = 1
+    SpeedLabel.Text = "ความเร็ว"
+    SpeedLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
+    SpeedLabel.Font = Enum.Font.GothamSemibold
+    SpeedLabel.TextSize = 14
+    SpeedLabel.TextXAlignment = Enum.TextXAlignment.Left
+    SpeedLabel.Parent = SpeedFrame
+    
+    local SpeedInput = Instance.new("TextBox")
+    SpeedInput.Size = UDim2.new(0, 70, 0, 30)
+    SpeedInput.Position = UDim2.new(0.35, 0, 0.5, -15)
+    SpeedInput.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    SpeedInput.Text = "50"
+    SpeedInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+    SpeedInput.Font = Enum.Font.Gotham
+    SpeedInput.TextSize = 14
+    SpeedInput.ClearTextOnFocus = false
+    SpeedInput.Parent = SpeedFrame
+    
+    local SpeedInputCorner = Instance.new("UICorner")
+    SpeedInputCorner.CornerRadius = UDim.new(0, 6)
+    SpeedInputCorner.Parent = SpeedInput
+    
+    local SpeedToggle = Instance.new("TextButton")
+    SpeedToggle.Size = UDim2.new(0, 80, 0, 30)
+    SpeedToggle.Position = UDim2.new(1, -90, 0.5, -15)
+    SpeedToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    SpeedToggle.Text = "ปิด"
+    SpeedToggle.TextColor3 = Color3.fromRGB(200, 50, 50)
+    SpeedToggle.Font = Enum.Font.GothamBold
+    SpeedToggle.TextSize = 13
+    SpeedToggle.Parent = SpeedFrame
+    
+    local SpeedToggleCorner = Instance.new("UICorner")
+    SpeedToggleCorner.CornerRadius = UDim.new(0, 6)
+    SpeedToggleCorner.Parent = SpeedToggle
+    
+    -- Jump Control
+    local JumpFrame = Instance.new("Frame")
+    JumpFrame.Size = UDim2.new(0.9, 0, 0, 50)
+    JumpFrame.Position = UDim2.new(0.05, 0, 0, 105)
+    JumpFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    JumpFrame.BorderSizePixel = 0
+    JumpFrame.Parent = PlayerPage
+    
+    local JumpCorner = Instance.new("UICorner")
+    JumpCorner.CornerRadius = UDim.new(0, 8)
+    JumpCorner.Parent = JumpFrame
+    
+    local JumpLabel = Instance.new("TextLabel")
+    JumpLabel.Size = UDim2.new(0.3, 0, 1, 0)
+    JumpLabel.Position = UDim2.new(0, 10, 0, 0)
+    JumpLabel.BackgroundTransparency = 1
+    JumpLabel.Text = "กระโดด"
+    JumpLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
+    JumpLabel.Font = Enum.Font.GothamSemibold
+    JumpLabel.TextSize = 14
+    JumpLabel.TextXAlignment = Enum.TextXAlignment.Left
+    JumpLabel.Parent = JumpFrame
+    
+    local JumpInput = Instance.new("TextBox")
+    JumpInput.Size = UDim2.new(0, 70, 0, 30)
+    JumpInput.Position = UDim2.new(0.35, 0, 0.5, -15)
+    JumpInput.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    JumpInput.Text = "100"
+    JumpInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+    JumpInput.Font = Enum.Font.Gotham
+    JumpInput.TextSize = 14
+    JumpInput.ClearTextOnFocus = false
+    JumpInput.Parent = JumpFrame
+    
+    local JumpInputCorner = Instance.new("UICorner")
+    JumpInputCorner.CornerRadius = UDim.new(0, 6)
+    JumpInputCorner.Parent = JumpInput
+    
+    local JumpToggle = Instance.new("TextButton")
+    JumpToggle.Size = UDim2.new(0, 80, 0, 30)
+    JumpToggle.Position = UDim2.new(1, -90, 0.5, -15)
+    JumpToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    JumpToggle.Text = "ปิด"
+    JumpToggle.TextColor3 = Color3.fromRGB(200, 50, 50)
+    JumpToggle.Font = Enum.Font.GothamBold
+    JumpToggle.TextSize = 13
+    JumpToggle.Parent = JumpFrame
+    
+    local JumpToggleCorner = Instance.new("UICorner")
+    JumpToggleCorner.CornerRadius = UDim.new(0, 6)
+    JumpToggleCorner.Parent = JumpToggle
+    
+    -- Speed/Jump Events
+    SpeedInput.FocusLost:Connect(function()
+        local num = tonumber(SpeedInput.Text)
+        if num and num > 0 then
+            desiredSpeed = num
+        else
+            SpeedInput.Text = tostring(desiredSpeed)
+        end
+    end)
+    
+    JumpInput.FocusLost:Connect(function()
+        local num = tonumber(JumpInput.Text)
+        if num and num > 0 then
+            desiredJump = num
+        else
+            JumpInput.Text = tostring(desiredJump)
+        end
+    end)
+    
+    SpeedToggle.MouseButton1Click:Connect(function()
+        speedEnabled = not speedEnabled
+        SpeedToggle.Text = speedEnabled and "เปิด" or "ปิด"
+        SpeedToggle.BackgroundColor3 = speedEnabled and Color3.fromRGB(0, 140, 0) or Color3.fromRGB(50, 50, 50)
+        SpeedToggle.TextColor3 = speedEnabled and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(200, 50, 50)
+    end)
+    
+    JumpToggle.MouseButton1Click:Connect(function()
+        jumpEnabled = not jumpEnabled
+        JumpToggle.Text = jumpEnabled and "เปิด" or "ปิด"
+        JumpToggle.BackgroundColor3 = jumpEnabled and Color3.fromRGB(0, 140, 0) or Color3.fromRGB(50, 50, 50)
+        JumpToggle.TextColor3 = jumpEnabled and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(200, 50, 50)
+    end)
+    
+    -- Speed/Jump Loop
+    task.spawn(function()
+        while task.wait() do
+            pcall(function()
+                local char = LocalPlayer.Character
+                if char then
+                    local humanoid = char:FindFirstChildOfClass("Humanoid")
+                    if humanoid then
+                        if speedEnabled then humanoid.WalkSpeed = desiredSpeed end
+                        if jumpEnabled then
+                            humanoid.UseJumpPower = true
+                            humanoid.JumpPower = desiredJump
+                        end
+                    end
+                end
+            end)
+        end
+    end)
+    
+    -- 💰 หน้าฟามเงิน
+    local FarmPage = Instance.new("Frame")
+    FarmPage.Size = UDim2.new(1, 0, 0, 600)
+    FarmPage.BackgroundTransparency = 1
+    FarmPage.Visible = false
+    FarmPage.Parent = ContentFrame
+    
+    local FarmTitle = Instance.new("TextLabel")
+    FarmTitle.Size = UDim2.new(1, 0, 0, 35)
+    FarmTitle.BackgroundTransparency = 1
+    FarmTitle.Text = "💰 ฟามเงิน"
+    FarmTitle.TextColor3 = Color3.fromRGB(255, 80, 80)
+    FarmTitle.Font = Enum.Font.GothamBlack
+    FarmTitle.TextSize = 20
+    FarmTitle.TextXAlignment = Enum.TextXAlignment.Center
+    FarmTitle.Parent = FarmPage
+    
+    local FarmWarn = Instance.new("TextLabel")
+    FarmWarn.Size = UDim2.new(0.9, 0, 0, 75)
+    FarmWarn.Position = UDim2.new(0.05, 0, 0, 45)
+    FarmWarn.BackgroundTransparency = 1
+    FarmWarn.Text = "ก่อนเปิดต้องเปลี่ยนทีมเป็นฝั่งตำรวจ!\nวิธีฟามเงินเยอะ: จับโจรก่อนแล้วค่อยกดปั้ม"
+    FarmWarn.TextColor3 = Color3.fromRGB(255, 215, 0)
+    FarmWarn.Font = Enum.Font.GothamSemibold
+    FarmWarn.TextSize = 14
+    FarmWarn.TextWrapped = true
+    FarmWarn.TextXAlignment = Enum.TextXAlignment.Center
+    FarmWarn.Parent = FarmPage
+    
+    local FarmToggle = Instance.new("TextButton")
+    FarmToggle.Size = UDim2.new(0.9, 0, 0, 45)
+    FarmToggle.Position = UDim2.new(0.05, 0, 0, 130)
+    FarmToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    FarmToggle.Text = "ปั้มเงิน : ปิด"
+    FarmToggle.TextColor3 = Color3.fromRGB(200, 50, 50)
+    FarmToggle.Font = Enum.Font.GothamBold
+    FarmToggle.TextSize = 16
+    FarmToggle.Parent = FarmPage
+    
+    local FarmToggleCorner = Instance.new("UICorner")
+    FarmToggleCorner.CornerRadius = UDim.new(0, 8)
+    FarmToggleCorner.Parent = FarmToggle
+    
+    local AutoPickupToggle = createButton(FarmPage, "AutoPickup", "ออโต้หยิบเงิน: ปิด", UDim2.new(0.05, 0, 0, 185), Color3.fromRGB(80, 80, 90))
+    
+    -- Farm Events
+    FarmToggle.MouseButton1Click:Connect(function()
+        farmEnabled = not farmEnabled
+        FarmToggle.Text = "ปั้มเงิน : " .. (farmEnabled and "เปิด" or "ปิด")
+        FarmToggle.BackgroundColor3 = farmEnabled and Color3.fromRGB(0, 140, 0) or Color3.fromRGB(50, 50, 50)
+        FarmToggle.TextColor3 = farmEnabled and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(200, 50, 50)
+        
+        if farmEnabled then
+            if farmMoneyLoop then farmMoneyLoop:Disconnect() end
+            if CollectPaycheck then
+                farmMoneyLoop = RunService.Heartbeat:Connect(function()
+                    pcall(function()
+                        CollectPaycheck:FireServer()
+                    end)
+                end)
+            end
+        else
+            if farmMoneyLoop then
+                farmMoneyLoop:Disconnect()
+                farmMoneyLoop = nil
+            end
+        end
+    end)
+    
+    AutoPickupToggle.MouseButton1Click:Connect(function()
+        autoFarmMoneyEnabled = not autoFarmMoneyEnabled
+        AutoPickupToggle.Text = "ออโต้หยิบเงิน: " .. (autoFarmMoneyEnabled and "เปิด" or "ปิด")
+        AutoPickupToggle.BackgroundColor3 = autoFarmMoneyEnabled and Color3.fromRGB(50, 200, 50) or Color3.fromRGB(80, 80, 90)
+    end)
+    
+    -- Auto Pickup Loop
+    task.spawn(function()
+        while task.wait(0.5) do
+            if autoFarmMoneyEnabled then
+                pcall(function()
+                    local character = LocalPlayer.Character
+                    if character and character:FindFirstChild("HumanoidRootPart") then
+                        local hrp = character.HumanoidRootPart
+                        local moneyDrops = workspace:FindFirstChild("MoneyDrops")
+                        if moneyDrops then
+                            for _, moneyDrop in pairs(moneyDrops:GetChildren()) do
+                                if moneyDrop:IsA("Model") and moneyDrop:FindFirstChild("Money") then
+                                    local moneyPart = moneyDrop:FindFirstChild("Money")
+                                    if moneyPart and moneyPart:FindFirstChild("ProximityPrompt") then
+                                        local originalPosition = hrp.CFrame
+                                        hrp.CFrame = moneyPart.CFrame
+                                        task.wait(0.15)
+                                        fireproximityprompt(moneyPart.ProximityPrompt)
+                                        task.wait(0.15)
+                                        hrp.CFrame = originalPosition
+                                        task.wait(0.1)
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end)
+            end
+        end
+    end)
+    
+    -- 🎯 ฟังก์ชันหลัก
+    local function equipMP5()
+        local character = LocalPlayer.Character
+        local backpack = LocalPlayer.Backpack
+        if character and backpack then
+            local mp5 = backpack:FindFirstChild("MP5")
+            if mp5 and mp5:IsA("Tool") then
+                character.Humanoid:EquipTool(mp5)
+                task.wait(0.1)
+                return true
+            end
+            return character:FindFirstChild("MP5") ~= nil
+        end
+        return false
+    end
+    
+    local function unequipMP5()
+        local character = LocalPlayer.Character
+        if character then
+            character.Humanoid:UnequipTools()
+        end
+    end
+    
+    local function executePlayer(targetPlayer)
+        pcall(function()
+            if targetPlayer.Character and KnockEvent then
+                KnockEvent:FireServer("execute", targetPlayer.Character)
+            end
+        end)
+    end
+    
+    local function shootMP5(targetPlayer)
+        task.spawn(function()
+            pcall(function()
+                local character = LocalPlayer.Character
+                if not character or not WeaponsSystem then return end
+                
+                local mp5 = character:FindFirstChild("MP5") or LocalPlayer.Backpack:FindFirstChild("MP5")
+                if not mp5 then return end
+                
+                local targetCharacter = targetPlayer.Character
+                if not targetCharacter then return end
+                
+                local humanoid = targetCharacter:FindFirstChild("Humanoid")
+                local targetPart = targetCharacter:FindFirstChild("LeftHand") or targetCharacter:FindFirstChild("HumanoidRootPart")
+                
+                if humanoid and targetPart and humanoid.Health > 15 then
+                    local myHRP = character:FindFirstChild("HumanoidRootPart")
+                    if not myHRP then return end
+                    
+                    local distance = (myHRP.Position - targetPart.Position).Magnitude
+                    local direction = (targetPart.Position - myHRP.Position).Unit
+                    
+                    -- WeaponFired
+                    WeaponsSystem.Network.WeaponFired:FireServer(mp5, {
+                        id = math.random(1, 999),
+                        charge = 0,
+                        origin = myHRP.Position,
+                        dir = direction
+                    })
+                    
+                    task.wait(0.03)
+                    
+                    -- WeaponHit
+                    WeaponsSystem.Network.WeaponHit:FireServer(mp5, {
+                        p = targetPart.Position,
+                        pid = 1,
+                        part = targetPart,
+                        d = distance,
+                        maxDist = distance,
+                        h = humanoid,
+                        m = Enum.Material.SmoothPlastic,
+                        n = direction,
+                        t = tick(),
+                        sid = math.random(1, 999)
+                    })
+                end
+            end)
+        end)
+    end
+    
+    -- ESP Functions
+    local function createESPCircle()
+        pcall(function()
+            if espCircle then espCircle:Remove() end
+            espCircle = Drawing.new("Circle")
+            espCircle.Color = Color3.fromRGB(255, 0, 0)
+            espCircle.Thickness = 3
+            espCircle.NumSides = 100
+            espCircle.Radius = 100
+            espCircle.Filled = false
+            espCircle.Transparency = 1
+            espCircle.Visible = false
+            espCircle.ZIndex = 999
+        end)
+    end
+    
+    createESPCircle()
+    
+    local function updateESP()
+        pcall(function()
+            if not espEnabled or not espCircle then
+                if espCircle then espCircle.Visible = false end
+                return
+            end
+            
+            local character = LocalPlayer.Character
+            if not character or not character:FindFirstChild("HumanoidRootPart") then
+                espCircle.Visible = false
+                return
+            end
+            
+            local hrp = character.HumanoidRootPart
+            local camera = workspace.CurrentCamera
+            local screenPos, onScreen = camera:WorldToViewportPoint(hrp.Position)
+            
+            if onScreen then
+                local distance = (camera.CFrame.Position - hrp.Position).Magnitude
+                local scale = 1 / distance * 1000
+                local radius = killAuraRange * scale
+                
+                espCircle.Position = Vector2.new(screenPos.X, screenPos.Y)
+                espCircle.Radius = math.clamp(radius, 50, 500)
+                espCircle.Visible = true
+            else
+                espCircle.Visible = false
+            end
+        end)
+    end
+    
+    task.spawn(function()
+        while task.wait() do
+            updateESP()
+        end
+    end)
+    
+    -- Kill Aura Function
+    local function killAura()
+        if killAuraLoop then
+            killAuraLoop:Disconnect()
+            killAuraLoop = nil
+        end
+        
+        if killAuraEnabled then
+            killAuraLoop = RunService.Heartbeat:Connect(function()
+                pcall(function()
+                    local character = LocalPlayer.Character
+                    if not character or not character:FindFirstChild("HumanoidRootPart") then return end
+                    
+                    local hrp = character.HumanoidRootPart
+                    local foundTarget = false
+                    
+                    for _, player in pairs(Players:GetPlayers()) do
+                        if player ~= LocalPlayer and player.Character then
+                            local targetHRP = player.Character:FindFirstChild("HumanoidRootPart")
+                            local targetHumanoid = player.Character:FindFirstChild("Humanoid")
+                            
+                            if targetHRP and targetHumanoid and targetHumanoid.Health > 0 then
+                                local distance = (hrp.Position - targetHRP.Position).Magnitude
+                                
+                                if distance <= killAuraRange then
+                                    foundTarget = true
+                                    
+                                    if not character:FindFirstChild("MP5") then
+                                        equipMP5()
+                                    end
+                                    
+                                    if targetHumanoid.Health > 15 then
+                                        shootMP5(player)
+                                    elseif targetHumanoid.Health <= 15 and targetHumanoid.Health > 0 then
+                                        local originalPos = hrp.CFrame
+                                        hrp.CFrame = targetHRP.CFrame + Vector3.new(0, 2, 0)
+                                        task.wait(0.1)
+                                        executePlayer(player)
+                                        task.wait(0.1)
+                                        hrp.CFrame = originalPos
+                                    end
+                                    break
+                                end
+                            end
+                        end
+                    end
+                    
+                    if not foundTarget then
+                        unequipMP5()
+                    end
+                end)
+            end)
+        end
+    end
+    
+    -- Auto Arrest Function
+    local function autoArrest()
+        if autoArrestLoop then
+            autoArrestLoop:Disconnect()
+            autoArrestLoop = nil
+        end
+        
+        if autoArrestEnabled then
+            autoArrestLoop = RunService.Heartbeat:Connect(function()
+                pcall(function()
+                    local character = LocalPlayer.Character
+                    if not character or not character:FindFirstChild("HumanoidRootPart") then return end
+                    
+                    local hrp = character.HumanoidRootPart
+                    local backpack = LocalPlayer.Backpack
+                    
+                    for _, player in pairs(Players:GetPlayers()) do
+                        if player ~= LocalPlayer and player.Character then
+                            local targetChar = player.Character
+                            local targetHRP = targetChar:FindFirstChild("HumanoidRootPart")
+                            local targetHumanoid = targetChar:FindFirstChild("Humanoid")
+                            
+                            if targetHRP and targetHumanoid and targetHumanoid.Health > 0 then
+                                local isWanted = false
+                                
+                                -- Check from GUI
+                                local policeGui = LocalPlayer.PlayerGui:FindFirstChild("PoliceGui")
+                                if policeGui then
+                                    local arrestGui = policeGui:FindFirstChild("PoliceArrestGui")
+                                    if arrestGui then
+                                        local wantedFrame = arrestGui:FindFirstChild("WantedListFrame")
+                                        if wantedFrame then
+                                            local scrollFrame = wantedFrame:FindFirstChild("ScrollFrame")
+                                            if scrollFrame then
+                                                for _, child in pairs(scrollFrame:GetChildren()) do
+                                                    if child.Name == player.Name then
+                                                        isWanted = true
+                                                        break
+                                                    end
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                                
+                                if isWanted then
+                                    local handcuff = backpack:FindFirstChild("Handcuff")
+                                    if handcuff then
+                                        character.Humanoid:EquipTool(handcuff)
+                                        task.wait(0.3)
+                                    end
+                                    
+                                    if character:FindFirstChild("Handcuff") then
+                                        local originalPos = hrp.CFrame
+                                        hrp.CFrame = targetHRP.CFrame * CFrame.new(0, 0, 3)
+                                        task.wait(0.5)
+                                        
+                                        for _, descendant in pairs(targetChar:GetDescendants()) do
+                                            if descendant:IsA("ProximityPrompt") then
+                                                for i = 1, 5 do
+                                                    fireproximityprompt(descendant, 0)
+                                                    task.wait(0.1)
+                                                end
+                                                break
+                                            end
+                                        end
+                                        
+                                        task.wait(0.8)
+                                        if character:FindFirstChild("HumanoidRootPart") then
+                                            character.HumanoidRootPart.CFrame = originalPos
+                                        end
+                                        task.wait(2)
+                                        break
+                                    end
+                                end
+                            end
+                        end
+                    end
+                    task.wait(0.5)
+                end)
+            end)
+        end
+    end
+    
+    -- Farm Kills Function
+    local function farmKills()
+        if farmKillsLoop then
+            farmKillsLoop:Disconnect()
+            farmKillsLoop = nil
+        end
+        
+        if farmKillsEnabled and selectedPlayer then
+            farmKillsLoop = RunService.Heartbeat:Connect(function()
+                task.spawn(function()
+                    pcall(function()
+                        local character = LocalPlayer.Character
+                        if not character or not character:FindFirstChild("HumanoidRootPart") then return end
+                        
+                        local targetPlayer = Players:FindFirstChild(selectedPlayer)
+                        if not targetPlayer or not targetPlayer.Character then return end
+                        
+                        local targetChar = targetPlayer.Character
+                        local targetHRP = targetChar:FindFirstChild("HumanoidRootPart")
+                        local targetHumanoid = targetChar:FindFirstChild("Humanoid")
+                        
+                        if not targetHRP or not targetHumanoid then return end
+                        
+                        local myHRP = character.HumanoidRootPart
+                        
+                        if targetHumanoid.Health > 15 then
+                            local originalPos = myHRP.CFrame
+                            myHRP.CFrame = targetHRP.CFrame + Vector3.new(5, 0, 0)
+                            task.wait(0.1)
+                            
+                            if not character:FindFirstChild("MP5") then
+                                equipMP5()
+                                task.wait(0.2)
+                            end
+                            
+                            local attempts = 0
+                            while targetHumanoid.Health > 15 and attempts < 50 do
+                                shootMP5(targetPlayer)
+                                task.wait(0.1)
+                                attempts = attempts + 1
+                            end
+                            
+                            task.wait(0.2)
+                            myHRP.CFrame = originalPos
+                        end
+                        
+                        if targetHumanoid.Health <= 15 and targetHumanoid.Health > 0 then
+                            if KnockEvent then
+                                KnockEvent:FireServer("revive", targetChar)
+                            end
+                        end
+                        
+                        task.wait(0.1)
+                    end)
+                end)
+            end)
+        end
+    end
+    
+    -- Update Player List
+    local function updatePlayerList()
+        pcall(function()
+            for _, child in pairs(PlayerListFrame:GetChildren()) do
+                if child:IsA("TextButton") then
+                    child:Destroy()
+                end
+            end
+            
+            local yPos = 0
+            for _, player in pairs(Players:GetPlayers()) do
+                if player ~= LocalPlayer then
+                    local playerBtn = Instance.new("TextButton")
+                    playerBtn.Size = UDim2.new(1, -5, 0, 30)
+                    playerBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+                    playerBtn.Text = player.Name
+                    playerBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+                    playerBtn.Font = Enum.Font.Gotham
+                    playerBtn.TextSize = 12
+                    playerBtn.Parent = PlayerListFrame
+                    
+                    local btnCorner = Instance.new("UICorner")
+                    btnCorner.CornerRadius = UDim.new(0, 4)
+                    btnCorner.Parent = playerBtn
+                    
+                    playerBtn.MouseButton1Click:Connect(function()
+                        selectedPlayer = player.Name
+                        PlayerDropdown.Text = player.Name
+                        PlayerListFrame.Visible = false
+                    end)
+                    
+                    yPos = yPos + 32
+                end
+            end
+            
+            PlayerListFrame.CanvasSize = UDim2.new(0, 0, 0, yPos)
+        end)
+    end
+    
+    task.spawn(function()
+        while task.wait(3) do
+            if PlayerListFrame.Visible then
+                updatePlayerList()
+            end
+        end
+    end)
+    
+    -- 🎮 Event Handlers
+    
+    -- Infinite Ammo
+    InfiniteAmmoButton.MouseButton1Click:Connect(function()
+        infiniteAmmoEnabled = not infiniteAmmoEnabled
+        InfiniteAmmoButton.Text = "กระสุน MP5 ไม่จำกัด: " .. (infiniteAmmoEnabled and "เปิด" or "ปิด")
+        InfiniteAmmoButton.BackgroundColor3 = infiniteAmmoEnabled and Color3.fromRGB(50, 200, 50) or Color3.fromRGB(80, 80, 90)
+        
+        if infiniteAmmoLoop then
+            infiniteAmmoLoop:Disconnect()
+            infiniteAmmoLoop = nil
+        end
+        
+        if infiniteAmmoEnabled and WeaponsSystem then
+            infiniteAmmoLoop = RunService.Heartbeat:Connect(function()
+                pcall(function()
+                    local character = LocalPlayer.Character
+                    local backpack = LocalPlayer.Backpack
+                    local mp5 = (character and character:FindFirstChild("MP5")) or (backpack and backpack:FindFirstChild("MP5"))
+                    if mp5 then
+                        WeaponsSystem.Network.WeaponReloadRequest:FireServer(mp5)
+                    end
+                    task.wait(0.1)
+                end)
+            end)
+        end
+    end)
+    
+    -- Click Kill
+    ClickKillButton.MouseButton1Click:Connect(function()
+        killClickEnabled = not killClickEnabled
+        ClickKillButton.Text = "คลิกตาย: " .. (killClickEnabled and "เปิด" or "ปิด")
+        ClickKillButton.BackgroundColor3 = killClickEnabled and Color3.fromRGB(50, 200, 50) or Color3.fromRGB(80, 80, 90)
+    end)
+    
+    Mouse.Button1Down:Connect(function()
+        if not killClickEnabled then return end
+        task.spawn(function()
+            pcall(function()
+                local target = Mouse.Target
+                if target and target.Parent then
+                    local targetPlayer = Players:GetPlayerFromCharacter(target.Parent)
+                    if targetPlayer and targetPlayer ~= LocalPlayer then
+                        equipMP5()
+                        
+                        local character = LocalPlayer.Character
+                        if not character or not character:FindFirstChild("HumanoidRootPart") then return end
+                        local originalPosition = character.HumanoidRootPart.CFrame
+                        
+                        local humanoid = targetPlayer.Character:FindFirstChild("Humanoid")
+                        local hrp = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
+                        
+                        if humanoid and hrp then
+                            while humanoid.Health > 15 do
+                                shootMP5(targetPlayer)
+                                task.wait(0.1)
+                            end
+                            
+                            task.wait(0.2)
+                            
+                            if humanoid.Health <= 15 and humanoid.Health > 0 then
+                                character.HumanoidRootPart.CFrame = hrp.CFrame + Vector3.new(0, 2, 0)
+                                task.wait(0.15)
+                                executePlayer(targetPlayer)
+                                task.wait(0.15)
+                                character.HumanoidRootPart.CFrame = originalPosition
+                            end
+                        end
+                        
+                        task.wait(0.2)
+                        unequipMP5()
+                    end
+                end
+            end)
+        end)
+    end)
+    
+    -- Kill All
+    KillAllButton.MouseButton1Click:Connect(function()
+        task.spawn(function()
+            pcall(function()
+                equipMP5()
+                
+                local character = LocalPlayer.Character
+                if not character or not character:FindFirstChild("HumanoidRootPart") then return end
+                local originalPosition = character.HumanoidRootPart.CFrame
+                
+                for _, player in pairs(Players:GetPlayers()) do
+                    if player ~= LocalPlayer and player.Character then
+                        local targetCharacter = player.Character
+                        local humanoid = targetCharacter:FindFirstChild("Humanoid")
+                        local hrp = targetCharacter:FindFirstChild("HumanoidRootPart")
+                        
+                        if humanoid and hrp then
+                            local attempts = 0
+                            while humanoid.Health > 15 and attempts < 100 do
+                                shootMP5(player)
+                                task.wait(0.1)
+                                attempts = attempts + 1
+                            end
+                            
+                            task.wait(0.2)
+                            
+                            if humanoid.Health <= 15 and humanoid.Health > 0 then
+                                character.HumanoidRootPart.CFrame = hrp.CFrame + Vector3.new(0, 2, 0)
+                                task.wait(0.15)
+                                executePlayer(player)
+                                task.wait(0.15)
+                            end
+                        end
+                    end
+                end
+                
+                task.wait(0.2)
+                if character and character:FindFirstChild("HumanoidRootPart") then
+                    character.HumanoidRootPart.CFrame = originalPosition
+                end
+                
+                task.wait(0.2)
+                unequipMP5()
+            end)
+        end)
+    end)
+    
+    -- ESP Toggle
+    ESPToggle.MouseButton1Click:Connect(function()
+        espEnabled = not espEnabled
+        ESPToggle.Text = "ESP:" .. (espEnabled and "เปิด" or "ปิด")
+        ESPToggle.BackgroundColor3 = espEnabled and Color3.fromRGB(0, 140, 0) or Color3.fromRGB(50, 50, 50)
+        ESPToggle.TextColor3 = espEnabled and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(200, 50, 50)
+        
+        if espEnabled then
+            if not espCircle then createESPCircle() end
+            espCircle.Visible = true
+        else
+            if espCircle then espCircle.Visible = false end
+        end
+    end)
+    
+    -- Kill Aura Input
+    KillAuraInput.FocusLost:Connect(function()
+        local num = tonumber(KillAuraInput.Text)
+        if num and num > 0 then
+            killAuraRange = num
+        else
+            KillAuraInput.Text = tostring(killAuraRange)
+        end
+    end)
+    
+    -- Kill Aura Toggle
+    KillAuraToggle.MouseButton1Click:Connect(function()
+        killAuraEnabled = not killAuraEnabled
+        KillAuraToggle.Text = killAuraEnabled and "เปิด" or "ปิด"
+        KillAuraToggle.BackgroundColor3 = killAuraEnabled and Color3.fromRGB(0, 140, 0) or Color3.fromRGB(50, 50, 50)
+        KillAuraToggle.TextColor3 = killAuraEnabled and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(200, 50, 50)
+        killAura()
+    end)
+    
+    -- Auto Arrest Toggle
+    AutoArrestButton.MouseButton1Click:Connect(function()
+        autoArrestEnabled = not autoArrestEnabled
+        AutoArrestButton.Text = "ออโต้จับโจร: " .. (autoArrestEnabled and "เปิด" or "ปิด")
+        AutoArrestButton.BackgroundColor3 = autoArrestEnabled and Color3.fromRGB(50, 200, 50) or Color3.fromRGB(80, 80, 90)
+        autoArrest()
+    end)
+    
+    -- Farm Kills Dropdown
+    PlayerDropdown.MouseButton1Click:Connect(function()
+        PlayerListFrame.Visible = not PlayerListFrame.Visible
+        if PlayerListFrame.Visible then
+            updatePlayerList()
+        end
+    end)
+    
+    -- Farm Kills Toggle
+    FarmKillsToggle.MouseButton1Click:Connect(function()
+        if not selectedPlayer then
+            PlayerDropdown.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+            task.wait(0.3)
+            PlayerDropdown.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+            return
+        end
+        
+        farmKillsEnabled = not farmKillsEnabled
+        FarmKillsToggle.Text = farmKillsEnabled and "เปิด" or "ปิด"
+        FarmKillsToggle.BackgroundColor3 = farmKillsEnabled and Color3.fromRGB(0, 140, 0) or Color3.fromRGB(50, 50, 50)
+        FarmKillsToggle.TextColor3 = farmKillsEnabled and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(200, 50, 50)
+        farmKills()
+    end)
+    
+    -- Music Input
+    MusicInput.FocusLost:Connect(function()
+        musicID = MusicInput.Text
+    end)
+    
+    -- Music Toggle
+    MusicToggle.MouseButton1Click:Connect(function()
+        musicEnabled = not musicEnabled
+        MusicToggle.Text = musicEnabled and "เปิด" or "ปิด"
+        MusicToggle.BackgroundColor3 = musicEnabled and Color3.fromRGB(0, 140, 0) or Color3.fromRGB(50, 50, 50)
+        MusicToggle.TextColor3 = musicEnabled and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(200, 50, 50)
+        
+        if musicLoop then
+            musicLoop:Disconnect()
+            musicLoop = nil
+        end
+        
+        if musicEnabled and musicID ~= "" then
+            musicLoop = RunService.Heartbeat:Connect(function()
+                pcall(function()
+                    local cars = workspace:FindFirstChild("Cars")
+                    if cars then
+                        for _, carName in pairs({"Lamborghini Aventador SVJ 63", "White Toyota Camry", "Lamborghini Aventador SVJ "}) do
+                            local car = cars:FindFirstChild(carName)
+                            if car and car:FindFirstChild("DriveSound") then
+                                car.DriveSound:FireServer("updateSound", "Rev", "rbxassetid://" .. musicID, 1, 10)
+                            end
+                        end
+                    end
+                    task.wait(0.01)
+                end)
+            end)
+        end
+    end)
+    
+    -- Close Dropdown
+    UserInputService.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            local mousePos = UserInputService:GetMouseLocation()
+            if not (mousePos.X >= PlayerDropdown.AbsolutePosition.X and 
+                    mousePos.X <= PlayerDropdown.AbsolutePosition.X + PlayerDropdown.AbsoluteSize.X and
+                    mousePos.Y >= PlayerDropdown.AbsolutePosition.Y and 
+                    mousePos.Y <= PlayerDropdown.AbsolutePosition.Y + PlayerDropdown.AbsoluteSize.Y) then
+                if not (mousePos.X >= PlayerListFrame.AbsolutePosition.X and 
+                        mousePos.X <= PlayerListFrame.AbsolutePosition.X + PlayerListFrame.AbsoluteSize.X and
+                        mousePos.Y >= PlayerListFrame.AbsolutePosition.Y and 
+                        mousePos.Y <= PlayerListFrame.AbsolutePosition.Y + PlayerListFrame.AbsoluteSize.Y) then
+                    PlayerListFrame.Visible = false
+                end
+            end
+        end
+    end)
+    
+    -- Tab System
+    local currentTab = "Home"
+    local function switchTab(tabName)
+        if tabName == currentTab then return end
+        
+        HomePage.Visible = false
+        JobPage.Visible = false
+        GriefPage.Visible = false
+        ShopPage.Visible = false
+        PlayerPage.Visible = false
+        FarmPage.Visible = false
+        
+        HomeTabBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+        HomeTabBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+        JobTabBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+        JobTabBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+        GriefTabBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+        GriefTabBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+        ShopTabBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+        ShopTabBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+        PlayerTabBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+        PlayerTabBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+        FarmTabBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+        FarmTabBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+        
+        if tabName == "Home" then
+            HomePage.Visible = true
+            HomeTabBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+            HomeTabBtn.TextColor3 = Color3.fromRGB(255, 80, 80)
+        elseif tabName == "Job" then
+            JobPage.Visible = true
+            JobTabBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+            JobTabBtn.TextColor3 = Color3.fromRGB(255, 80, 80)
+        elseif tabName == "Grief" then
+            GriefPage.Visible = true
+            GriefTabBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+            GriefTabBtn.TextColor3 = Color3.fromRGB(255, 80, 80)
+        elseif tabName == "Shop" then
+            ShopPage.Visible = true
+            ShopTabBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+            ShopTabBtn.TextColor3 = Color3.fromRGB(255, 80, 80)
+        elseif tabName == "Player" then
+            PlayerPage.Visible = true
+            PlayerTabBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+            PlayerTabBtn.TextColor3 = Color3.fromRGB(255, 80, 80)
+        elseif tabName == "Farm" then
+            FarmPage.Visible = true
+            FarmTabBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+            FarmTabBtn.TextColor3 = Color3.fromRGB(255, 80, 80)
+        end
+        
+        currentTab = tabName
+    end
+    
+    HomeTabBtn.MouseButton1Click:Connect(function() switchTab("Home") end)
+    JobTabBtn.MouseButton1Click:Connect(function() switchTab("Job") end)
+    GriefTabBtn.MouseButton1Click:Connect(function() switchTab("Grief") end)
+    ShopTabBtn.MouseButton1Click:Connect(function() switchTab("Shop") end)
+    PlayerTabBtn.MouseButton1Click:Connect(function() switchTab("Player") end)
+    FarmTabBtn.MouseButton1Click:Connect(function() switchTab("Farm") end)
+    
+    -- Open Button
+    local OpenGuiBtn = Instance.new("TextButton")
+    OpenGuiBtn.Size = UDim2.new(0, 60, 0, 60)
+    OpenGuiBtn.Position = UDim2.new(0.05, 0, 0.5, -30)
+    OpenGuiBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+    OpenGuiBtn.Text = "📱"
+    OpenGuiBtn.TextSize = 30
+    OpenGuiBtn.Font = Enum.Font.GothamBold
+    OpenGuiBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    OpenGuiBtn.Visible = false
+    OpenGuiBtn.Parent = ScreenGui
+    MakeDraggable(OpenGuiBtn)
+    
+    local OpenCorner = Instance.new("UICorner")
+    OpenCorner.CornerRadius = UDim.new(1, 0)
+    OpenCorner.Parent = OpenGuiBtn
+    
+    CloseBtn.MouseButton1Click:Connect(function()
+        MainFrame.Visible = false
+        OpenGuiBtn.Visible = true
+    end)
+    
+    OpenGuiBtn.MouseButton1Click:Connect(function()
+        MainFrame.Visible = true
+        OpenGuiBtn.Visible = false
+    end)
+    
+    print("🔥 PS CITY GUI LOADED SUCCESSFULLY! 🔥")
+end)
+
+if not success then
+    warn("❌ ERROR: " .. tostring(errMsg))
+    
+    local ErrorGui = Instance.new("ScreenGui")
+    ErrorGui.Parent = game:GetService("CoreGui")
+    
+    local ErrorFrame = Instance.new("Frame")
+    ErrorFrame.Size = UDim2.new(0, 400, 0, 200)
+    ErrorFrame.Position = UDim2.new(0.5, -200, 0.5, -100)
+    ErrorFrame.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+    ErrorFrame.Parent = ErrorGui
+    
+    local ErrorCorner = Instance.new("UICorner")
+    ErrorCorner.CornerRadius = UDim.new(0, 10)
+    ErrorCorner.Parent = ErrorFrame
+    
+    local ErrorText = Instance.new("TextLabel")
+    ErrorText.Size = UDim2.new(1, -20, 1, -20)
+    ErrorText.Position = UDim2.new(0, 10, 0, 10)
+    ErrorText.BackgroundTransparency = 1
+    ErrorText.Text = "❌ ERROR LOADING GUI\n\n" .. tostring(errMsg) .. "\n\nกรุณาแจ้งผู้พัฒนา"
+    ErrorText.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ErrorText.Font = Enum.Font.GothamBold
+    ErrorText.TextSize = 14
+    ErrorText.TextWrapped = true
+    ErrorText.Parent = ErrorFrame
+    
+    print("❌ Script failed to load: " .. tostring(errMsg))
+else
+    print("✅ Script loaded successfully!")
+end
