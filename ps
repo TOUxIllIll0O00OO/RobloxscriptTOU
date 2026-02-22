@@ -693,7 +693,7 @@ local function executePlayer(targetPlayer)
     end)
 end
 
--- แทนที่ฟังก์ชัน shootMP5 ทั้งหมดด้วย:
+-- วิธีที่ 2 - ใช้ getfenv เพื่อเข้าถึง vector แบบเกม
 
 local function shootMP5(targetPlayer)
     pcall(function()
@@ -712,33 +712,32 @@ local function shootMP5(targetPlayer)
         local leftHand = targetCharacter:FindFirstChild("LeftHand")
         local targetHRP = targetCharacter:FindFirstChild("HumanoidRootPart")
         
-        -- ใช้ LeftHand เป็นหลัก ถ้าไม่มีใช้ HRP
         local targetPart = leftHand or targetHRP
         
         if humanoid and targetPart and humanoid.Health > 15 then
             local myHRP = character:FindFirstChild("HumanoidRootPart")
             if not myHRP then return end
             
-            -- คำนวณระยะทาง
             local distance = (myHRP.Position - targetPart.Position).Magnitude
-            
-            -- คำนวณทิศทาง
             local direction = (targetPart.Position - myHRP.Position).Unit
             
-            -- ใช้ vector แบบเดียวกับเกม
+            -- สร้าง vector ด้วย Vector3 แล้วแปลง
+            local posVec = targetPart.Position
+            local dirVec = direction
+            
             local args = {
                 mp5,
                 {
-                    ["p"] = vector.create(targetPart.Position.X, targetPart.Position.Y, targetPart.Position.Z),
-                    ["pid"] = 1,
-                    ["part"] = targetPart,
-                    ["d"] = distance,
-                    ["maxDist"] = distance,
-                    ["h"] = humanoid,
-                    ["m"] = Enum.Material.SmoothPlastic,
-                    ["n"] = vector.create(direction.X, direction.Y, direction.Z),
-                    ["t"] = tick(),
-                    ["sid"] = math.random(1, 100)
+                    p = posVec,
+                    pid = 1,
+                    part = targetPart,
+                    d = distance,
+                    maxDist = distance,
+                    h = humanoid,
+                    m = Enum.Material.SmoothPlastic,
+                    n = dirVec,
+                    t = tick(),
+                    sid = math.random(1, 999)
                 }
             }
             
