@@ -693,7 +693,7 @@ local function executePlayer(targetPlayer)
     end)
 end
 
--- วิธีที่ 3 - ยิงด้วย Raycast
+-- แทนที่ฟังก์ชัน shootMP5 ทั้งหมด:
 
 local function shootMP5(targetPlayer)
     pcall(function()
@@ -709,47 +709,52 @@ local function shootMP5(targetPlayer)
         if not targetCharacter then return end
         
         local humanoid = targetCharacter:FindFirstChild("Humanoid")
-        local torso = targetCharacter:FindFirstChild("Torso") or targetCharacter:FindFirstChild("UpperTorso")
+        local leftHand = targetCharacter:FindFirstChild("LeftHand")
+        local targetHRP = targetCharacter:FindFirstChild("HumanoidRootPart")
         
-        if humanoid and torso and humanoid.Health > 15 then
+        local targetPart = leftHand or targetHRP
+        
+        if humanoid and targetPart and humanoid.Health > 15 then
             local myHRP = character:FindFirstChild("HumanoidRootPart")
             if not myHRP then return end
             
-            -- ยิงไปที่ศีรษะ, หน้าอก, แขน, ขา
-            local bodyParts = {
-                targetCharacter:FindFirstChild("Head"),
-                targetCharacter:FindFirstChild("UpperTorso"),
-                targetCharacter:FindFirstChild("LeftHand"),
-                targetCharacter:FindFirstChild("RightHand"),
-                targetCharacter:FindFirstChild("LeftLowerArm"),
-                targetCharacter:FindFirstChild("RightLowerArm")
+            -- คำนวณระยะทางและทิศทาง
+            local distance = (myHRP.Position - targetPart.Position).Magnitude
+            local direction = (targetPart.Position - myHRP.Position).Unit
+            
+            -- 1. Fire WeaponFired ก่อน (ยิงปืนออก)
+            local fireArgs = {
+                mp5,
+                {
+                    id = math.random(1, 100),
+                    charge = 0,
+                    origin = myHRP.Position,
+                    dir = direction
+                }
             }
             
-            for _, part in pairs(bodyParts) do
-                if part then
-                    local distance = (myHRP.Position - part.Position).Magnitude
-                    local direction = (part.Position - myHRP.Position).Unit
-                    
-                    local args = {
-                        mp5,
-                        {
-                            p = part.Position,
-                            pid = 1,
-                            part = part,
-                            d = distance,
-                            maxDist = distance,
-                            h = humanoid,
-                            m = part.Material,
-                            n = direction,
-                            t = tick(),
-                            sid = math.random(1, 999)
-                        }
-                    }
-                    
-                    WeaponsSystem:WaitForChild("Network"):WaitForChild("WeaponHit"):FireServer(unpack(args))
-                    wait(0.05)
-                end
-            end
+            WeaponsSystem:WaitForChild("Network"):WaitForChild("WeaponFired"):FireServer(unpack(fireArgs))
+            
+            wait(0.05) -- รอนิดนึง
+            
+            -- 2. Fire WeaponHit (ตรวจสอบว่ายิงโดน)
+            local hitArgs = {
+                mp5,
+                {
+                    p = targetPart.Position,
+                    pid = 1,
+                    part = targetPart,
+                    d = distance,
+                    maxDist = distance,
+                    h = humanoid,
+                    m = Enum.Material.SmoothPlastic,
+                    n = direction,
+                    t = tick(),
+                    sid = math.random(1, 100)
+                }
+            }
+            
+            WeaponsSystem:WaitForChild("Network"):WaitForChild("WeaponHit"):FireServer(unpack(hitArgs))
         end
     end)
 end
