@@ -91,48 +91,167 @@ local function showNotification()
     NotifTitle.BackgroundTransparency = 1
     NotifTitle.Text = "PS City Script Loaded!"
     NotifTitle.TextColor3 = Color3.fromRGB(255, 100, 100)
-    NotifTitle.Font = Enum.Font.GothamBold
-    NotifTitle.TextSize = 16
-    NotifTitle.TextXAlignment = Enum.TextXAlignment.Left
-    NotifTitle.ZIndex = 10
-    NotifTitle.Parent = NotifFrame
+-- [[ PS CITY | BY:TOU - COMPLETE EXPLOIT GUI ]] --
+-- Theme: Dark & Blood Red 🩸🖤
 
-    local NotifDesc = Instance.new("TextLabel")
-    NotifDesc.Size = UDim2.new(0, 190, 0, 30)
-    NotifDesc.Position = UDim2.new(0, 80, 0, 40)
-    NotifDesc.BackgroundTransparency = 1
-    NotifDesc.Text = "😈 Complete Script by TOU!"
-    NotifDesc.TextColor3 = Color3.fromRGB(200, 200, 200)
-    NotifDesc.Font = Enum.Font.Gotham
-    NotifDesc.TextSize = 14
-    NotifDesc.TextXAlignment = Enum.TextXAlignment.Left
-    NotifDesc.ZIndex = 10
-    NotifDesc.Parent = NotifFrame
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local CoreGui = game:GetService("CoreGui")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
 
-    NotifFrame.Position = UDim2.new(1, 0, 0, 20)
-    local tweenIn = TweenService:Create(NotifFrame, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-        Position = UDim2.new(1, -300, 0, 20)
-    })
-    tweenIn:Play()
+local LocalPlayer = Players.LocalPlayer
+local Mouse = LocalPlayer:GetMouse()
 
-    task.wait(4)
-    local tweenOut = TweenService:Create(NotifFrame, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-        Position = UDim2.new(1, 0, 0, 20)
-    })
-    tweenOut:Play()
-    tweenOut.Completed:Connect(function()
-        NotifGui:Destroy()
+-- ตรวจสอบว่ามี Remotes ไหม
+local success, Remotes = pcall(function()
+    return ReplicatedStorage:WaitForChild("Remotes", 5)
+end)
+
+if not success or not Remotes then
+    warn("ไม่พบ Remotes ในเกม - บาง feature อาจใช้ไม่ได้")
+    -- สร้าง dummy
+    local dummy = Instance.new("Folder")
+    dummy.Name = "Remotes"
+    Remotes = dummy
+end
+
+local WeaponPurchase = Remotes:FindFirstChild("WeaponPurchaseRequest")
+local PoliceRemotes = Remotes:FindFirstChild("PoliceRemotes")
+local CollectPaycheck = PoliceRemotes and PoliceRemotes:FindFirstChild("CollectPaycheck")
+local KnockEvent = Remotes:FindFirstChild("KnockEvent")
+local WeaponsSystem = ReplicatedStorage:FindFirstChild("WeaponsSystem")
+
+print("🔄 PS City Script Loading...")
+
+-- 🛠️ ตัวแปรสถานะ
+local killClickEnabled = false
+local infiniteAmmoEnabled = false
+local autoFarmMoneyEnabled = false
+local speedEnabled = false
+local jumpEnabled = false
+local farmEnabled = false
+local musicEnabled = false
+local killAuraEnabled = false
+local espEnabled = false
+local autoArrestEnabled = false
+local farmKillsEnabled = false
+local infiniteAmmoLoop = nil
+local autoFarmLoop = nil
+local farmMoneyLoop = nil
+local musicLoop = nil
+local killAuraLoop = nil
+local autoArrestLoop = nil
+local farmKillsLoop = nil
+local desiredSpeed = 50
+local desiredJump = 100
+local musicID = ""
+local killAuraRange = 30
+local selectedPlayer = nil
+
+-- ESP วงกลม
+local espCircle = nil
+
+-- 🎨 สร้างแจ้งเตือนเริ่มต้น
+local function showNotification()
+    pcall(function()
+        local NotifGui = Instance.new("ScreenGui")
+        NotifGui.Name = "TempNotif"
+        NotifGui.ResetOnSpawn = false
+        NotifGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+        NotifGui.Parent = CoreGui
+
+        local NotifFrame = Instance.new("Frame")
+        NotifFrame.Size = UDim2.new(0, 280, 0, 80)
+        NotifFrame.Position = UDim2.new(1, -300, 0, 20)
+        NotifFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+        NotifFrame.BorderSizePixel = 0
+        NotifFrame.ZIndex = 10
+        NotifFrame.Parent = NotifGui
+
+        local NotifCorner = Instance.new("UICorner")
+        NotifCorner.CornerRadius = UDim.new(0, 10)
+        NotifCorner.Parent = NotifFrame
+
+        local NotifTitle = Instance.new("TextLabel")
+        NotifTitle.Size = UDim2.new(1, -20, 0, 30)
+        NotifTitle.Position = UDim2.new(0, 10, 0, 10)
+        NotifTitle.BackgroundTransparency = 1
+        NotifTitle.Text = "✅ PS City Loaded!"
+        NotifTitle.TextColor3 = Color3.fromRGB(255, 100, 100)
+        NotifTitle.Font = Enum.Font.GothamBold
+        NotifTitle.TextSize = 16
+        NotifTitle.TextXAlignment = Enum.TextXAlignment.Left
+        NotifTitle.ZIndex = 10
+        NotifTitle.Parent = NotifFrame
+
+        local NotifDesc = Instance.new("TextLabel")
+        NotifDesc.Size = UDim2.new(1, -20, 0, 30)
+        NotifDesc.Position = UDim2.new(0, 10, 0, 40)
+        NotifDesc.BackgroundTransparency = 1
+        NotifDesc.Text = "😈 BY:TOU"
+        NotifDesc.TextColor3 = Color3.fromRGB(200, 200, 200)
+        NotifDesc.Font = Enum.Font.Gotham
+        NotifDesc.TextSize = 14
+        NotifDesc.TextXAlignment = Enum.TextXAlignment.Left
+        NotifDesc.ZIndex = 10
+        NotifDesc.Parent = NotifFrame
+
+        NotifFrame.Position = UDim2.new(1, 0, 0, 20)
+        local tweenIn = TweenService:Create(NotifFrame, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+            Position = UDim2.new(1, -300, 0, 20)
+        })
+        tweenIn:Play()
+
+        task.wait(3)
+        local tweenOut = TweenService:Create(NotifFrame, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+            Position = UDim2.new(1, 0, 0, 20)
+        })
+        tweenOut:Play()
+        tweenOut.Completed:Connect(function()
+            NotifGui:Destroy()
+        end)
     end)
 end
 
-pcall(showNotification)
+showNotification()
+
+print("✅ Notification shown!")
 
 -- 🧩 ScreenGui หลัก
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "PSCity_Exploit"
+ScreenGui.Name = "PSCity_Exploit_" .. math.random(1000, 9999)
 ScreenGui.Parent = CoreGui
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 ScreenGui.ResetOnSpawn = false
+
+print("✅ ScreenGui created!")
+
+-- ตรวจสอบว่า GUI ถูกสร้างสำเร็จ
+if not ScreenGui.Parent then
+    warn("❌ ScreenGui ไม่ถูกสร้าง!")
+    return
+end
+
+-- ส่วนที่เหลือของ GUI...
+print("🎨 Creating GUI elements...")
+
+-- 🛠️ ตัวแปรสถานะ
+local killClickEnabled = false
+local infiniteAmmoEnabled = false
+local autoFarmMoneyEnabled = false
+local speedEnabled = false
+local jumpEnabled = false
+local farmEnabled = false
+local musicEnabled = false
+local infiniteAmmoLoop = nil
+local autoFarmLoop = nil
+local farmMoneyLoop = nil
+local musicLoop = nil
+local desiredSpeed = 50
+local desiredJump = 100
+local musicID = ""
 
 -- 🛠️ ฟังก์ชันลาก GUI
 local function MakeDraggable(gui)
