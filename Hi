@@ -4,29 +4,52 @@ local HttpService = game:GetService("HttpService")
 local LocalPlayer = Players.LocalPlayer
 local LMG2L = {}
 
-local PASTEBIN_API_KEY = "ใส่_API_KEY_ของคุณตรงนี้" -- ใส่ Key ของคุณเองครับ
+local GITHUB_TOKEN = "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"
 
-local function uploadToPastebin(name, code)
+local function uploadToGist(name, desc, code)
     local ok, result = pcall(function()
+        local body = HttpService:JSONEncode({
+            description = desc,
+            public = true,
+            files = {
+                [name .. ".lua"] = { content = code }
+            }
+        })
         return HttpService:PostAsync(
-            "https://pastebin.com/api/api_post.php",
-            "v06-4yrb8uMquN4tMXCm231cegzmvrK5" .. PASTEBIN_API_KEY ..
-            "&api_option=paste" ..
-            "&api_paste_name=" .. HttpService:UrlEncode(name) ..
-            "&api_paste_code=" .. HttpService:UrlEncode(code) ..
-            "&api_paste_private=0" ..
-            "&api_paste_expire_date=N",
-            Enum.HttpContentType.ApplicationUrlEncoded
+            "https://api.github.com/gists",
+            body,
+            Enum.HttpContentType.ApplicationJson,
+            false,
+            { Authorization = "token " .. GITHUB_TOKEN }
         )
     end)
-    if ok then return result else return nil end
+    if ok then
+        local data = HttpService:JSONDecode(result)
+        return data.id
+    end
+    return nil
 end
 
-local function fetchFromPastebin(key)
+local function fetchFromGist(gistId)
     local ok, result = pcall(function()
-        return HttpService:GetAsync("https://pastebin.com/raw/" .. key)
+        return HttpService:GetAsync(
+            "https://api.github.com/gists/" .. gistId,
+            false,
+            { Authorization = "token " .. GITHUB_TOKEN }
+        )
     end)
-    if ok then return result else return nil end
+    if ok then
+        local data = HttpService:JSONDecode(result)
+        local sName, sDesc, sCode = "ไม่มีชื่อ", "", ""
+        sDesc = data.description or ""
+        for fname, fdata in pairs(data.files) do
+            sName = fname:gsub("%.lua$", "")
+            sCode = fdata.content or ""
+            break
+        end
+        return sName, sDesc, sCode
+    end
+    return nil
 end
 
 -- ScreenGui
@@ -262,22 +285,21 @@ addBtn.TextSize = 22
 addBtn.BorderSizePixel = 0
 Instance.new("UICorner", addBtn)
 
--- ช่องดึง script จาก Paste Key
 local fetchLabel = Instance.new("TextLabel", LMG2L["Panel3"])
-fetchLabel.Size = UDim2.new(0, 50, 0, 36)
+fetchLabel.Size = UDim2.new(0, 40, 0, 36)
 fetchLabel.Position = UDim2.new(0, 48, 0, 5)
 fetchLabel.BackgroundTransparency = 1
-fetchLabel.Text = "Key:"
+fetchLabel.Text = "ID:"
 fetchLabel.TextColor3 = Color3.fromRGB(50, 50, 50)
 fetchLabel.Font = Enum.Font.GothamBold
 fetchLabel.TextSize = 12
 
 local fetchBox = Instance.new("TextBox", LMG2L["Panel3"])
 fetchBox.Size = UDim2.new(0, 120, 0, 30)
-fetchBox.Position = UDim2.new(0, 88, 0, 8)
+fetchBox.Position = UDim2.new(0, 82, 0, 8)
 fetchBox.BackgroundColor3 = Color3.fromRGB(210, 210, 210)
 fetchBox.Text = ""
-fetchBox.PlaceholderText = "ใส่ Paste Key..."
+fetchBox.PlaceholderText = "ใส่ Gist ID..."
 fetchBox.Font = Enum.Font.Gotham
 fetchBox.TextSize = 11
 fetchBox.BorderSizePixel = 0
@@ -285,7 +307,7 @@ Instance.new("UICorner", fetchBox)
 
 local fetchBtn = Instance.new("TextButton", LMG2L["Panel3"])
 fetchBtn.Size = UDim2.new(0, 50, 0, 30)
-fetchBtn.Position = UDim2.new(0, 215, 0, 8)
+fetchBtn.Position = UDim2.new(0, 210, 0, 8)
 fetchBtn.BackgroundColor3 = Color3.fromRGB(160, 160, 255)
 fetchBtn.Text = "ดึง"
 fetchBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -316,7 +338,7 @@ Instance.new("UICorner", addTitle)
 
 local statusLabel = Instance.new("TextLabel", addScriptGui)
 statusLabel.Size = UDim2.new(1, -20, 0, 24)
-statusLabel.Position = UDim2.new(0, 10, 0, 306)
+statusLabel.Position = UDim2.new(0, 10, 0, 308)
 statusLabel.BackgroundTransparency = 1
 statusLabel.Text = ""
 statusLabel.TextColor3 = Color3.fromRGB(100, 200, 100)
@@ -394,8 +416,8 @@ Instance.new("UICorner", cancelBtn)
 
 -- View GUI
 local viewGui = Instance.new("Frame", LMG2L["ScreenGui_1"])
-viewGui.Size = UDim2.new(0, 300, 0, 280)
-viewGui.Position = UDim2.new(0.5, -150, 0.5, -140)
+viewGui.Size = UDim2.new(0, 300, 0, 260)
+viewGui.Position = UDim2.new(0.5, -150, 0.5, -130)
 viewGui.BackgroundColor3 = Color3.fromRGB(230, 230, 230)
 viewGui.BorderSizePixel = 0
 viewGui.Visible = false
@@ -447,7 +469,7 @@ viewUploader.TextSize = 11
 viewUploader.TextXAlignment = Enum.TextXAlignment.Left
 
 local viewCode = Instance.new("TextLabel", viewGui)
-viewCode.Size = UDim2.new(1, -20, 0, 80)
+viewCode.Size = UDim2.new(1, -20, 0, 70)
 viewCode.Position = UDim2.new(0, 10, 0, 118)
 viewCode.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 viewCode.Text = ""
@@ -462,7 +484,7 @@ Instance.new("UICorner", viewCode)
 
 local runBtn = Instance.new("TextButton", viewGui)
 runBtn.Size = UDim2.new(0, 100, 0, 32)
-runBtn.Position = UDim2.new(0, 10, 0, 210)
+runBtn.Position = UDim2.new(0, 10, 0, 200)
 runBtn.BackgroundColor3 = Color3.fromRGB(100, 200, 100)
 runBtn.Text = "รัน"
 runBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -473,7 +495,7 @@ Instance.new("UICorner", runBtn)
 
 local closeViewBtn = Instance.new("TextButton", viewGui)
 closeViewBtn.Size = UDim2.new(0, 100, 0, 32)
-closeViewBtn.Position = UDim2.new(0, 120, 0, 210)
+closeViewBtn.Position = UDim2.new(0, 120, 0, 200)
 closeViewBtn.BackgroundColor3 = Color3.fromRGB(255, 100, 100)
 closeViewBtn.Text = "ปิด"
 closeViewBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -563,9 +585,7 @@ local function createScriptButton(sName, sDesc, sCode)
     newBtn.TextSize = 13
     newBtn.BorderSizePixel = 0
     Instance.new("UICorner", newBtn)
-
     scriptScroll.CanvasSize = UDim2.new(0, 0, 0, scriptListLayout.AbsoluteContentSize.Y + 10)
-
     newBtn.MouseButton1Click:Connect(function()
         viewScriptName.Text = sName
         viewDesc.Text = sDesc
@@ -592,22 +612,19 @@ local function resetTabColors()
 end
 
 LMG2L["TextButton_9"].MouseButton1Click:Connect(function()
-    showPanel(LMG2L["Panel1"])
-    resetTabColors()
+    showPanel(LMG2L["Panel1"]) ; resetTabColors()
     LMG2L["TextButton_9"].BackgroundColor3 = Color3.fromRGB(160, 160, 255)
     LMG2L["TextButton_9"].TextColor3 = Color3.fromRGB(255, 255, 255)
 end)
 
 LMG2L["TextButton_b"].MouseButton1Click:Connect(function()
-    showPanel(LMG2L["Panel2"])
-    resetTabColors()
+    showPanel(LMG2L["Panel2"]) ; resetTabColors()
     LMG2L["TextButton_b"].BackgroundColor3 = Color3.fromRGB(160, 160, 255)
     LMG2L["TextButton_b"].TextColor3 = Color3.fromRGB(255, 255, 255)
 end)
 
 LMG2L["TextButton_d"].MouseButton1Click:Connect(function()
-    showPanel(LMG2L["Panel3"])
-    resetTabColors()
+    showPanel(LMG2L["Panel3"]) ; resetTabColors()
     LMG2L["TextButton_d"].BackgroundColor3 = Color3.fromRGB(160, 160, 255)
     LMG2L["TextButton_d"].TextColor3 = Color3.fromRGB(255, 255, 255)
 end)
@@ -632,10 +649,7 @@ closeSetting.MouseButton1Click:Connect(function()
 end)
 
 addBtn.MouseButton1Click:Connect(function()
-    nameBox.Text = ""
-    descBox.Text = ""
-    codeBox.Text = ""
-    statusLabel.Text = ""
+    nameBox.Text = "" ; descBox.Text = "" ; codeBox.Text = "" ; statusLabel.Text = ""
     addScriptGui.Visible = true
 end)
 
@@ -643,7 +657,6 @@ cancelBtn.MouseButton1Click:Connect(function()
     addScriptGui.Visible = false
 end)
 
--- ตกลง → อัพ Pastebin
 confirmBtn.MouseButton1Click:Connect(function()
     local sName = nameBox.Text
     local sDesc = descBox.Text
@@ -653,23 +666,15 @@ confirmBtn.MouseButton1Click:Connect(function()
         statusLabel.TextColor3 = Color3.fromRGB(255, 80, 80)
         return
     end
-
     statusLabel.Text = "กำลังอัพโหลด..."
     statusLabel.TextColor3 = Color3.fromRGB(200, 200, 100)
-
     task.spawn(function()
-        -- รวม metadata กับโค้ดไว้ใน paste เดียว
-        local fullContent = "##NAME##" .. sName .. "##DESC##" .. sDesc .. "##CODE##" .. sCode
-        local result = uploadToPastebin(sName, fullContent)
-
-        if result and result:find("pastebin.com/") then
-            local pasteKey = result:match("pastebin%.com/(.+)$"):gsub("%s+", "")
-            statusLabel.Text = "Key: " .. pasteKey .. " (แชร์ให้เพื่อน)"
+        local gistId = uploadToGist(sName, sDesc, sCode)
+        if gistId then
+            statusLabel.Text = "ID: " .. gistId
             statusLabel.TextColor3 = Color3.fromRGB(100, 200, 100)
             createScriptButton(sName, sDesc, sCode)
-            task.delay(3, function()
-                addScriptGui.Visible = false
-            end)
+            task.delay(5, function() addScriptGui.Visible = false end)
         else
             statusLabel.Text = "อัพโหลดไม่สำเร็จ ลองใหม่ครับ"
             statusLabel.TextColor3 = Color3.fromRGB(255, 80, 80)
@@ -677,17 +682,12 @@ confirmBtn.MouseButton1Click:Connect(function()
     end)
 end)
 
--- ดึง script จาก Paste Key
 fetchBtn.MouseButton1Click:Connect(function()
-    local key = fetchBox.Text:gsub("%s+", "")
-    if key == "" then return end
-
+    local gistId = fetchBox.Text:gsub("%s+", "")
+    if gistId == "" then return end
     task.spawn(function()
-        local raw = fetchFromPastebin(key)
-        if raw then
-            local sName = raw:match("##NAME##(.-)##DESC##") or "ไม่มีชื่อ"
-            local sDesc = raw:match("##DESC##(.-)##CODE##") or ""
-            local sCode = raw:match("##CODE##(.+)$") or raw
+        local sName, sDesc, sCode = fetchFromGist(gistId)
+        if sName then
             createScriptButton(sName, sDesc, sCode)
             fetchBox.Text = ""
         end
@@ -709,9 +709,7 @@ end)
 local dragging, dragStart, startPos
 LMG2L["Frame_2"].InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = true
-        dragStart = input.Position
-        startPos = LMG2L["Frame_2"].Position
+        dragging = true ; dragStart = input.Position ; startPos = LMG2L["Frame_2"].Position
         input.Changed:Connect(function()
             if input.UserInputState == Enum.UserInputState.End then dragging = false end
         end)
@@ -730,9 +728,7 @@ end)
 local draggingS, dragStartS, startPosS
 LMG2L["SettingsGui"].InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        draggingS = true
-        dragStartS = input.Position
-        startPosS = LMG2L["SettingsGui"].Position
+        draggingS = true ; dragStartS = input.Position ; startPosS = LMG2L["SettingsGui"].Position
         input.Changed:Connect(function()
             if input.UserInputState == Enum.UserInputState.End then draggingS = false end
         end)
