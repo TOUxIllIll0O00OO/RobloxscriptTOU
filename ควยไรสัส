@@ -14,7 +14,8 @@ local function uploadToPastebin(name, code)
             "&api_option=paste" ..
             "&api_paste_name=" .. HttpService:UrlEncode(name) ..
             "&api_paste_code=" .. HttpService:UrlEncode(code) ..
-            "&api_paste_private=0",
+            "&api_paste_private=0" ..
+            "&api_paste_expire_date=N",
             Enum.HttpContentType.ApplicationUrlEncoded
         )
     end)
