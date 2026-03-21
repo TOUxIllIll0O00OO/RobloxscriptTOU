@@ -1,0 +1,673 @@
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local LocalPlayer = Players.LocalPlayer
+local LMG2L = {}
+
+LMG2L["ScreenGui_1"] = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
+LMG2L["ScreenGui_1"].ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+LMG2L["ScreenGui_1"].ResetOnSpawn = false
+
+-- ============ MAIN GUI ============
+
+LMG2L["Frame_2"] = Instance.new("Frame", LMG2L["ScreenGui_1"])
+LMG2L["Frame_2"].BorderSizePixel = 0
+LMG2L["Frame_2"].BackgroundColor3 = Color3.fromRGB(220, 220, 220)
+LMG2L["Frame_2"].Size = UDim2.new(0, 474, 0, 300)
+LMG2L["Frame_2"].Position = UDim2.new(0.5, -237, 0.5, -150)
+Instance.new("UICorner", LMG2L["Frame_2"])
+
+LMG2L["TextLabel_4"] = Instance.new("TextLabel", LMG2L["Frame_2"])
+LMG2L["TextLabel_4"].BorderSizePixel = 0
+LMG2L["TextLabel_4"].BackgroundColor3 = Color3.fromRGB(129, 129, 129)
+LMG2L["TextLabel_4"].Size = UDim2.new(0, 352, 0, 46)
+LMG2L["TextLabel_4"].Text = "SCRIPT CITY THAILAND 2 | V 0.1"
+LMG2L["TextLabel_4"].Position = UDim2.new(0, 44, 0, 4)
+LMG2L["TextLabel_4"].TextColor3 = Color3.fromRGB(255, 255, 255)
+LMG2L["TextLabel_4"].Font = Enum.Font.GothamBold
+LMG2L["TextLabel_4"].TextSize = 13
+Instance.new("UICorner", LMG2L["TextLabel_4"])
+
+LMG2L["TextButton_6"] = Instance.new("TextButton", LMG2L["Frame_2"])
+LMG2L["TextButton_6"].BorderSizePixel = 0
+LMG2L["TextButton_6"].BackgroundColor3 = Color3.fromRGB(255, 100, 100)
+LMG2L["TextButton_6"].Size = UDim2.new(0, 64, 0, 32)
+LMG2L["TextButton_6"].Text = "ปิด GUI"
+LMG2L["TextButton_6"].Position = UDim2.new(0, 398, 0, 8)
+LMG2L["TextButton_6"].TextColor3 = Color3.fromRGB(255, 255, 255)
+LMG2L["TextButton_6"].Font = Enum.Font.GothamBold
+LMG2L["TextButton_6"].TextSize = 13
+Instance.new("UICorner", LMG2L["TextButton_6"])
+
+LMG2L["Sidebar"] = Instance.new("Frame", LMG2L["Frame_2"])
+LMG2L["Sidebar"].BorderSizePixel = 0
+LMG2L["Sidebar"].BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+LMG2L["Sidebar"].Size = UDim2.new(0, 100, 0, 246)
+LMG2L["Sidebar"].Position = UDim2.new(0, 6, 0, 52)
+Instance.new("UICorner", LMG2L["Sidebar"])
+
+LMG2L["TextButton_9"] = Instance.new("TextButton", LMG2L["Sidebar"])
+LMG2L["TextButton_9"].BorderSizePixel = 0
+LMG2L["TextButton_9"].BackgroundColor3 = Color3.fromRGB(160, 160, 255)
+LMG2L["TextButton_9"].Size = UDim2.new(0, 84, 0, 38)
+LMG2L["TextButton_9"].Text = "ข้อมูลSCRIPT"
+LMG2L["TextButton_9"].Position = UDim2.new(0, 8, 0, 6)
+LMG2L["TextButton_9"].TextColor3 = Color3.fromRGB(255, 255, 255)
+LMG2L["TextButton_9"].Font = Enum.Font.GothamBold
+LMG2L["TextButton_9"].TextSize = 12
+Instance.new("UICorner", LMG2L["TextButton_9"])
+
+LMG2L["TextButton_b"] = Instance.new("TextButton", LMG2L["Sidebar"])
+LMG2L["TextButton_b"].BorderSizePixel = 0
+LMG2L["TextButton_b"].BackgroundColor3 = Color3.fromRGB(194, 194, 194)
+LMG2L["TextButton_b"].Size = UDim2.new(0, 84, 0, 38)
+LMG2L["TextButton_b"].Text = "ผู้เล่น"
+LMG2L["TextButton_b"].Position = UDim2.new(0, 8, 0, 54)
+LMG2L["TextButton_b"].Font = Enum.Font.GothamBold
+LMG2L["TextButton_b"].TextSize = 13
+Instance.new("UICorner", LMG2L["TextButton_b"])
+
+LMG2L["TextButton_d"] = Instance.new("TextButton", LMG2L["Sidebar"])
+LMG2L["TextButton_d"].BorderSizePixel = 0
+LMG2L["TextButton_d"].BackgroundColor3 = Color3.fromRGB(194, 194, 194)
+LMG2L["TextButton_d"].Size = UDim2.new(0, 84, 0, 38)
+LMG2L["TextButton_d"].Text = "SCRIPT"
+LMG2L["TextButton_d"].Position = UDim2.new(0, 8, 0, 102)
+LMG2L["TextButton_d"].Font = Enum.Font.GothamBold
+LMG2L["TextButton_d"].TextSize = 13
+Instance.new("UICorner", LMG2L["TextButton_d"])
+
+LMG2L["TextButton_f"] = Instance.new("TextButton", LMG2L["Frame_2"])
+LMG2L["TextButton_f"].BorderSizePixel = 0
+LMG2L["TextButton_f"].BackgroundColor3 = Color3.fromRGB(106, 106, 106)
+LMG2L["TextButton_f"].Size = UDim2.new(0, 36, 0, 40)
+LMG2L["TextButton_f"].Text = "⚙️"
+LMG2L["TextButton_f"].Position = UDim2.new(0, 6, 0, 6)
+Instance.new("UICorner", LMG2L["TextButton_f"])
+
+LMG2L["ContentPanel"] = Instance.new("Frame", LMG2L["Frame_2"])
+LMG2L["ContentPanel"].BorderSizePixel = 0
+LMG2L["ContentPanel"].BackgroundColor3 = Color3.fromRGB(235, 235, 235)
+LMG2L["ContentPanel"].Size = UDim2.new(0, 356, 0, 246)
+LMG2L["ContentPanel"].Position = UDim2.new(0, 112, 0, 52)
+Instance.new("UICorner", LMG2L["ContentPanel"])
+
+-- ============ PANEL 1 - ข้อมูลSCRIPT ============
+
+LMG2L["Panel1"] = Instance.new("Frame", LMG2L["ContentPanel"])
+LMG2L["Panel1"].Size = UDim2.new(1, 0, 1, 0)
+LMG2L["Panel1"].BackgroundTransparency = 1
+LMG2L["Panel1"].Visible = true
+
+LMG2L["AvatarImage"] = Instance.new("ImageLabel", LMG2L["Panel1"])
+LMG2L["AvatarImage"].Size = UDim2.new(0, 80, 0, 80)
+LMG2L["AvatarImage"].Position = UDim2.new(0, 10, 0, 10)
+LMG2L["AvatarImage"].BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+Instance.new("UICorner", LMG2L["AvatarImage"])
+
+local content = Players:GetUserThumbnailAsync(LocalPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size100x100)
+LMG2L["AvatarImage"].Image = content
+
+local function makeInfoLabel(parent, text, posY, bold)
+    local lbl = Instance.new("TextLabel", parent)
+    lbl.Size = UDim2.new(0, 240, 0, 28)
+    lbl.Position = UDim2.new(0, 100, 0, posY)
+    lbl.BackgroundTransparency = 1
+    lbl.Text = text
+    lbl.TextColor3 = Color3.fromRGB(40, 40, 40)
+    lbl.Font = bold and Enum.Font.GothamBold or Enum.Font.Gotham
+    lbl.TextSize = 13
+    lbl.TextXAlignment = Enum.TextXAlignment.Left
+    return lbl
+end
+
+makeInfoLabel(LMG2L["Panel1"], "ชื่อเล่น : " .. LocalPlayer.DisplayName, 10, true)
+makeInfoLabel(LMG2L["Panel1"], "ชื่อจริง : @" .. LocalPlayer.Name, 40, false)
+makeInfoLabel(LMG2L["Panel1"], "อายุบัญชี : " .. LocalPlayer.AccountAge .. " วัน", 70, false)
+
+local divider = Instance.new("Frame", LMG2L["Panel1"])
+divider.Size = UDim2.new(1, -20, 0, 2)
+divider.Position = UDim2.new(0, 10, 0, 100)
+divider.BackgroundColor3 = Color3.fromRGB(180, 180, 180)
+divider.BorderSizePixel = 0
+
+local scriptLabel = Instance.new("TextLabel", LMG2L["Panel1"])
+scriptLabel.Size = UDim2.new(1, -20, 0, 28)
+scriptLabel.Position = UDim2.new(0, 10, 0, 110)
+scriptLabel.BackgroundTransparency = 1
+scriptLabel.Text = "Script : SCRIPT CITY THAILAND 2"
+scriptLabel.TextColor3 = Color3.fromRGB(100, 100, 255)
+scriptLabel.Font = Enum.Font.GothamBold
+scriptLabel.TextSize = 14
+scriptLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+-- ============ PANEL 2 - ผู้เล่น ============
+
+LMG2L["Panel2"] = Instance.new("Frame", LMG2L["ContentPanel"])
+LMG2L["Panel2"].Size = UDim2.new(1, 0, 1, 0)
+LMG2L["Panel2"].BackgroundTransparency = 1
+LMG2L["Panel2"].Visible = false
+
+local function makeRow(parent, labelText, defaultVal, posY, onConfirm)
+    local label = Instance.new("TextLabel", parent)
+    label.Size = UDim2.new(0, 110, 0, 32)
+    label.Position = UDim2.new(0, 10, 0, posY)
+    label.BackgroundTransparency = 1
+    label.Text = labelText
+    label.TextColor3 = Color3.fromRGB(40, 40, 40)
+    label.Font = Enum.Font.GothamBold
+    label.TextSize = 13
+    label.TextXAlignment = Enum.TextXAlignment.Left
+
+    local box = Instance.new("TextBox", parent)
+    box.Size = UDim2.new(0, 80, 0, 32)
+    box.Position = UDim2.new(0, 125, 0, posY)
+    box.BackgroundColor3 = Color3.fromRGB(210, 210, 210)
+    box.Text = defaultVal
+    box.Font = Enum.Font.Gotham
+    box.TextSize = 13
+    box.BorderSizePixel = 0
+    Instance.new("UICorner", box)
+
+    local btn = Instance.new("TextButton", parent)
+    btn.Size = UDim2.new(0, 60, 0, 32)
+    btn.Position = UDim2.new(0, 215, 0, posY)
+    btn.BackgroundColor3 = Color3.fromRGB(100, 200, 100)
+    btn.Text = "ตกลง"
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 13
+    btn.BorderSizePixel = 0
+    Instance.new("UICorner", btn)
+
+    btn.MouseButton1Click:Connect(function()
+        local val = tonumber(box.Text)
+        if val then
+            onConfirm(val)
+            btn.BackgroundColor3 = Color3.fromRGB(60, 180, 60)
+            task.delay(0.5, function() btn.BackgroundColor3 = Color3.fromRGB(100, 200, 100) end)
+        else
+            box.TextColor3 = Color3.fromRGB(255, 80, 80)
+            task.delay(0.5, function()
+                box.TextColor3 = Color3.fromRGB(50, 50, 50)
+                box.Text = defaultVal
+            end)
+        end
+    end)
+end
+
+makeRow(LMG2L["Panel2"], "ความเร็วผู้เล่น", "16", 20, function(val)
+    local char = LocalPlayer.Character
+    if char and char:FindFirstChild("Humanoid") then
+        char.Humanoid.WalkSpeed = val
+    end
+end)
+
+makeRow(LMG2L["Panel2"], "กระโดดผู้เล่น", "7.2", 80, function(val)
+    local char = LocalPlayer.Character
+    if char and char:FindFirstChild("Humanoid") then
+        char.Humanoid.JumpHeight = val
+    end
+end)
+
+-- ============ PANEL 3 - SCRIPT ============
+
+LMG2L["Panel3"] = Instance.new("Frame", LMG2L["ContentPanel"])
+LMG2L["Panel3"].Size = UDim2.new(1, 0, 1, 0)
+LMG2L["Panel3"].BackgroundTransparency = 1
+LMG2L["Panel3"].Visible = false
+
+-- ScrollingFrame สำหรับปุ่ม script ที่เพิ่ม
+local scriptScroll = Instance.new("ScrollingFrame", LMG2L["Panel3"])
+scriptScroll.Size = UDim2.new(1, -10, 1, -50)
+scriptScroll.Position = UDim2.new(0, 5, 0, 45)
+scriptScroll.BackgroundTransparency = 1
+scriptScroll.BorderSizePixel = 0
+scriptScroll.ScrollBarThickness = 4
+scriptScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+
+local scriptListLayout = Instance.new("UIListLayout", scriptScroll)
+scriptListLayout.Padding = UDim.new(0, 6)
+scriptListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+-- ปุ่ม +
+local addBtn = Instance.new("TextButton", LMG2L["Panel3"])
+addBtn.Size = UDim2.new(0, 36, 0, 36)
+addBtn.Position = UDim2.new(0, 5, 0, 5)
+addBtn.BackgroundColor3 = Color3.fromRGB(100, 200, 100)
+addBtn.Text = "+"
+addBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+addBtn.Font = Enum.Font.GothamBold
+addBtn.TextSize = 22
+addBtn.BorderSizePixel = 0
+Instance.new("UICorner", addBtn)
+
+-- ============ GUI เพิ่ม Script (popup) ============
+
+local addScriptGui = Instance.new("Frame", LMG2L["ScreenGui_1"])
+addScriptGui.Size = UDim2.new(0, 360, 0, 320)
+addScriptGui.Position = UDim2.new(0.5, -180, 0.5, -160)
+addScriptGui.BackgroundColor3 = Color3.fromRGB(230, 230, 230)
+addScriptGui.BorderSizePixel = 0
+addScriptGui.Visible = false
+addScriptGui.ZIndex = 10
+Instance.new("UICorner", addScriptGui)
+
+local addTitle = Instance.new("TextLabel", addScriptGui)
+addTitle.Size = UDim2.new(1, 0, 0, 36)
+addTitle.Position = UDim2.new(0, 0, 0, 0)
+addTitle.BackgroundColor3 = Color3.fromRGB(160, 160, 255)
+addTitle.Text = "เพิ่ม Script"
+addTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+addTitle.Font = Enum.Font.GothamBold
+addTitle.TextSize = 14
+addTitle.BorderSizePixel = 0
+Instance.new("UICorner", addTitle)
+
+local function makeAddLabel(text, posY)
+    local lbl = Instance.new("TextLabel", addScriptGui)
+    lbl.Size = UDim2.new(0, 100, 0, 24)
+    lbl.Position = UDim2.new(0, 10, 0, posY)
+    lbl.BackgroundTransparency = 1
+    lbl.Text = text
+    lbl.TextColor3 = Color3.fromRGB(40, 40, 40)
+    lbl.Font = Enum.Font.GothamBold
+    lbl.TextSize = 12
+    lbl.TextXAlignment = Enum.TextXAlignment.Left
+end
+
+local function makeAddBox(posY, height, multiLine)
+    local box = Instance.new("TextBox", addScriptGui)
+    box.Size = UDim2.new(1, -20, 0, height)
+    box.Position = UDim2.new(0, 10, 0, posY)
+    box.BackgroundColor3 = Color3.fromRGB(210, 210, 210)
+    box.Text = ""
+    box.Font = Enum.Font.Gotham
+    box.TextSize = 12
+    box.BorderSizePixel = 0
+    box.ClearTextOnFocus = false
+    box.TextXAlignment = Enum.TextXAlignment.Left
+    box.TextYAlignment = Enum.TextYAlignment.Top
+    if multiLine then
+        box.MultiLine = true
+        box.TextWrapped = true
+    end
+    Instance.new("UICorner", box)
+    return box
+end
+
+makeAddLabel("ชื่อ Script :", 42)
+local nameBox = makeAddBox(64, 30, false)
+nameBox.PlaceholderText = "ใส่ชื่อ Script..."
+
+makeAddLabel("คำอธิบาย :", 102)
+local descBox = makeAddBox(124, 40, true)
+descBox.PlaceholderText = "ใส่คำอธิบาย..."
+
+makeAddLabel("Script Code :", 172)
+local codeBox = makeAddBox(194, 70, true)
+codeBox.PlaceholderText = "ใส่โค้ด Script..."
+codeBox.Font = Enum.Font.Code
+codeBox.TextSize = 11
+
+-- ปุ่ม ตกลง / ยกเลิก
+local confirmBtn = Instance.new("TextButton", addScriptGui)
+confirmBtn.Size = UDim2.new(0, 100, 0, 32)
+confirmBtn.Position = UDim2.new(0, 10, 0, 278)
+confirmBtn.BackgroundColor3 = Color3.fromRGB(100, 200, 100)
+confirmBtn.Text = "ตกลง"
+confirmBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+confirmBtn.Font = Enum.Font.GothamBold
+confirmBtn.TextSize = 13
+confirmBtn.BorderSizePixel = 0
+Instance.new("UICorner", confirmBtn)
+
+local cancelBtn = Instance.new("TextButton", addScriptGui)
+cancelBtn.Size = UDim2.new(0, 100, 0, 32)
+cancelBtn.Position = UDim2.new(0, 120, 0, 278)
+cancelBtn.BackgroundColor3 = Color3.fromRGB(255, 100, 100)
+cancelBtn.Text = "ยกเลิก"
+cancelBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+cancelBtn.Font = Enum.Font.GothamBold
+cancelBtn.TextSize = 13
+cancelBtn.BorderSizePixel = 0
+Instance.new("UICorner", cancelBtn)
+
+-- ============ GUI ดูรายละเอียด Script ============
+
+local viewGui = Instance.new("Frame", LMG2L["ScreenGui_1"])
+viewGui.Size = UDim2.new(0, 300, 0, 260)
+viewGui.Position = UDim2.new(0.5, -150, 0.5, -130)
+viewGui.BackgroundColor3 = Color3.fromRGB(230, 230, 230)
+viewGui.BorderSizePixel = 0
+viewGui.Visible = false
+viewGui.ZIndex = 10
+Instance.new("UICorner", viewGui)
+
+local viewAvatar = Instance.new("ImageLabel", viewGui)
+viewAvatar.Size = UDim2.new(0, 60, 0, 60)
+viewAvatar.Position = UDim2.new(0, 10, 0, 10)
+viewAvatar.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+viewAvatar.Image = content
+Instance.new("UICorner", viewAvatar)
+
+local viewScriptName = Instance.new("TextLabel", viewGui)
+viewScriptName.Size = UDim2.new(0, 200, 0, 28)
+viewScriptName.Position = UDim2.new(0, 80, 0, 10)
+viewScriptName.BackgroundTransparency = 1
+viewScriptName.Text = ""
+viewScriptName.TextColor3 = Color3.fromRGB(100, 100, 255)
+viewScriptName.Font = Enum.Font.GothamBold
+viewScriptName.TextSize = 14
+viewScriptName.TextXAlignment = Enum.TextXAlignment.Left
+
+local viewDesc = Instance.new("TextLabel", viewGui)
+viewDesc.Size = UDim2.new(1, -20, 0, 40)
+viewDesc.Position = UDim2.new(0, 80, 0, 38)
+viewDesc.BackgroundTransparency = 1
+viewDesc.Text = ""
+viewDesc.TextColor3 = Color3.fromRGB(60, 60, 60)
+viewDesc.Font = Enum.Font.Gotham
+viewDesc.TextSize = 12
+viewDesc.TextXAlignment = Enum.TextXAlignment.Left
+viewDesc.TextWrapped = true
+
+local viewDivider = Instance.new("Frame", viewGui)
+viewDivider.Size = UDim2.new(1, -20, 0, 2)
+viewDivider.Position = UDim2.new(0, 10, 0, 82)
+viewDivider.BackgroundColor3 = Color3.fromRGB(180, 180, 180)
+viewDivider.BorderSizePixel = 0
+
+local viewUploader = Instance.new("TextLabel", viewGui)
+viewUploader.Size = UDim2.new(1, -20, 0, 24)
+viewUploader.Position = UDim2.new(0, 10, 0, 90)
+viewUploader.BackgroundTransparency = 1
+viewUploader.Text = "อัพโหลดโดย : @" .. LocalPlayer.Name
+viewUploader.TextColor3 = Color3.fromRGB(100, 100, 100)
+viewUploader.Font = Enum.Font.Gotham
+viewUploader.TextSize = 11
+viewUploader.TextXAlignment = Enum.TextXAlignment.Left
+
+local viewCode = Instance.new("TextLabel", viewGui)
+viewCode.Size = UDim2.new(1, -20, 0, 80)
+viewCode.Position = UDim2.new(0, 10, 0, 118)
+viewCode.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+viewCode.Text = ""
+viewCode.TextColor3 = Color3.fromRGB(200, 255, 200)
+viewCode.Font = Enum.Font.Code
+viewCode.TextSize = 11
+viewCode.TextXAlignment = Enum.TextXAlignment.Left
+viewCode.TextYAlignment = Enum.TextYAlignment.Top
+viewCode.TextWrapped = true
+viewCode.BorderSizePixel = 0
+Instance.new("UICorner", viewCode)
+
+local runBtn = Instance.new("TextButton", viewGui)
+runBtn.Size = UDim2.new(0, 100, 0, 32)
+runBtn.Position = UDim2.new(0, 10, 0, 210)
+runBtn.BackgroundColor3 = Color3.fromRGB(100, 200, 100)
+runBtn.Text = "รัน"
+runBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+runBtn.Font = Enum.Font.GothamBold
+runBtn.TextSize = 13
+runBtn.BorderSizePixel = 0
+Instance.new("UICorner", runBtn)
+
+local closeViewBtn = Instance.new("TextButton", viewGui)
+closeViewBtn.Size = UDim2.new(0, 100, 0, 32)
+closeViewBtn.Position = UDim2.new(0, 120, 0, 210)
+closeViewBtn.BackgroundColor3 = Color3.fromRGB(255, 100, 100)
+closeViewBtn.Text = "ปิด"
+closeViewBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeViewBtn.Font = Enum.Font.GothamBold
+closeViewBtn.TextSize = 13
+closeViewBtn.BorderSizePixel = 0
+Instance.new("UICorner", closeViewBtn)
+
+-- ============ ปุ่มเปิด Menu ============
+
+LMG2L["เปิด Menu_11"] = Instance.new("TextButton", LMG2L["ScreenGui_1"])
+LMG2L["เปิด Menu_11"].BorderSizePixel = 0
+LMG2L["เปิด Menu_11"].BackgroundColor3 = Color3.fromRGB(160, 160, 255)
+LMG2L["เปิด Menu_11"].Size = UDim2.new(0, 100, 0, 36)
+LMG2L["เปิด Menu_11"].Text = "เปิด Menu"
+LMG2L["เปิด Menu_11"].Name = "เปิด Menu"
+LMG2L["เปิด Menu_11"].Position = UDim2.new(0.5, -50, 0, 8)
+LMG2L["เปิด Menu_11"].TextColor3 = Color3.fromRGB(255, 255, 255)
+LMG2L["เปิด Menu_11"].Font = Enum.Font.GothamBold
+LMG2L["เปิด Menu_11"].TextSize = 13
+LMG2L["เปิด Menu_11"].Visible = false
+Instance.new("UICorner", LMG2L["เปิด Menu_11"])
+
+-- ============ SETTINGS GUI ============
+
+LMG2L["SettingsGui"] = Instance.new("Frame", LMG2L["ScreenGui_1"])
+LMG2L["SettingsGui"].BorderSizePixel = 0
+LMG2L["SettingsGui"].BackgroundColor3 = Color3.fromRGB(137, 137, 137)
+LMG2L["SettingsGui"].Size = UDim2.new(0, 340, 0, 240)
+LMG2L["SettingsGui"].Position = UDim2.new(0.5, -170, 0.5, -120)
+LMG2L["SettingsGui"].Visible = false
+Instance.new("UICorner", LMG2L["SettingsGui"])
+
+local settingsTitle = Instance.new("TextBox", LMG2L["SettingsGui"])
+settingsTitle.BorderSizePixel = 0
+settingsTitle.TextSize = 15
+settingsTitle.BackgroundColor3 = Color3.fromRGB(195, 195, 195)
+settingsTitle.Size = UDim2.new(0, 153, 0, 46)
+settingsTitle.Position = UDim2.new(0, 4, 0, 0)
+settingsTitle.Text = "การตั้งค่า⚙️"
+settingsTitle.TextEditable = false
+settingsTitle.Font = Enum.Font.GothamBold
+Instance.new("UICorner", settingsTitle)
+
+local settingsTitleRight = Instance.new("Frame", LMG2L["SettingsGui"])
+settingsTitleRight.BorderSizePixel = 0
+settingsTitleRight.BackgroundColor3 = Color3.fromRGB(196, 196, 196)
+settingsTitleRight.Size = UDim2.new(0, 144, 0, 46)
+settingsTitleRight.Position = UDim2.new(0, 148, 0, 0)
+Instance.new("UICorner", settingsTitleRight)
+
+local closeSetting = Instance.new("TextButton", LMG2L["SettingsGui"])
+closeSetting.BorderSizePixel = 0
+closeSetting.BackgroundColor3 = Color3.fromRGB(255, 109, 109)
+closeSetting.Size = UDim2.new(0, 46, 0, 46)
+closeSetting.Text = "X"
+closeSetting.Position = UDim2.new(1, -50, 0, 0)
+closeSetting.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeSetting.Font = Enum.Font.GothamBold
+closeSetting.TextSize = 20
+Instance.new("UICorner", closeSetting)
+
+local settingsBody = Instance.new("Frame", LMG2L["SettingsGui"])
+settingsBody.Size = UDim2.new(1, -10, 0, 180)
+settingsBody.Position = UDim2.new(0, 5, 0, 52)
+settingsBody.BackgroundColor3 = Color3.fromRGB(160, 160, 160)
+settingsBody.BorderSizePixel = 0
+Instance.new("UICorner", settingsBody)
+
+local settingsPlaceholder = Instance.new("TextLabel", settingsBody)
+settingsPlaceholder.Size = UDim2.new(1, 0, 1, 0)
+settingsPlaceholder.BackgroundTransparency = 1
+settingsPlaceholder.Text = "เนื้อหาการตั้งค่า..."
+settingsPlaceholder.TextColor3 = Color3.fromRGB(230, 230, 230)
+settingsPlaceholder.Font = Enum.Font.Gotham
+settingsPlaceholder.TextSize = 14
+
+-- ============ LOGIC ============
+
+local currentCode = ""
+
+local function showPanel(panel)
+    LMG2L["Panel1"].Visible = false
+    LMG2L["Panel2"].Visible = false
+    LMG2L["Panel3"].Visible = false
+    panel.Visible = true
+end
+
+local function resetTabColors()
+    LMG2L["TextButton_9"].BackgroundColor3 = Color3.fromRGB(194, 194, 194)
+    LMG2L["TextButton_9"].TextColor3 = Color3.fromRGB(50, 50, 50)
+    LMG2L["TextButton_b"].BackgroundColor3 = Color3.fromRGB(194, 194, 194)
+    LMG2L["TextButton_b"].TextColor3 = Color3.fromRGB(50, 50, 50)
+    LMG2L["TextButton_d"].BackgroundColor3 = Color3.fromRGB(194, 194, 194)
+    LMG2L["TextButton_d"].TextColor3 = Color3.fromRGB(50, 50, 50)
+end
+
+LMG2L["TextButton_9"].MouseButton1Click:Connect(function()
+    showPanel(LMG2L["Panel1"])
+    resetTabColors()
+    LMG2L["TextButton_9"].BackgroundColor3 = Color3.fromRGB(160, 160, 255)
+    LMG2L["TextButton_9"].TextColor3 = Color3.fromRGB(255, 255, 255)
+end)
+
+LMG2L["TextButton_b"].MouseButton1Click:Connect(function()
+    showPanel(LMG2L["Panel2"])
+    resetTabColors()
+    LMG2L["TextButton_b"].BackgroundColor3 = Color3.fromRGB(160, 160, 255)
+    LMG2L["TextButton_b"].TextColor3 = Color3.fromRGB(255, 255, 255)
+end)
+
+LMG2L["TextButton_d"].MouseButton1Click:Connect(function()
+    showPanel(LMG2L["Panel3"])
+    resetTabColors()
+    LMG2L["TextButton_d"].BackgroundColor3 = Color3.fromRGB(160, 160, 255)
+    LMG2L["TextButton_d"].TextColor3 = Color3.fromRGB(255, 255, 255)
+end)
+
+LMG2L["TextButton_6"].MouseButton1Click:Connect(function()
+    LMG2L["Frame_2"].Visible = false
+    LMG2L["SettingsGui"].Visible = false
+    LMG2L["เปิด Menu_11"].Visible = true
+end)
+
+LMG2L["เปิด Menu_11"].MouseButton1Click:Connect(function()
+    LMG2L["Frame_2"].Visible = true
+    LMG2L["เปิด Menu_11"].Visible = false
+end)
+
+LMG2L["TextButton_f"].MouseButton1Click:Connect(function()
+    LMG2L["SettingsGui"].Visible = not LMG2L["SettingsGui"].Visible
+end)
+
+closeSetting.MouseButton1Click:Connect(function()
+    LMG2L["SettingsGui"].Visible = false
+end)
+
+-- ปุ่ม + เปิด popup เพิ่ม script
+addBtn.MouseButton1Click:Connect(function()
+    nameBox.Text = ""
+    descBox.Text = ""
+    codeBox.Text = ""
+    addScriptGui.Visible = true
+end)
+
+-- ยกเลิก
+cancelBtn.MouseButton1Click:Connect(function()
+    addScriptGui.Visible = false
+end)
+
+-- ตกลง - สร้างปุ่ม script ใหม่
+confirmBtn.MouseButton1Click:Connect(function()
+    local sName = nameBox.Text
+    local sDesc = descBox.Text
+    local sCode = codeBox.Text
+    if sName == "" then return end
+
+    addScriptGui.Visible = false
+
+    -- สร้างปุ่มใหม่ใน scrolling frame
+    local newBtn = Instance.new("TextButton", scriptScroll)
+    newBtn.Size = UDim2.new(1, -8, 0, 38)
+    newBtn.BackgroundColor3 = Color3.fromRGB(160, 160, 255)
+    newBtn.Text = sName
+    newBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    newBtn.Font = Enum.Font.GothamBold
+    newBtn.TextSize = 13
+    newBtn.BorderSizePixel = 0
+    Instance.new("UICorner", newBtn)
+
+    -- อัปเดตขนาด canvas
+    scriptListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        scriptScroll.CanvasSize = UDim2.new(0, 0, 0, scriptListLayout.AbsoluteContentSize.Y + 10)
+    end)
+    scriptScroll.CanvasSize = UDim2.new(0, 0, 0, scriptListLayout.AbsoluteContentSize.Y + 10)
+
+    -- กดปุ่ม script → เปิด viewGui
+    newBtn.MouseButton1Click:Connect(function()
+        viewScriptName.Text = sName
+        viewDesc.Text = sDesc
+        viewCode.Text = sCode
+        currentCode = sCode
+        viewGui.Visible = true
+    end)
+end)
+
+-- ปุ่มรัน
+runBtn.MouseButton1Click:Connect(function()
+    if currentCode ~= "" then
+        local fn, err = loadstring(currentCode)
+        if fn then
+            fn()
+        end
+    end
+end)
+
+-- ปุ่มปิด viewGui
+closeViewBtn.MouseButton1Click:Connect(function()
+    viewGui.Visible = false
+end)
+
+-- ============ DRAG Main Frame ============
+
+local dragging, dragStart, startPos
+
+LMG2L["Frame_2"].InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = LMG2L["Frame_2"].Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = input.Position - dragStart
+        local screenSize = workspace.CurrentCamera.ViewportSize
+        local newX = math.clamp(startPos.X.Offset + delta.X, 0, screenSize.X - LMG2L["Frame_2"].AbsoluteSize.X)
+        local newY = math.clamp(startPos.Y.Offset + delta.Y, 0, screenSize.Y - LMG2L["Frame_2"].AbsoluteSize.Y)
+        LMG2L["Frame_2"].Position = UDim2.new(0, newX, 0, newY)
+    end
+end)
+
+-- ============ DRAG Settings Frame ============
+
+local draggingS, dragStartS, startPosS
+
+LMG2L["SettingsGui"].InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        draggingS = true
+        dragStartS = input.Position
+        startPosS = LMG2L["SettingsGui"].Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                draggingS = false
+            end
+        end)
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if draggingS and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = input.Position - dragStartS
+        local screenSize = workspace.CurrentCamera.ViewportSize
+        local newX = math.clamp(startPosS.X.Offset + delta.X, 0, screenSize.X - LMG2L["SettingsGui"].AbsoluteSize.X)
+        local newY = math.clamp(startPosS.Y.Offset + delta.Y, 0, screenSize.Y - LMG2L["SettingsGui"].AbsoluteSize.Y)
+        LMG2L["SettingsGui"].Position = UDim2.new(0, newX, 0, newY)
+    end
+end)
+
+return LMG2L["ScreenGui_1"]
