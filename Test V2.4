@@ -1,0 +1,336 @@
+-- SIGMA ASSASSIN v23.1 (NPC Puller Edition) 😈
+-- [PART 1/2: GUI & CORE LOGIC]
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+local player = Players.LocalPlayer
+local mouse = player:GetMouse()
+
+-- GUI Container
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "SigmaAssassin_V23.1"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = player:WaitForChild("PlayerGui")
+
+-- Variables
+local auraEnabled = false
+local clickKillEnabled = false
+local espEnabled = false
+local speedEnabled = false
+local jumpEnabled = false
+local killRange = 13
+local walkSpeedValue = 16
+local isAssassinating = false
+
+-- [ESP] Circle Visualizer
+local AuraCircle = Instance.new("Part")
+AuraCircle.Name = "AuraVisualizer"
+AuraCircle.Shape = Enum.PartType.Cylinder
+AuraCircle.Material = Enum.Material.Neon
+AuraCircle.Color = Color3.fromRGB(255, 0, 0)
+AuraCircle.Transparency = 0.7
+AuraCircle.CanCollide = false
+AuraCircle.Anchored = false
+AuraCircle.CastShadow = false
+AuraCircle.Size = Vector3.new(0.02, killRange * 2, killRange * 2)
+AuraCircle.Parent = nil
+
+-- Main Menu Frame
+local MainFrame = Instance.new("Frame")
+MainFrame.Size = UDim2.new(0, 260, 0, 530) -- เพิ่มความสูงสำหรับปุ่มใหม่
+MainFrame.Position = UDim2.new(1, -270, 0.5, -265)
+MainFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
+MainFrame.Parent = ScreenGui
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 12)
+local stroke = Instance.new("UIStroke", MainFrame)
+stroke.Color = Color3.fromRGB(255, 0, 50)
+stroke.Thickness = 2
+
+-- Title
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 40)
+title.BackgroundColor3 = Color3.fromRGB(40, 10, 10)
+title.Text = "💀 SIGMA V23.1 💀"
+title.TextColor3 = Color3.new(1, 1, 1)
+title.TextScaled = true
+title.Font = Enum.Font.GothamBold
+title.Parent = MainFrame
+Instance.new("UICorner", title).CornerRadius = UDim.new(0, 12)
+
+-- Remote Finder
+local function getMeleeRemote()
+    return ReplicatedStorage:FindFirstChild("Assets", true) 
+        and ReplicatedStorage.Assets:FindFirstChild("Remotes", true) 
+        and ReplicatedStorage.Assets.Remotes:FindFirstChild("meleeHit")
+end
+
+-- [CORE LOGIC] Instant Attack Batch
+local function attackTargetBatch(targetChar)
+    if not targetChar or not targetChar:FindFirstChild("Humanoid") then return false end
+    local hum = targetChar.Humanoid
+    local char = player.Character
+    local tool = char and char:FindFirstChildWhichIsA("Tool") or player.Backpack:FindFirstChildWhichIsA("Tool")
+    local remote = getMeleeRemote()
+    
+    if tool and remote and hum.Health > 0 then
+        for i = 1, 10 do
+            if hum.Health > 0 then 
+                pcall(function() remote:FireServer(tool, hum, 1) end) 
+            else 
+                return true
+            end
+        end
+    end
+    return hum.Health <= 0
+end
+
+-- [PART 2/2: BUTTONS & NPC PULLER SYSTEM]
+
+-- Helper: Create Toggle Button
+local function createToggle(name, pos, color, callback)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0.9, 0, 0, 35)
+    btn.Position = pos
+    btn.Text = name .. " : ปิด"
+    btn.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+    btn.TextColor3 = Color3.new(1, 1, 1)
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 13
+    btn.Parent = MainFrame
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
+    local state = false
+    btn.MouseButton1Click:Connect(function()
+        state = not state
+        btn.Text = name .. (state and " : เปิด" or " : ปิด")
+        btn.BackgroundColor3 = state and color or Color3.fromRGB(30, 30, 40)
+        callback(state)
+    end)
+end
+
+-- 1. [NEW] TP NPCs TO ME (ดึง NPC ทั้งแมพมาที่ตัว)
+local PullBtn = Instance.new("TextButton")
+PullBtn.Size = UDim2.new(0.9, 0, 0, 45)
+PullBtn.Position = UDim2.new(0.05, 0, 0, 50)
+PullBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+PullBtn.Text = "🌀 TP NPCs TO ME 🌀"
+PullBtn.TextColor3 = Color3.new(1, 1, 1)
+PullBtn.Font = Enum.Font.GothamBold
+PullBtn.TextSize = 14
+PullBtn.Parent = MainFrame
+Instance.new("UICorner", PullBtn).CornerRadius = UDim.new(0, 8)
+
+PullBtn.MouseButton1Click:Connect(function()
+    local char = player.Character
+    local root = char and char:FindFirstChild("HumanoidRootPart")
+    if not root then return end
+    
+    for _, obj in pairs(workspace:GetDescendants()) do
+        if obj:IsA("Model") and obj:FindFirstChild("Humanoid") and obj:FindFirstChild("HumanoidRootPart") then
+            -- ตรวจสอบว่าเป็น NPC (ไม่ใช่ผู้เล่น)
+            if not Players:GetPlayerFromCharacter(obj) and obj ~= char then
+                pcall(function()
+                    -- ดึง NPC มาไว้ข้างหน้าเรา 3 Studs
+                    obj:PivotTo(root.CFrame * CFrame.new(0, 0, -3))
+                end)
+            end
+        end
+    end
+end)
+
+-- 2. MASS KILL NPCs (ปุ่มสั่งตาย)
+local MassKillBtn = Instance.new("TextButton")
+MassKillBtn.Size = UDim2.new(0.9, 0, 0, 45)
+MassKillBtn.Position = UDim2.new(0.05, 0, 0, 100)
+MassKillBtn.BackgroundColor3 = Color3.fromRGB(180, 0, 0)
+MassKillBtn.Text = "🔥 MASS KILL NPCs 🔥"
+MassKillBtn.TextColor3 = Color3.new(1, 1, 1)
+MassKillBtn.Font = Enum.Font.GothamBold
+MassKillBtn.TextSize = 14
+MassKillBtn.Parent = MainFrame
+Instance.new("UICorner", MassKillBtn).CornerRadius = UDim.new(0, 8)
+
+MassKillBtn.MouseButton1Click:Connect(function()
+    local char = player.Character
+    local root = char and char:FindFirstChild("HumanoidRootPart")
+    local hum = char and char:FindFirstChild("Humanoid")
+    if not root or not hum then return end
+    
+    local tool = char:FindFirstChildWhichIsA("Tool") or player.Backpack:FindFirstChildWhichIsA("Tool")
+    if not tool then return end
+    
+    hum:EquipTool(tool)
+    task.wait(0.1)
+    
+    for _, obj in pairs(workspace:GetDescendants()) do
+        if obj:IsA("Model") and obj:FindFirstChild("Humanoid") and obj:FindFirstChild("HumanoidRootPart") then
+            if not Players:GetPlayerFromCharacter(obj) and obj ~= char then
+                local dist = (root.Position - obj.HumanoidRootPart.Position).Magnitude
+                if dist <= killRange and obj.Humanoid.Health > 0 then
+                    attackTargetBatch(obj)
+                end
+            end
+        end
+    end
+    task.wait(0.1)
+    hum:UnequipTools()
+end)
+
+-- 3. Regular Toggles
+createToggle("Smart Aura Kill", UDim2.new(0.05, 0, 0, 155), Color3.fromRGB(200, 0, 0), function(val) auraEnabled = val end)
+createToggle("Click Warp Kill", UDim2.new(0.05, 0, 0, 195), Color3.fromRGB(0, 150, 255), function(val) clickKillEnabled = val end)
+createToggle("ESP ระยะ (วงกลม)", UDim2.new(0.05, 0, 0, 235), Color3.fromRGB(255, 150, 0), function(val) 
+    espEnabled = val 
+    if val then AuraCircle.Parent = workspace else AuraCircle.Parent = nil end
+end)
+createToggle("กระโดดไม่จำกัด", UDim2.new(0.05, 0, 0, 275), Color3.fromRGB(150, 0, 255), function(val) jumpEnabled = val end)
+createToggle("ล็อคความเร็ววิ่ง", UDim2.new(0.05, 0, 0, 315), Color3.fromRGB(0, 200, 100), function(val) speedEnabled = val end)
+
+-- Helper: Create Input Box
+local function createInput(name, pos, defaultVal, callback)
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(0.9, 0, 0, 40)
+    frame.Position = pos
+    frame.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+    frame.Parent = MainFrame
+    Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 8)
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(0.6, 0, 1, 0)
+    label.BackgroundTransparency = 1
+    label.Text = " " .. name
+    label.TextColor3 = Color3.new(1, 1, 1)
+    label.Font = Enum.Font.GothamBold
+    label.TextSize = 12
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Parent = frame
+    local input = Instance.new("TextBox")
+    input.Size = UDim2.new(0.3, 0, 0.7, 0)
+    input.Position = UDim2.new(0.65, 0, 0.15, 0)
+    input.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
+    input.Text = tostring(defaultVal)
+    input.TextColor3 = Color3.new(1, 1, 1)
+    input.Parent = frame
+    Instance.new("UICorner", input).CornerRadius = UDim.new(0, 4)
+    input.FocusLost:Connect(function()
+        local val = tonumber(input.Text)
+        if val then input.Text = tostring(callback(val)) else input.Text = tostring(defaultVal) end
+    end)
+end
+
+createInput("ระยะ (10-13)", UDim2.new(0.05, 0, 0, 365), killRange, function(val)
+    if val > 13 then val = 13 end
+    killRange = val
+    return val
+end)
+
+createInput("ความเร็ววิ่ง", UDim2.new(0.05, 0, 0, 415), walkSpeedValue, function(val)
+    walkSpeedValue = val
+    return val
+end)
+
+-- [SYSTEM LOOPS]
+RunService.Heartbeat:Connect(function()
+    local char = player.Character
+    local root = char and char:FindFirstChild("HumanoidRootPart")
+    local hum = char and char:FindFirstChild("Humanoid")
+    
+    if root and hum then
+        if speedEnabled then hum.WalkSpeed = walkSpeedValue end
+        if espEnabled then
+            AuraCircle.Parent = workspace
+            AuraCircle.CFrame = (root.CFrame * CFrame.new(0, -2.8, 0)) * CFrame.Angles(0, 0, math.rad(90))
+            AuraCircle.Size = Vector3.new(0.02, killRange * 2, killRange * 2)
+        else
+            AuraCircle.Parent = nil
+        end
+
+        if auraEnabled and not isAssassinating then
+            local targetFound = false
+            for _, p in pairs(Players:GetPlayers()) do
+                if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") and p.Character:FindFirstChild("Humanoid") then
+                    local targetHum = p.Character.Humanoid
+                    local dist = (root.Position - p.Character.HumanoidRootPart.Position).Magnitude
+                    if dist <= killRange and targetHum.Health > 0 then
+                        targetFound = true
+                        if not char:FindFirstChildWhichIsA("Tool") then
+                            local t = player.Backpack:FindFirstChildWhichIsA("Tool")
+                            if t then hum:EquipTool(t) end
+                        end
+                        local isDead = attackTargetBatch(p.Character)
+                        if isDead then
+                            if char:FindFirstChildWhichIsA("Tool") then hum:UnequipTools() end
+                            targetFound = false
+                        end
+                        task.wait(0.05)
+                    end
+                end
+            end
+            if not targetFound and char:FindFirstChildWhichIsA("Tool") then hum:UnequipTools() end
+        end
+    end
+end)
+
+-- Click Warp Kill Logic
+mouse.Button1Down:Connect(function()
+    if clickKillEnabled and not isAssassinating and mouse.Target then
+        local model = mouse.Target:FindFirstAncestorOfClass("Model")
+        if model and model:FindFirstChild("Humanoid") and Players:GetPlayerFromCharacter(model) ~= player then
+            isAssassinating = true
+            local originalPos = player.Character.HumanoidRootPart.CFrame
+            local tool = player.Character:FindFirstChildWhichIsA("Tool") or player.Backpack:FindFirstChildWhichIsA("Tool")
+            if tool then
+                player.Character.Humanoid:EquipTool(tool)
+                task.wait(0.1)
+                player.Character:PivotTo(model.HumanoidRootPart.CFrame * CFrame.new(0, 0, 2))
+                local sTime = tick()
+                while model and model.Humanoid.Health > 0 and clickKillEnabled and (tick()-sTime < 5) do
+                    attackTargetBatch(model)
+                    player.Character:PivotTo(model.HumanoidRootPart.CFrame * CFrame.new(0, 0, 2))
+                    task.wait(0.1)
+                end
+                player.Character:PivotTo(originalPos)
+                player.Character.Humanoid:UnequipTools()
+            end
+            isAssassinating = false
+        end
+    end
+end)
+
+UserInputService.JumpRequest:Connect(function()
+    if jumpEnabled and player.Character and player.Character:FindFirstChild("Humanoid") then
+        player.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+    end
+end)
+
+-- Menu UI Controls
+local OpenCloseBtn = Instance.new("TextButton")
+OpenCloseBtn.Size = UDim2.new(0, 100, 0, 30)
+OpenCloseBtn.Position = UDim2.new(0.5, -50, 0, 10)
+OpenCloseBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+OpenCloseBtn.Text = "MENU [ON]"
+OpenCloseBtn.TextColor3 = Color3.fromRGB(255, 0, 0)
+OpenCloseBtn.Font = Enum.Font.GothamBold
+OpenCloseBtn.Parent = ScreenGui
+OpenCloseBtn.MouseButton1Click:Connect(function()
+    MainFrame.Visible = not MainFrame.Visible
+    OpenCloseBtn.Text = MainFrame.Visible and "MENU [ON]" or "MENU [OFF]"
+end)
+
+-- Dragging Logic
+local dragging, dragStart, startPos
+title.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true; dragStart = input.Position; startPos = MainFrame.Position
+    end
+end)
+UserInputService.InputChanged:Connect(function(input)
+    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = input.Position - dragStart
+        MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+UserInputService.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end end)
+
+print("😈 Sigma Assassin v23.1: NPC Puller & Buster Fully Loaded!")
