@@ -1,0 +1,300 @@
+-- SIGMA ASSASSIN v25 (Horizontal Dashboard) 😈
+-- [PART 1/2: UI LAYOUT & CORE LOGIC]
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+
+local player = Players.LocalPlayer
+local mouse = player:GetMouse()
+
+-- Variables
+local auraEnabled = false
+local clickKillEnabled = false
+local espEnabled = false
+local speedEnabled = false
+local jumpEnabled = false
+local killRange = 13
+local walkSpeedValue = 16
+local isAssassinating = false
+
+-- 🎨 THEME COLORS (Cyber Red)
+local COLORS = {
+    Background = Color3.fromRGB(15, 15, 18),
+    Frame = Color3.fromRGB(25, 25, 30),
+    Accent = Color3.fromRGB(255, 0, 55),
+    Text = Color3.fromRGB(255, 255, 255),
+    Input = Color3.fromRGB(35, 35, 40)
+}
+
+-- GUI Container
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "SigmaAssassin_V25"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = player:WaitForChild("PlayerGui")
+
+-- [NEW] Main Horizontal Frame
+local MainFrame = Instance.new("Frame")
+MainFrame.Size = UDim2.new(0, 600, 0, 220) -- เปลี่ยนเป็นแนวนอน กว้าง 600
+MainFrame.Position = UDim2.new(0.5, -300, 0.8, -110) -- อยู่ล่างจอแบบ Dashboard
+MainFrame.BackgroundColor3 = COLORS.Background
+MainFrame.Parent = ScreenGui
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 12)
+local stroke = Instance.new("UIStroke", MainFrame)
+stroke.Color = COLORS.Accent
+stroke.Thickness = 1.5
+
+-- Header (Title)
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 35)
+title.BackgroundColor3 = COLORS.Frame
+title.Text = "SYSTEM.SIGMA [V25-HORIZONTAL]"
+title.TextColor3 = COLORS.Text
+title.Font = Enum.Font.Michroma
+title.TextSize = 14
+title.Parent = MainFrame
+Instance.new("UICorner", title).CornerRadius = UDim.new(0, 12)
+
+-- Remote Finder
+local function getMeleeRemote()
+    return ReplicatedStorage:FindFirstChild("Assets", true) 
+        and ReplicatedStorage.Assets:FindFirstChild("Remotes", true) 
+        and ReplicatedStorage.Assets.Remotes:FindFirstChild("meleeHit")
+end
+
+-- Attack Logic
+local function attackTargetBatch(targetChar)
+    if not targetChar or not targetChar:FindFirstChild("Humanoid") then return false end
+    local hum = targetChar.Humanoid
+    local char = player.Character
+    local tool = char and char:FindFirstChildWhichIsA("Tool") or player.Backpack:FindFirstChildWhichIsA("Tool")
+    local remote = getMeleeRemote()
+    
+    if tool and remote and hum.Health > 0 then
+        for i = 1, 10 do
+            if hum.Health > 0 then 
+                pcall(function() remote:FireServer(tool, hum, 1) end) 
+            else 
+                return true
+            end
+        end
+    end
+    return hum.Health <= 0
+end
+
+-- ESP Part
+local AuraCircle = Instance.new("Part")
+AuraCircle.Shape = Enum.PartType.Cylinder
+AuraCircle.Material = Enum.Material.Neon
+AuraCircle.Color = COLORS.Accent
+AuraCircle.Transparency = 0.75
+AuraCircle.CanCollide = false
+AuraCircle.Anchored = false
+AuraCircle.Size = Vector3.new(0.02, killRange * 2, killRange * 2)
+
+-- [PART 2/2: HORIZONTAL LAYOUT & BUTTONS]
+
+-- 🏛️ COLUMN WRAPPERS (แบ่ง 3 ช่อง)
+local LeftCol = Instance.new("Frame")
+LeftCol.Size = UDim2.new(0.3, -15, 1, -50)
+LeftCol.Position = UDim2.new(0.02, 0, 0, 45)
+LeftCol.BackgroundTransparency = 1
+LeftCol.Parent = MainFrame
+
+local MidCol = Instance.new("Frame")
+MidCol.Size = UDim2.new(0.3, -15, 1, -50)
+MidCol.Position = UDim2.new(0.35, 0, 0, 45)
+MidCol.BackgroundTransparency = 1
+MidCol.Parent = MainFrame
+
+local RightCol = Instance.new("Frame")
+RightCol.Size = UDim2.new(0.3, -15, 1, -50)
+RightCol.Position = UDim2.new(0.68, 0, 0, 45)
+RightCol.BackgroundTransparency = 1
+RightCol.Parent = MainFrame
+
+-- UI List Layout (ช่วยจัดปุ่มให้ตรงกัน)
+local function applyList(parent)
+    local layout = Instance.new("UIListLayout", parent)
+    layout.Padding = UDim.new(0, 8)
+    layout.SortOrder = Enum.SortOrder.LayoutOrder
+end
+applyList(LeftCol); applyList(MidCol); applyList(RightCol)
+
+-- Helper: Styled Toggle
+local function createToggle(name, parent, callback)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, 0, 0, 35)
+    btn.BackgroundColor3 = COLORS.Frame
+    btn.Text = name .. " : OFF"
+    btn.TextColor3 = COLORS.Text
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 11
+    btn.Parent = parent
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
+    local state = false
+    btn.MouseButton1Click:Connect(function()
+        state = not state
+        btn.Text = name .. (state and " : ON" or " : OFF")
+        TweenService:Create(btn, TweenInfo.new(0.3), {
+            BackgroundColor3 = state and COLORS.Accent or COLORS.Frame
+        }):Play()
+        callback(state)
+    end)
+end
+
+-- 1. [LEFT COLUMN] - Main Execution
+local MassKillBtn = Instance.new("TextButton")
+MassKillBtn.Size = UDim2.new(1, 0, 0, 120) -- ปุ่มใหญ่สะใจ
+MassKillBtn.BackgroundColor3 = COLORS.Accent
+MassKillBtn.Text = "🔥 KILL ALL NPCs 🔥"
+MassKillBtn.TextColor3 = Color3.new(1, 1, 1)
+MassKillBtn.Font = Enum.Font.Michroma
+MassKillBtn.TextSize = 12
+MassKillBtn.TextWrapped = true
+MassKillBtn.Parent = LeftCol
+Instance.new("UICorner", MassKillBtn).CornerRadius = UDim.new(0, 8)
+
+MassKillBtn.MouseButton1Click:Connect(function()
+    local char = player.Character
+    local hum = char and char:FindFirstChild("Humanoid")
+    local root = char and char:FindFirstChild("HumanoidRootPart")
+    local tool = char:FindFirstChildWhichIsA("Tool") or player.Backpack:FindFirstChildWhichIsA("Tool")
+    if not root or not tool then return end
+    hum:EquipTool(tool)
+    task.wait(0.1)
+    for _, obj in pairs(workspace:GetDescendants()) do
+        if obj:IsA("Model") and obj:FindFirstChild("Humanoid") and obj:FindFirstChild("HumanoidRootPart") then
+            if not Players:GetPlayerFromCharacter(obj) and obj ~= char then
+                local dist = (root.Position - obj.HumanoidRootPart.Position).Magnitude
+                if dist <= killRange and obj.Humanoid.Health > 0 then
+                    attackTargetBatch(obj)
+                end
+            end
+        end
+    end
+    task.wait(0.1)
+    hum:UnequipTools()
+end)
+
+-- 2. [MIDDLE COLUMN] - Combat Mods
+createToggle("Smart Aura", MidCol, function(v) auraEnabled = v end)
+createToggle("Click Warp", MidCol, function(v) clickKillEnabled = v end)
+createToggle("Visual Range", MidCol, function(v) 
+    espEnabled = v 
+    if v then AuraCircle.Parent = workspace else AuraCircle.Parent = nil end
+end)
+
+-- 3. [RIGHT COLUMN] - Character Mods & Setting
+createToggle("Inf Jump", RightCol, function(v) jumpEnabled = v end)
+createToggle("Speed Lock", RightCol, function(v) speedEnabled = v end)
+
+-- Small Input Helper
+local function createSmallInput(name, parent, defaultVal, callback)
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(1, 0, 0, 30)
+    frame.BackgroundTransparency = 1
+    frame.Parent = parent
+    local lbl = Instance.new("TextLabel")
+    lbl.Size = UDim2.new(0.6, 0, 1, 0)
+    lbl.Text = name; lbl.TextColor3 = COLORS.Text; lbl.Font = Enum.Font.GothamBold; lbl.TextSize = 10
+    lbl.BackgroundTransparency = 1; lbl.Parent = frame; lbl.TextXAlignment = Enum.TextXAlignment.Left
+    local box = Instance.new("TextBox")
+    box.Size = UDim2.new(0.35, 0, 0.8, 0); box.Position = UDim2.new(0.6, 0, 0.1, 0)
+    box.BackgroundColor3 = COLORS.Input; box.TextColor3 = COLORS.Accent; box.Text = tostring(defaultVal)
+    box.Font = Enum.Font.GothamBold; box.TextSize = 10; box.Parent = frame
+    Instance.new("UICorner", box).CornerRadius = UDim.new(0, 4)
+    box.FocusLost:Connect(function()
+        local v = tonumber(box.Text)
+        if v then box.Text = tostring(callback(v)) else box.Text = tostring(defaultVal) end
+    end)
+end
+
+createSmallInput("Range (13)", RightCol, killRange, function(v) if v > 13 then v = 13 end; killRange = v; return v end)
+createSmallInput("Speed Value", RightCol, walkSpeedValue, function(v) walkSpeedValue = v; return v end)
+
+-- [SYSTEM LOOPS]
+RunService.Heartbeat:Connect(function()
+    local char = player.Character
+    local root = char and char:FindFirstChild("HumanoidRootPart")
+    local hum = char and char:FindFirstChild("Humanoid")
+    if root and hum then
+        if speedEnabled then hum.WalkSpeed = walkSpeedValue end
+        if espEnabled then
+            AuraCircle.Parent = workspace
+            AuraCircle.CFrame = (root.CFrame * CFrame.new(0, -2.8, 0)) * CFrame.Angles(0, 0, math.rad(90))
+            AuraCircle.Size = Vector3.new(0.02, killRange * 2, killRange * 2)
+        else AuraCircle.Parent = nil end
+        if auraEnabled and not isAssassinating then
+            local targetFound = false
+            for _, p in pairs(Players:GetPlayers()) do
+                if p ~= player and p.Character and p.Character:FindFirstChild("Humanoid") then
+                    local targetHum = p.Character.Humanoid
+                    local dist = (root.Position - p.Character.HumanoidRootPart.Position).Magnitude
+                    if dist <= killRange and targetHum.Health > 0 then
+                        targetFound = true
+                        if not char:FindFirstChildWhichIsA("Tool") then
+                            local t = player.Backpack:FindFirstChildWhichIsA("Tool")
+                            if t then hum:EquipTool(t) end
+                        end
+                        if attackTargetBatch(p.Character) then hum:UnequipTools(); targetFound = false end
+                        task.wait(0.05)
+                    end
+                end
+            end
+            if not targetFound and char:FindFirstChildWhichIsA("Tool") then hum:UnequipTools() end
+        end
+    end
+end)
+
+-- Click Warp Kill Logic
+mouse.Button1Down:Connect(function()
+    if clickKillEnabled and not isAssassinating and mouse.Target then
+        local model = mouse.Target:FindFirstAncestorOfClass("Model")
+        if model and model:FindFirstChild("Humanoid") and Players:GetPlayerFromCharacter(model) ~= player then
+            isAssassinating = true
+            local originalPos = player.Character.HumanoidRootPart.CFrame
+            local tool = player.Character:FindFirstChildWhichIsA("Tool") or player.Backpack:FindFirstChildWhichIsA("Tool")
+            if tool then
+                player.Character.Humanoid:EquipTool(tool)
+                task.wait(0.1)
+                player.Character:PivotTo(model.HumanoidRootPart.CFrame * CFrame.new(0, 0, 2))
+                local sTime = tick()
+                while model and model.Humanoid.Health > 0 and clickKillEnabled and (tick()-sTime < 5) do
+                    attackTargetBatch(model)
+                    player.Character:PivotTo(model.HumanoidRootPart.CFrame * CFrame.new(0, 0, 2))
+                    task.wait(0.1)
+                end
+                player.Character:PivotTo(originalPos)
+                player.Character.Humanoid:UnequipTools()
+            end
+            isAssassinating = false
+        end
+    end
+end)
+
+UserInputService.JumpRequest:Connect(function()
+    if jumpEnabled and player.Character and player.Character:FindFirstChild("Humanoid") then
+        player.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+    end
+end)
+
+-- Toggle Menu
+local MenuBtn = Instance.new("TextButton")
+MenuBtn.Size = UDim2.new(0, 150, 0, 30); MenuBtn.Position = UDim2.new(0.5, -75, 0, 5)
+MenuBtn.BackgroundColor3 = COLORS.Background; MenuBtn.Text = "MENU: SIGMA"; MenuBtn.TextColor3 = COLORS.Accent
+MenuBtn.Font = Enum.Font.Michroma; MenuBtn.TextSize = 10; MenuBtn.Parent = ScreenGui
+Instance.new("UICorner", MenuBtn).CornerRadius = UDim.new(0, 8)
+MenuBtn.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFrame.Visible end)
+
+-- Dragging
+local dragging, dragStart, startPos
+title.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then dragging = true; dragStart = i.Position; startPos = MainFrame.Position end end)
+UserInputService.InputChanged:Connect(function(i) if dragging and i.UserInputType == Enum.UserInputType.MouseMovement then
+    local d = i.Position - dragStart; MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + d.X, startPos.Y.Scale, startPos.Y.Offset + d.Y)
+end end)
+UserInputService.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end end)
+
+print("😈 SIGMA V25: Horizontal Dashboard Loaded!")
