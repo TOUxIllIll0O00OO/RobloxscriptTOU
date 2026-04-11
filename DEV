@@ -3,7 +3,7 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 
 local TARGET_NAMES = {
-    ["birdV2_123"] = true,
+    ["Wsghoi2744"] = true,
     ["AniF_Xx"] = true,
 }
 
