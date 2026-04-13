@@ -1,5 +1,5 @@
 -- [[ [🔫🌊!]🎐เมืองไทย 2 | BY: รุ่นใหญ่ HUB ]] --
--- [[ RE-DESIGN: MINI TROLL UI & FIXED SPAM SYSTEM ]] --
+-- [[ RE-DESIGN: AUTO EQUIP & FAST SPAM SYSTEM ]] --
 
 local Library = {}
 local UIS = game:GetService("UserInputService")
@@ -8,7 +8,7 @@ local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
--- ลบของเก่า
+-- ล้างสคริปต์เก่า
 if CoreGui:FindFirstChild("Studiokidcoolsound_Hub") then
     CoreGui:FindFirstChild("Studiokidcoolsound_Hub"):Destroy()
 end
@@ -64,7 +64,7 @@ ToggleButton.MouseButton1Click:Connect(function()
     ToggleButton.Text = MainFrame.Visible and "X" or "O"
 end)
 
--- ลาก GUI
+-- ระบบลาก GUI
 local dragInput, dragStart, startPos
 MainFrame.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -132,15 +132,13 @@ local function CreatePage(name, icon_text)
     TabButton.TextSize = 12
     TabButton.AutoButtonColor = false
 
-    local TabCorner = Instance.new("UICorner")
+    local TabCorner = Instance.new("UICorner", TabButton)
     TabCorner.CornerRadius = UDim.new(0, 6)
-    TabCorner.Parent = TabButton
 
-    local TabStroke = Instance.new("UIStroke")
+    local TabStroke = Instance.new("UIStroke", TabButton)
     TabStroke.Color = Color3.fromRGB(255, 0, 0)
     TabStroke.Thickness = 1
     TabStroke.Transparency = 1
-    TabStroke.Parent = TabButton
 
     TabButton.MouseButton1Click:Connect(function()
         for _, p in pairs(Pages) do p.Visible = false end
@@ -165,7 +163,7 @@ local TrollPage = CreatePage("เกรียน", "🤡")
 local DecorPage = CreatePage("ตบแต่ง", "✨")
 local SettingsPage = CreatePage("การตั้งค่า", "⚙️")
 
--- [[ หน้าเกรียน: ดีไซน์จิ๋วเรียงแนวนอน ]] --
+-- [[ หน้าเกรียน: Mini UI + Auto Equip Spam ]] --
 local TrollRow = Instance.new("Frame")
 TrollRow.Name = "TrollRow"
 TrollRow.Parent = TrollPage
@@ -175,59 +173,60 @@ TrollRow.BackgroundTransparency = 1
 local TrollRowLayout = Instance.new("UIListLayout")
 TrollRowLayout.Parent = TrollRow
 TrollRowLayout.FillDirection = Enum.FillDirection.Horizontal
-TrollRowLayout.SortOrder = Enum.SortOrder.LayoutOrder
 TrollRowLayout.Padding = UDim.new(0, 5)
 
--- ข้อความ "ทำเซิร์ฟเน่า"
-local TrollText = Instance.new("TextLabel")
+local TrollText = Instance.new("TextLabel", TrollRow)
 TrollText.Size = UDim2.new(0, 100, 1, 0)
 TrollText.BackgroundTransparency = 1
 TrollText.Font = Enum.Font.GothamBold
 TrollText.Text = "ทำเซิร์ฟเน่า"
 TrollText.TextColor3 = Color3.fromRGB(255, 255, 255)
 TrollText.TextSize = 13
-TrollText.Parent = TrollRow
 
--- ช่องใส่จำนวน (เล็ก)
-local AmountInput = Instance.new("TextBox")
+local AmountInput = Instance.new("TextBox", TrollRow)
 AmountInput.Size = UDim2.new(0, 80, 1, 0)
 AmountInput.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-AmountInput.Font = Enum.Font.GothamBold
 AmountInput.PlaceholderText = "[จำนวน]"
 AmountInput.Text = ""
 AmountInput.TextColor3 = Color3.fromRGB(255, 255, 0)
 AmountInput.TextSize = 12
-AmountInput.Parent = TrollRow
 Instance.new("UICorner", AmountInput).CornerRadius = UDim.new(0, 4)
 
--- ปุ่มจัดการ (เล็ก)
-local ManageBtn = Instance.new("TextButton")
+local ManageBtn = Instance.new("TextButton", TrollRow)
 ManageBtn.Size = UDim2.new(0, 80, 1, 0)
 ManageBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
-ManageBtn.Font = Enum.Font.GothamBold
 ManageBtn.Text = "[จัดการ]"
 ManageBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 ManageBtn.TextSize = 12
-ManageBtn.Parent = TrollRow
 Instance.new("UICorner", ManageBtn).CornerRadius = UDim.new(0, 4)
 
--- ระบบสแปมรีโมท (Fixed)
+-- ระบบสแปมแบบ Auto Equip/Unequip
 ManageBtn.MouseButton1Click:Connect(function()
     local amt = tonumber(AmountInput.Text)
-    if amt then
-        local backpack = LocalPlayer:FindFirstChild("Backpack")
-        local fireflies = backpack and backpack:FindFirstChild("Fireflies")
-        local remote = fireflies and fireflies:FindFirstChild("RemoteEvent")
+    local char = LocalPlayer.Character
+    local hum = char and char:FindFirstChildOfClass("Humanoid")
+    local backpack = LocalPlayer:FindFirstChild("Backpack")
+    local tool = backpack and backpack:FindFirstChild("Fireflies") or (char and char:FindFirstChild("Fireflies"))
+    
+    if amt and tool and hum then
+        -- 1. หยิบ Tool ออกมา
+        hum:EquipTool(tool)
+        
+        -- 2. รอให้ Tool เข้าไปใน Character (ใช้ pcall กันพลาด)
+        local remote = tool:WaitForChild("RemoteEvent", 1)
         
         if remote then
-            print("🚀 รุ่นใหญ่ HUB กำลังถล่มเซิร์ฟ: " .. amt .. " ครั้ง")
+            print("🚀 รุ่นใหญ่ HUB กำลังสแปม: " .. amt .. " ครั้ง")
             for i = 1, amt do
                 remote:FireServer()
             end
-            print("✅ ถล่มเสร็จสิ้น!")
-        else
-            warn("❌ ไม่พบไอเทม Fireflies! กรุณาถือไอเทมก่อน")
+            print("✅ สแปมครบถ้วน!")
         end
+        
+        -- 3. เก็บ Tool ทันที
+        hum:UnequipTools()
+    else
+        warn("❌ กรุณาใส่จำนวน หรือตรวจสอบว่ามีไอเทม Fireflies!")
     end
 end)
 
@@ -273,17 +272,18 @@ local InfoList = Instance.new("UIListLayout")
 InfoList.Parent = InfoContainer
 InfoList.Padding = UDim.new(0, 5)
 
+-- ข้อมูลผู้ใช้
 CreateLabel("👤 ชื่อเล่น (Display): " .. LocalPlayer.DisplayName, InfoContainer)
 CreateLabel("🆔 ชื่อจริง (User): " .. LocalPlayer.Name, InfoContainer)
 CreateLabel("🗓️ อายุบัญชี: " .. LocalPlayer.AccountAge .. " วัน", InfoContainer)
 CreateLabel("🚩 สถานะ: ผู้สร้างสรรค์ ⚡", InfoContainer)
 
--- เพิ่มพื้นที่ว่าง (Padding Space) เพื่อขยับปุ่มลงมา
+-- เพิ่มพื้นที่ว่าง (Spacer) ขยับปุ่มลงมาตามสั่ง
 local Spacer = Instance.new("Frame")
 Spacer.Name = "Spacer"
 Spacer.Parent = HomePage
 Spacer.BackgroundTransparency = 1
-Spacer.Size = UDim2.new(1, 0, 0, 15) 
+Spacer.Size = UDim2.new(1, 0, 0, 20) 
 
 -- [[ ฟังก์ชันปุ่มพื้นฐาน ]] --
 local function CreateFunctionalButton(parent, text, callback)
@@ -303,7 +303,7 @@ local function CreateFunctionalButton(parent, text, callback)
     return Button
 end
 
--- ลิงก์ Discord ของคุณ
+-- ลิงก์ Discord
 local MyDiscord = "https://discord.gg/D83uT6PFgg"
 
 CreateFunctionalButton(HomePage, "📢 คัดลอกลิงก์ Discord (รุ่นใหญ่ HUB)", function()
@@ -314,19 +314,20 @@ CreateFunctionalButton(SettingsPage, "🛑 ปิดใช้งานสคร�
     MainGui:Destroy()
 end)
 
--- ตั้งค่าหน้าแรกให้แสดงผล
+-- ตั้งค่าหน้าแรกให้แสดงผลเริ่มต้น
 Pages["หน้าหลัก"].Visible = true
 TabButtons["หน้าหลัก"].TextColor3 = Color3.fromRGB(255, 0, 0)
 TabButtons["หน้าหลัก"].UIStroke.Transparency = 0
 
--- ระบบแจ้งเตือนสุดท้าย
+-- ระบบแจ้งเตือนเมื่อรันสำเร็จ
 game:GetService("StarterGui"):SetCore("SendNotification", {
     Title = "[🔫🌊!]🎐เมืองไทย 2",
-    Text = "ระบบทำเซิร์ฟเน่าพร้อมใช้งาน! 😈🔥",
+    Text = "ระบบ Auto Equip & Spam พร้อมถล่ม! 😈🔥",
     Duration = 5
 })
 
 print("---------------------------------------")
 print("  [🔫🌊!]🎐เมืองไทย 2 | BY: รุ่นใหญ่ HUB")
-print("  STATUS: MINI UI & FIX SPAM")
+print("  STATUS: AUTO EQUIP FIXED")
+print("  DISCORD: " .. MyDiscord)
 print("---------------------------------------")
