@@ -1,301 +1,142 @@
--- [[ 💀 KILL AURA x TROLL HUB | BY : TOU x JOHN x รุ่นใหญ่ HUB 💀 ]]
--- Features: Custom Background, Kill Aura, Auto-Dup, and SERVER CRASH (Fireflies)
+-- [[ ทำเชิฟเน่า | BY:รุ่นใหญ่ ]] --
+-- 😈 พัฒนาโดยผู้ช่วยสาย Exploit ของคุณ ⚙️
 
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+local ScreenGui = Instance.new("ScreenGui")
+local MainFrame = Instance.new("Frame")
+local Title = Instance.new("TextLabel")
+local AmountInput = Instance.new("TextBox")
+local ExecuteBtn = Instance.new("TextButton")
+local GetToolBtn = Instance.new("TextButton")
+local UICorner = Instance.new("UICorner")
+local UIStroke = Instance.new("UIStroke")
 
--- [[ ระบบรูปพื้นหลัง ]]
-local ContentId = "rbxassetid://128929027375821" 
+-- Properties
+ScreenGui.Name = "LoonYai_Exploit_V2"
+ScreenGui.Parent = game:GetService("CoreGui")
+ScreenGui.ResetOnSpawn = false
 
-local function CreateBackground()
-    if game.CoreGui:FindFirstChild("Rayfield_CustomBackground") then
-        game.CoreGui.Rayfield_CustomBackground:Destroy()
-    end
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+MainFrame.Position = UDim2.new(0.5, -100, 0.5, -100)
+MainFrame.Size = UDim2.new(0, 200, 0, 200) -- ขยายขนาดเพื่อรองรับปุ่มใหม่
+MainFrame.Active = true
+MainFrame.Draggable = true -- ลากได้ตามคำขอ 🖱️
 
-    local ScreenGui = Instance.new("ScreenGui")
-    local ImageLabel = Instance.new("ImageLabel")
+UICorner.CornerRadius = UDim.new(0, 10)
+UICorner.Parent = MainFrame
+
+UIStroke.Color = Color3.fromRGB(255, 0, 0)
+UIStroke.Thickness = 2
+UIStroke.Parent = MainFrame
+
+Title.Name = "Title"
+Title.Parent = MainFrame
+Title.BackgroundTransparency = 1
+Title.Size = UDim2.new(1, 0, 0, 40)
+Title.Font = Enum.Font.GothamBold
+Title.Text = "ทำเชิฟเน่า | BY:รุ่นใหญ่"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 14
+
+AmountInput.Name = "AmountInput"
+AmountInput.Parent = MainFrame
+AmountInput.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+AmountInput.Position = UDim2.new(0.1, 0, 0.25, 0)
+AmountInput.Size = UDim2.new(0.8, 0, 0, 30)
+AmountInput.Font = Enum.Font.Gotham
+AmountInput.PlaceholderText = "ใส่จำนวน..."
+AmountInput.Text = ""
+AmountInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+AmountInput.TextSize = 14
+
+GetToolBtn.Name = "GetToolBtn"
+GetToolBtn.Parent = MainFrame
+GetToolBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 0) -- สีเขียวสำหรับหยิบของ
+GetToolBtn.Position = UDim2.new(0.1, 0, 0.45, 0)
+GetToolBtn.Size = UDim2.new(0.8, 0, 0, 35)
+GetToolBtn.Font = Enum.Font.GothamBold
+GetToolBtn.Text = "หยิบ Fireflies 📦"
+GetToolBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+GetToolBtn.TextSize = 14
+
+local GetToolCorner = Instance.new("UICorner")
+GetToolCorner.CornerRadius = UDim.new(0, 8)
+GetToolCorner.Parent = GetToolBtn
+
+ExecuteBtn.Name = "ExecuteBtn"
+ExecuteBtn.Parent = MainFrame
+ExecuteBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+ExecuteBtn.Position = UDim2.new(0.1, 0, 0.7, 0)
+ExecuteBtn.Size = UDim2.new(0.8, 0, 0, 40)
+ExecuteBtn.Font = Enum.Font.GothamBold
+ExecuteBtn.Text = "จัดการเลย! 😈"
+ExecuteBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ExecuteBtn.TextSize = 16
+
+local BtnCorner = Instance.new("UICorner")
+BtnCorner.CornerRadius = UDim.new(0, 8)
+BtnCorner.Parent = ExecuteBtn
+
+local BtnCorner = Instance.new("UICorner")
+BtnCorner.CornerRadius = UDim.new(0, 8)
+BtnCorner.Parent = ExecuteBtn
+
+-- Logic 🧠
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local TargetPos = Vector3.new(89.44, 176.45, 244.02)
+
+-- ฟังก์ชันหยิบ Tool 📦
+GetToolBtn.MouseButton1Click:Connect(function()
+    local closestCD = nil
+    local minDistance = math.huge
     
-    ScreenGui.Name = "Rayfield_CustomBackground"
-    ScreenGui.Parent = game.CoreGui
-    ScreenGui.DisplayOrder = -1 
-    ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-
-    ImageLabel.Name = "BackgroundImage"
-    ImageLabel.Parent = ScreenGui
-    ImageLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    ImageLabel.BackgroundTransparency = 1
-    ImageLabel.Position = UDim2.new(0, 0, 0, 0)
-    ImageLabel.Size = UDim2.new(1, 0, 1, 0)
-    ImageLabel.Image = ContentId
-    ImageLabel.ScaleType = Enum.ScaleType.Crop 
-    ImageLabel.ImageTransparency = 0.5 
-    ImageLabel.ImageColor3 = Color3.fromRGB(255, 255, 255)
-end
-
-CreateBackground()
-
-local Window = Rayfield:CreateWindow({
-    Name = "💀 KILL AURA x รุ่นใหญ่ HUB 💀",
-    LoadingTitle = "🚀 Loading Chaos System...",
-    LoadingSubtitle = "😈 BY: TOU x JOHN & รุ่นใหญ่ HUB 😈",
-    ConfigurationSaving = { Enabled = true, FolderName = "JohnHubConfig", FileName = "ChaosHub" },
-    KeySystem = false,
-    Theme = "Amethyst"
-})
-
--- [[ การตั้งค่าเริ่มต้น ]]
-local _G = {
-    AutoBuySave = false, 
-    AutoShoot = false,
-    V2Shoot = false,
-    V2Mode = "1 กระบอก",
-    AntiFriend = false,
-    AutoOrbit = false,
-    SpecificTarget = "",
-    AimPart = "HumanoidRootPart",
-    FloatingColor = Color3.fromRGB(150, 0, 255),
-    RainbowMode = false,
-    ShowTracer = false,
-    TracerColor = Color3.fromRGB(255, 255, 255),
-    TracerRainbow = false,
-    SilentDelay = 0.0001,
-    FastFireDelay = 0.001,
-    OrbitSpeed = 0.5,
-    SkyHeight = 5000,
-    OwnerName = "Libbyeli1091",
-    -- [ Troll Settings ]
-    SpamAmount = 100
-}
-
-local Player = game.Players.LocalPlayer
-local RunService = game:GetService("RunService")
-local UIS = game:GetService("UserInputService")
-local Camera = workspace.CurrentCamera
-
--- [[ ฟังก์ชันคลังแสง ]]
-local function forceUnequip()
-    if Player.Character and Player.Character:FindFirstChild("Humanoid") then
-        Player.Character.Humanoid:UnequipTools()
-    end
-end
-
--- [[ ฟังก์ชันช่วยเหลือเป้าหมาย ]]
-local function getBestTarget()
-    if _G.SpecificTarget ~= "" then
-        for _, p in pairs(game.Players:GetPlayers()) do
-            if p ~= Player and (string.find(string.lower(p.Name), string.lower(_G.SpecificTarget)) or string.find(string.lower(p.DisplayName), string.lower(_G.SpecificTarget))) then
-                if p.Character and p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.Health > 0 then
-                    return p
+    -- ค้นหา ClickDetector ที่ใกล้พิกัดเป้าหมายที่สุด
+    for _, v in pairs(game:GetDescendants()) do
+        if v:IsA("ClickDetector") then
+            local part = v.Parent
+            if part and part:IsA("BasePart") then
+                local dist = (part.Position - TargetPos).Magnitude
+                if dist < minDistance then
+                    minDistance = dist
+                    closestCD = v
                 end
             end
         end
-        return nil
     end
-    local closestPlayer = nil
-    local shortestDistance = math.huge
-    for _, v in pairs(game:GetService("Players"):GetPlayers()) do
-        if v ~= Player and v.Character and v.Character:FindFirstChild(_G.AimPart) 
-           and v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.Health > 0 then
-            local distance = (v.Character[_G.AimPart].Position - Player.Character.HumanoidRootPart.Position).Magnitude
-            if distance < shortestDistance then
-                shortestDistance = distance
-                closestPlayer = v
-            end
-        end
+    
+    if closestCD then
+        fireclickdetector(closestCD) -- กด ClickDetector ทันที ⚡
+        print("กด ClickDetector เรียบร้อย! 😈")
+    else
+        warn("ไม่พบ ClickDetector ในบริเวณนั้น! ❌")
     end
-    return closestPlayer
-end
+end)
 
--- [[ สร้าง Tabs ]]
-local TabTroll = Window:CreateTab("🤡 เกรียน (Troll)", 4483362458)
-local TabAttack = Window:CreateTab("⚔️ โจมตีสังหาร", 4483362458)
-
--- [[ Tab เกรียน: ระบบทำเซิร์ฟเน่า (Fireflies) ]]
-TabTroll:CreateSection("🚨 ระบบทำเซิร์ฟเน่า (Fireflies Spam)")
-
--- ตัวแปรเก็บจำนวนสแปม
-local SpamAmountValue = 100
-
-TabTroll:CreateInput({
-    Name = "ทำเซิร์ฟเน่า [จำนวน]",
-    PlaceholderText = "ใส่จำนวน...",
-    RemoveTextAfterFocusLost = false,
-    Callback = function(Text)
-        SpamAmountValue = tonumber(Text) or 100
-    end,
-})
-
-TabTroll:CreateButton({
-    Name = "จัดการ (Execute Spam) 🚀",
-    Callback = function()
-        local char = Player.Character
-        local hum = char and char:FindFirstChildOfClass("Humanoid")
-        local backpack = Player:FindFirstChild("Backpack")
-        local tool = backpack and backpack:FindFirstChild("Fireflies") or (char and char:FindFirstChild("Fireflies"))
+-- ฟังก์ชันทำเซิร์ฟเน่า 🔥
+ExecuteBtn.MouseButton1Click:Connect(function()
+    local amount = tonumber(AmountInput.Text)
+    if not amount then return end
+    
+    local character = LocalPlayer.Character
+    local backpack = LocalPlayer.Backpack
+    local tool = backpack:FindFirstChild("Fireflies") or (character and character:FindFirstChild("Fireflies"))
+    
+    if tool then
+        -- ถือ Tool ทันที 🛠️
+        tool.Parent = character
         
-        if tool and hum then
-            -- 1. ถือ Tool ทันที
-            hum:EquipTool(tool)
-            
-            -- 2. รอ Remote ใน Character (จุดที่บวกแรงที่สุด)
-            local remote = tool:WaitForChild("RemoteEvent", 1)
-            
-            if remote then
-                Rayfield:Notify({Title = "รุ่นใหญ่ HUB", Content = "กำลังถล่มเซิร์ฟ " .. SpamAmountValue .. " ครั้ง!", Duration = 2})
-                for i = 1, SpamAmountValue do
-                    remote:FireServer()
-                end
-            end
-            
-            -- 3. เก็บ Tool ทันทีที่รันครบ
-            hum:UnequipTools()
-        else
-            Rayfield:Notify({Title = "Error!", Content = "ต้องมีไอเทม Fireflies ในตัวก่อน!", Duration = 3})
+        local remote = tool:WaitForChild("RemoteEvent")
+        
+        -- รันรีโมทรัวๆ ตามจำนวน ⚙️🔥
+        for i = 1, amount do
+            remote:FireServer()
         end
-    end,
-})
-
--- [[ Tab โจมตีสังหาร (ระบบเดิมของนาย) ]]
-TabAttack:CreateToggle({
-    Name = "🔥 2 นัด (Silent)", 
-    CurrentValue = false, 
-    Flag = "AutoShoot", 
-    Callback = function(V) 
-        _G.AutoShoot = V 
-        if V then forceUnequip() end 
-    end
-})
-
-task.spawn(function()
-    while true do
-        if _G.AutoShoot then
-            pcall(function()
-                local t = getBestTarget()
-                if t and t.Character and t.Character:FindFirstChild(_G.AimPart) then
-                    local pos = t.Character[_G.AimPart].Position + (t.Character[_G.AimPart].Velocity * 0.16)
-                    for _, tool in pairs(Player.Backpack:GetChildren()) do 
-                        if tool:FindFirstChild("shot") then tool.shot:FireServer(pos) end 
-                    end
-                end
-            end)
-        end
-        task.wait(_G.SilentDelay)
+        
+        -- เก็บ Tool ทันทีหลังรันครบ 📦
+        tool.Parent = backpack
+    else
+        warn("ไม่พบ Fireflies ในกระเป๋าหรือตัวละคร! ❌")
     end
 end)
-
-TabAttack:CreateDropdown({Name = "⚙️ โหมดวนปืน", Options = {"1 กระบอก", "2 กระบอก"}, CurrentOption = {"1 กระบอก"}, Callback = function(O) _G.V2Mode = O[1] end})
-TabAttack:CreateToggle({Name = "🧨 ยิงแบบรัว (Fast Fire)", CurrentValue = false, Flag = "V2Shoot", Callback = function(V) _G.V2Shoot = V if V then forceUnequip() end end})
-
-task.spawn(function()
-    while true do
-        if _G.V2Shoot then
-            pcall(function()
-                local t = getBestTarget()
-                if t and t.Character and t.Character:FindFirstChild(_G.AimPart) then
-                    local pos = t.Character[_G.AimPart].Position + (t.Character[_G.AimPart].Velocity * 0.16)
-                    local guns = {}
-                    for _, tool in pairs(Player.Backpack:GetChildren()) do if tool.Name == "Gun" then table.insert(guns, tool) end end
-                    local step = (_G.V2Mode == "2 กระบอก") and 2 or 1
-                    for i = 1, #guns, step do
-                        if not _G.V2Shoot then break end
-                        local g1, g2 = guns[i], guns[i+1]
-                        if g1 then g1.Parent = Player.Character end if g2 then g2.Parent = Player.Character end
-                        if g1 and g1:FindFirstChild("shot") then g1.shot:FireServer(pos) end 
-                        if g2 and g2:FindFirstChild("shot") then g2.shot:FireServer(pos) end
-                        task.wait(_G.FastFireDelay)
-                        if g1 then g1.Parent = Player.Backpack end if g2 then g2.Parent = Player.Backpack end
-                    end
-                end
-            end)
-        end
-        task.wait(0.0001)
-    end
-end)
-
--- [[ สร้าง Tabs ที่เหลือ ]]
-local TabSafety = Window:CreateTab("🛡️ ความปลอดภัย", 4483362458)
-local TabMove = Window:CreateTab("🏎️ เคลื่อนที่เร็ว", 4483362458)
-local TabFloat = Window:CreateTab("☁️ GUI ลอย", 4483362458)
-local TabTracer = Window:CreateTab("📍 เส้นชี้เป้า", 4483362458)
-local TabConfig = Window:CreateTab("⚡ ปรับแต่งความเร็ว", 4483362458)
-
--- [[ Tab 🛡️ ความปลอดภัย ]]
-TabSafety:CreateToggle({
-    Name = "🤝 ป้องกันเพื่อน (Anti-Friend)", 
-    CurrentValue = false, 
-    Flag = "AntiFriend", 
-    Callback = function(V) _G.AntiFriend = V end
-})
-
--- [[ Tab 🏎️ เคลื่อนที่เร็ว ]]
-TabMove:CreateInput({
-    Name = "🎯 ชื่อเป้าหมายเดี่ยว", 
-    PlaceholderText = "ระบุชื่อ...", 
-    Callback = function(T) _G.SpecificTarget = T end
-})
-
-TabMove:CreateToggle({
-    Name = "🌀 วาร์ปออร์บิท (Auto Orbit)", 
-    CurrentValue = false, 
-    Flag = "AutoOrbit", 
-    Callback = function(V) _G.AutoOrbit = V end
-})
-
--- ระบบ Orbit Loop
-task.spawn(function()
-    local a = 0
-    while true do
-        if _G.AutoOrbit then
-            local t = getBestTarget()
-            if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then
-                a = a + _G.OrbitSpeed
-                Player.Character.HumanoidRootPart.CFrame = CFrame.new(t.Character.HumanoidRootPart.Position + Vector3.new(math.cos(a)*12, math.sin(a*0.8)*8, math.sin(a)*12), t.Character.HumanoidRootPart.Position)
-            end
-        end
-        RunService.Heartbeat:Wait()
-    end
-end)
-
--- [[ Tab ☁️ GUI ลอย ]]
-TabFloat:CreateColorPicker({Name = "🎨 สีขอบ GUI ลอย", Color = _G.FloatingColor, Callback = function(C) _G.FloatingColor = C end})
-TabFloat:CreateToggle({Name = "🌈 โหมดรุ้ง (Rainbow)", CurrentValue = false, Callback = function(V) _G.RainbowMode = V end})
-TabFloat:CreateSection("🛠️ สร้างปุ่มลอยควบคุม")
-TabFloat:CreateButton({Name = "🧊 ปุ่มลอย: ยิง 2 นัด", Callback = function() createFloatingGUI("Shoot2", "AutoShoot") end})
-TabFloat:CreateButton({Name = "🧊 ปุ่มลอย: ยิงรัว V2", Callback = function() createFloatingGUI("V2Fire", "V2Shoot") end})
-TabFloat:CreateButton({Name = "🧊 ปุ่มลอย: วาร์ปพิเศษ", Callback = function() createFloatingGUI("Orbit HUD", "AutoOrbit", true) end})
-
--- [[ Tab 📍 เส้นชี้เป้า ]]
-TabTracer:CreateToggle({Name = "👁️ เปิดใช้งานเส้นชี้เป้า", CurrentValue = false, Callback = function(V) _G.ShowTracer = V end})
-TabTracer:CreateColorPicker({Name = "🖌️ ปรับสีเส้น", Color = _G.TracerColor, Callback = function(C) _G.TracerColor = C end})
-TabTracer:CreateToggle({Name = "🌈 เส้นสีรุ้ง (Rainbow Tracer)", CurrentValue = false, Callback = function(V) _G.TracerRainbow = V end})
-
--- [[ Tab ⚡ ปรับแต่งความเร็ว ]]
-TabConfig:CreateInput({Name = "⏲️ ความเร็วยิง Silent", PlaceholderText = "0.0001", Callback = function(val) _G.SilentDelay = tonumber(val) or 0.0001 end})
-TabConfig:CreateInput({Name = "🧨 ความเร็วยิงรัว V2", PlaceholderText = "0.001", Callback = function(val) _G.FastFireDelay = tonumber(val) or 0.001 end})
-TabConfig:CreateInput({Name = "🌀 ความเร็ว Orbit", PlaceholderText = "0.5", Callback = function(val) _G.OrbitSpeed = tonumber(val) or 0.5 end})
-TabConfig:CreateButton({
-    Name = "🔄 รีเซ็ตค่าความเร็วทั้งหมด", 
-    Callback = function() 
-        _G.SilentDelay = 0.0001; _G.FastFireDelay = 0.001; _G.OrbitSpeed = 0.5;
-        Rayfield:Notify({Title = "Reset Success", Content = "คืนค่าเริ่มต้นเรียบร้อย!", Duration = 2}) 
-    end
-})
-
--- [[ ระบบจัดการตัวละครเพิ่มเติม ]]
-Player.CharacterAdded:Connect(function()
-    task.wait(0.5)
-    if _G.AutoBuySave then task.spawn(function() runAutoDup(10) end) end
-end)
-
--- [แจ้งเตือนเมื่อรันสคริปต์สำเร็จ]
-Rayfield:Notify({
-    Title = "💀 CHAOS x TROLL ACTIVE 💀", 
-    Content = "รุ่นใหญ่ HUB | ระบบเกรียนและ Kill Aura พร้อมแล้ว! 😈", 
-    Duration = 5, 
-    Image = 4483362458
-})
-
-print("---------------------------------------")
-print("  [🔫🌊!] เมืองไทย 2 | BY: รุ่นใหญ่ HUB")
-print("  GUI: RAYFIELD (TOU x JOHN)")
-print("  STATUS: TROLL & KILL AURA LOADED")
-print("---------------------------------------")
