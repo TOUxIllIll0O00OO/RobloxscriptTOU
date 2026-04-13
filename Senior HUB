@@ -1,5 +1,5 @@
 -- [[ [🔫🌊!]🎐เมืองไทย 2 | BY: รุ่นใหญ่ HUB ]] --
--- [[ FULL SCRIPT VERSION : RED & BLACK THEME ]] --
+-- [[ EDIT: ปรับตำแหน่งปุ่ม Toggle และระยะห่างหน้าหลัก ]] --
 
 local Library = {}
 local UIS = game:GetService("UserInputService")
@@ -20,26 +20,28 @@ MainGui.Parent = CoreGui
 MainGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 MainGui.ResetOnSpawn = false
 
--- ปุ่มเปิด/ปิด (Floating Toggle Button)
+-- ปุ่มเปิด/ปิดใหม่ (Small Square at Top Center)
 local ToggleButton = Instance.new("TextButton")
 ToggleButton.Name = "MainToggleButton"
 ToggleButton.Parent = MainGui
 ToggleButton.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 ToggleButton.BorderSizePixel = 0
-ToggleButton.Position = UDim2.new(0.02, 0, 0.4, 0)
-ToggleButton.Size = UDim2.new(0, 60, 0, 60)
-ToggleButton.Font = Enum.Font.LuckiestGuy
-ToggleButton.Text = "ON"
-ToggleButton.TextColor3 = Color3.fromRGB(255, 0, 0)
-ToggleButton.TextSize = 18
+-- ปรับตำแหน่งไว้กึ่งกลางบนสุด (Top Center)
+ToggleButton.Position = UDim2.new(0.5, -15, 0, 10) 
+-- ปรับขนาดเป็นสี่เหลี่ยมเล็กๆ 30x30
+ToggleButton.Size = UDim2.new(0, 30, 0, 30) 
+ToggleButton.Font = Enum.Font.GothamBold
+ToggleButton.Text = "X" -- หรือใช้ไอคอนอื่น
+ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 0) -- สีเหลืองตัดกับแดง
+ToggleButton.TextSize = 14
 
 local UICorner_Toggle = Instance.new("UICorner")
-UICorner_Toggle.CornerRadius = UDim.new(1, 0) -- ปุ่มกลม
+UICorner_Toggle.CornerRadius = UDim.new(0, 4) -- เหลี่ยมๆ มนๆ นิดเดียว
 UICorner_Toggle.Parent = ToggleButton
 
 local UIStroke_Toggle = Instance.new("UIStroke")
 UIStroke_Toggle.Color = Color3.fromRGB(255, 0, 0)
-UIStroke_Toggle.Thickness = 2
+UIStroke_Toggle.Thickness = 1.5
 UIStroke_Toggle.Parent = ToggleButton
 
 -- ตัวหน้าจอหลัก (Main Frame)
@@ -62,7 +64,7 @@ UIStroke_Main.Color = Color3.fromRGB(255, 0, 0)
 UIStroke_Main.Thickness = 2
 UIStroke_Main.Parent = MainFrame
 
--- หัวข้อ GUI (Title Area)
+-- หัวข้อ GUI
 local TitleLabel = Instance.new("TextLabel")
 TitleLabel.Name = "Title"
 TitleLabel.Parent = MainFrame
@@ -77,7 +79,8 @@ TitleLabel.TextSize = 20
 -- ระบบเปิด/ปิด
 ToggleButton.MouseButton1Click:Connect(function()
     MainFrame.Visible = not MainFrame.Visible
-    ToggleButton.Text = MainFrame.Visible and "OFF" or "ON"
+    ToggleButton.Text = MainFrame.Visible and "X" or "O"
+    ToggleButton.TextColor3 = MainFrame.Visible and Color3.fromRGB(255, 0, 0) or Color3.fromRGB(0, 255, 0)
 end)
 
 -- ระบบลาก (Draggable)
@@ -226,7 +229,7 @@ local function CreateLabel(text, parent, size)
 end
 
 local InfoContainer = Instance.new("Frame")
-InfoContainer.Size = UDim2.new(1, 0, 0, 100)
+InfoContainer.Size = UDim2.new(1, 0, 0, 110) -- เพิ่มความสูงเล็กน้อย
 InfoContainer.BackgroundTransparency = 1
 InfoContainer.Parent = HomePage
 local InfoList = Instance.new("UIListLayout")
@@ -237,6 +240,13 @@ CreateLabel("👤 ชื่อเล่น (Display): " .. LocalPlayer.DisplayNa
 CreateLabel("🆔 ชื่อจริง (User): " .. LocalPlayer.Name, InfoContainer)
 CreateLabel("🗓️ อายุบัญชี: " .. LocalPlayer.AccountAge .. " วัน", InfoContainer)
 CreateLabel("🚩 สถานะ: ผู้สร้างสรรค์ ⚡", InfoContainer)
+
+-- เพิ่มพื้นที่ว่าง (Padding Space) เพื่อขยับปุ่มลงมา
+local Spacer = Instance.new("Frame")
+Spacer.Name = "Spacer"
+Spacer.Parent = HomePage
+Spacer.BackgroundTransparency = 1
+Spacer.Size = UDim2.new(1, 0, 0, 15) -- ขยับลงมา 15 พิกเซล
 
 -- ตั้งค่าหน้าแรก
 Pages["หน้าหลัก"].Visible = true
@@ -267,7 +277,7 @@ local function CreateFunctionalButton(parent, text, callback)
     Stroke.Parent = Button
 
     Button.MouseButton1Click:Connect(function()
-        -- Visual Feedback
+        -- Effect เมื่อมีการกดปุ่ม
         local tween = TweenService:Create(Button, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(255, 0, 0)})
         tween:Play()
         tween.Completed:Wait()
@@ -278,60 +288,60 @@ local function CreateFunctionalButton(parent, text, callback)
     return Button
 end
 
--- [[ การตั้งค่าหน้าต่างๆ (Page Setup) ]] --
+-- [[ การตั้งค่าหน้าต่างๆ และลิงก์ Discord ]] --
 
--- ลิงก์ Discord ของคุณ
 local MyDiscord = "https://discord.gg/D83uT6PFgg"
 
--- หน้าหลัก (Home)
+-- หน้าหลัก (Home) - ปุ่มนี้จะอยู่ต่อจาก Spacer ที่ขยับลงมาแล้ว
 CreateFunctionalButton(HomePage, "📢 คัดลอกลิงก์ Discord (รุ่นใหญ่ HUB)", function()
     setclipboard(MyDiscord)
     game:GetService("StarterGui"):SetCore("SendNotification", {
         Title = "รุ่นใหญ่ HUB",
-        Text = "คัดลอกลิงก์ดิสคอร์ดเรียบร้อย!",
+        Text = "คัดลอกลิงก์ดิสคอร์ดลง Clipboard แล้ว! 😈",
         Duration = 3
     })
 end)
 
 -- หน้าฟามเงิน (Farm)
-CreateFunctionalButton(FarmPage, "💰 เริ่มระบบฟามเงินอัตโนมัติ", function()
-    print("Auto Farm Activated")
+CreateFunctionalButton(FarmPage, "💰 ระบบฟามเงิน (Coming Soon)", function()
+    print("Auto Farm System Waiting for commands...")
 end)
 
 -- หน้าเกรียน (Troll)
-CreateFunctionalButton(TrollPage, "🔥 ขัดขวางผู้เล่นอื่น", function()
-    print("Trolling Mode On")
+CreateFunctionalButton(TrollPage, "🔥 ขัดขวางผู้เล่นอื่น (Troll Mode)", function()
+    print("Trolling System Waiting for commands...")
 end)
 
 -- หน้าตบแต่ง (Decor)
-CreateFunctionalButton(DecorPage, "🌈 เปิดโหมดสายรุ้ง (RGB)", function()
-    print("RGB Decor Active")
+CreateFunctionalButton(DecorPage, "✨ ปรับแต่งตัวละคร (Client Side)", function()
+    print("Decor System Waiting for commands...")
 end)
 
 -- หน้าการตั้งค่า (Settings)
-CreateFunctionalButton(SettingsPage, "🛑 ปิดใช้งานสคริปต์ทั้งหมด", function()
+CreateFunctionalButton(SettingsPage, "🛑 ปิดใช้งานสคริปต์ (Destroy GUI)", function()
     MainGui:Destroy()
 end)
 
-CreateFunctionalButton(SettingsPage, "📋 Re-Copy Discord", function()
+CreateFunctionalButton(SettingsPage, "📋 คัดลอกลิงก์ Discord สำรอง", function()
     setclipboard(MyDiscord)
 end)
 
--- [[ ระบบแจ้งเตือนเมื่อโหลดเสร็จ (Final Initialization) ]] --
+-- [[ ระบบแจ้งเตือนสุดท้าย (Final Notification) ]] --
 
 local function FinalNotify()
     game:GetService("StarterGui"):SetCore("SendNotification", {
         Title = "[🔫🌊!]🎐เมืองไทย 2",
-        Text = "BY: รุ่นใหญ่ HUB พร้อมลุยแล้ว!",
+        Text = "BY: รุ่นใหญ่ HUB | พร้อมลุยแล้วนายท่าน!",
         Icon = "rbxassetid://6023426926",
         Duration = 5
     })
 end
 
--- แสดงผลใน Console
+-- แสดงสถานะใน Console
 print("---------------------------------------")
 print("  [🔫🌊!]🎐เมืองไทย 2 | BY: รุ่นใหญ่ HUB")
 print("  STATUS: ACTIVE")
+print("  POSITION: TOP CENTER TOGGLE")
 print("  DISCORD: " .. MyDiscord)
 print("---------------------------------------")
 
