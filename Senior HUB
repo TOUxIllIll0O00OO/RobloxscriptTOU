@@ -1,5 +1,5 @@
 -- [[ [🔫🌊!]🎐เมืองไทย 2 | BY: รุ่นใหญ่ HUB ]] --
--- [[ EDIT: เพิ่มระบบทำเซิร์ฟเน่า (Fireflies Spam) ]] --
+-- [[ RE-DESIGN: MINI TROLL UI & FIXED SPAM SYSTEM ]] --
 
 local Library = {}
 local UIS = game:GetService("UserInputService")
@@ -8,7 +8,7 @@ local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
--- ตรวจสอบการรันซ้ำ
+-- ลบของเก่า
 if CoreGui:FindFirstChild("Studiokidcoolsound_Hub") then
     CoreGui:FindFirstChild("Studiokidcoolsound_Hub"):Destroy()
 end
@@ -18,89 +18,61 @@ local MainGui = Instance.new("ScreenGui")
 MainGui.Name = "Studiokidcoolsound_Hub"
 MainGui.Parent = CoreGui
 MainGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-MainGui.ResetOnSpawn = false
 
--- ปุ่มเปิด/ปิด (Small Square at Top Center)
+-- ปุ่มเปิด/ปิด (Small Square Top Center)
 local ToggleButton = Instance.new("TextButton")
-ToggleButton.Name = "MainToggleButton"
 ToggleButton.Parent = MainGui
 ToggleButton.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-ToggleButton.BorderSizePixel = 0
-ToggleButton.Position = UDim2.new(0.5, -15, 0, 10) 
+ToggleButton.Position = UDim2.new(0.5, -15, 0, 5) 
 ToggleButton.Size = UDim2.new(0, 30, 0, 30) 
 ToggleButton.Font = Enum.Font.GothamBold
 ToggleButton.Text = "X" 
 ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 0)
 ToggleButton.TextSize = 14
 
-local UICorner_Toggle = Instance.new("UICorner")
-UICorner_Toggle.CornerRadius = UDim.new(0, 4)
-UICorner_Toggle.Parent = ToggleButton
+local UICorner_T = Instance.new("UICorner")
+UICorner_T.CornerRadius = UDim.new(0, 4)
+UICorner_T.Parent = ToggleButton
 
-local UIStroke_Toggle = Instance.new("UIStroke")
-UIStroke_Toggle.Color = Color3.fromRGB(255, 0, 0)
-UIStroke_Toggle.Thickness = 1.5
-UIStroke_Toggle.Parent = ToggleButton
-
--- ตัวหน้าจอหลัก (Main Frame)
+-- Main Frame
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Parent = MainGui
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-MainFrame.BorderSizePixel = 0
 MainFrame.Position = UDim2.new(0.5, -250, 0.5, -150)
 MainFrame.Size = UDim2.new(0, 500, 0, 300)
-MainFrame.ClipsDescendants = true
-MainFrame.Visible = true
 
-local UICorner_Main = Instance.new("UICorner")
-UICorner_Main.CornerRadius = UDim.new(0, 10)
-UICorner_Main.Parent = MainFrame
+local UIStroke_M = Instance.new("UIStroke")
+UIStroke_M.Color = Color3.fromRGB(255, 0, 0)
+UIStroke_M.Thickness = 2
+UIStroke_M.Parent = MainFrame
 
-local UIStroke_Main = Instance.new("UIStroke")
-UIStroke_Main.Color = Color3.fromRGB(255, 0, 0)
-UIStroke_Main.Thickness = 2
-UIStroke_Main.Parent = MainFrame
-
--- หัวข้อ GUI
-local TitleLabel = Instance.new("TextLabel")
-TitleLabel.Name = "Title"
-TitleLabel.Parent = MainFrame
-TitleLabel.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-TitleLabel.BackgroundTransparency = 0.9
-TitleLabel.Size = UDim2.new(1, 0, 0, 40)
-TitleLabel.Font = Enum.Font.PermanentMarker
-TitleLabel.Text = " [🔫🌊!]🎐เมืองไทย 2 | BY: รุ่นใหญ่ HUB "
-TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-TitleLabel.TextSize = 20
+-- หัวข้อ
+local Title = Instance.new("TextLabel")
+Title.Parent = MainFrame
+Title.Size = UDim2.new(1, 0, 0, 40)
+Title.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+Title.BackgroundTransparency = 0.9
+Title.Font = Enum.Font.PermanentMarker
+Title.Text = " [🔫🌊!]🎐เมืองไทย 2 | BY: รุ่นใหญ่ HUB "
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 18
 
 -- ระบบเปิด/ปิด
 ToggleButton.MouseButton1Click:Connect(function()
     MainFrame.Visible = not MainFrame.Visible
     ToggleButton.Text = MainFrame.Visible and "X" or "O"
-    ToggleButton.TextColor3 = MainFrame.Visible and Color3.fromRGB(255, 0, 0) or Color3.fromRGB(0, 255, 0)
 end)
 
--- ระบบลาก (Draggable)
+-- ลาก GUI
 local dragInput, dragStart, startPos
 MainFrame.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragStart = input.Position
-        startPos = MainFrame.Position
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then
-                dragInput = nil
-            end
-        end)
-    end
-end)
-MainFrame.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-        dragInput = input
+        dragStart = input.Position startPos = MainFrame.Position
     end
 end)
 UIS.InputChanged:Connect(function(input)
-    if input == dragInput then
+    if (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) and dragStart then
         local delta = input.Position - dragStart
         MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
     end
@@ -186,70 +158,75 @@ local function CreatePage(name, icon_text)
     return Page
 end
 
--- สร้างหน้าตามสั่ง
+-- สร้างหน้า (Home, Farm, Troll, Decor, Settings)
 local HomePage = CreatePage("หน้าหลัก", "🏠")
 local FarmPage = CreatePage("ฟามเงิน", "💰")
 local TrollPage = CreatePage("เกรียน", "🤡")
 local DecorPage = CreatePage("ตบแต่ง", "✨")
 local SettingsPage = CreatePage("การตั้งค่า", "⚙️")
 
--- [[ ฟังก์ชันเฉพาะหน้าเกรียน: ทำเซิร์ฟเน่า ]] --
-local TrollLabel = Instance.new("TextLabel")
-TrollLabel.Size = UDim2.new(0.9, 0, 0, 30)
-TrollLabel.BackgroundTransparency = 1
-TrollLabel.Font = Enum.Font.GothamBold
-TrollLabel.Text = "🚨 ระบบทำเซิร์ฟเน่า (Fireflies Spam)"
-TrollLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
-TrollLabel.TextSize = 14
-TrollLabel.Parent = TrollPage
+-- [[ หน้าเกรียน: ดีไซน์จิ๋วเรียงแนวนอน ]] --
+local TrollRow = Instance.new("Frame")
+TrollRow.Name = "TrollRow"
+TrollRow.Parent = TrollPage
+TrollRow.Size = UDim2.new(0.95, 0, 0, 40)
+TrollRow.BackgroundTransparency = 1
 
+local TrollRowLayout = Instance.new("UIListLayout")
+TrollRowLayout.Parent = TrollRow
+TrollRowLayout.FillDirection = Enum.FillDirection.Horizontal
+TrollRowLayout.SortOrder = Enum.SortOrder.LayoutOrder
+TrollRowLayout.Padding = UDim.new(0, 5)
+
+-- ข้อความ "ทำเซิร์ฟเน่า"
+local TrollText = Instance.new("TextLabel")
+TrollText.Size = UDim2.new(0, 100, 1, 0)
+TrollText.BackgroundTransparency = 1
+TrollText.Font = Enum.Font.GothamBold
+TrollText.Text = "ทำเซิร์ฟเน่า"
+TrollText.TextColor3 = Color3.fromRGB(255, 255, 255)
+TrollText.TextSize = 13
+TrollText.Parent = TrollRow
+
+-- ช่องใส่จำนวน (เล็ก)
 local AmountInput = Instance.new("TextBox")
-AmountInput.Name = "AmountInput"
-AmountInput.Parent = TrollPage
-AmountInput.Size = UDim2.new(0.9, 0, 0, 40)
+AmountInput.Size = UDim2.new(0, 80, 1, 0)
 AmountInput.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 AmountInput.Font = Enum.Font.GothamBold
-AmountInput.PlaceholderText = "ใส่จำนวนที่จะสแปม..."
+AmountInput.PlaceholderText = "[จำนวน]"
 AmountInput.Text = ""
-AmountInput.TextColor3 = Color3.fromRGB(255, 255, 255)
-AmountInput.TextSize = 14
+AmountInput.TextColor3 = Color3.fromRGB(255, 255, 0)
+AmountInput.TextSize = 12
+AmountInput.Parent = TrollRow
+Instance.new("UICorner", AmountInput).CornerRadius = UDim.new(0, 4)
 
-local UICorner_Input = Instance.new("UICorner")
-UICorner_Input.CornerRadius = UDim.new(0, 6)
-UICorner_Input.Parent = AmountInput
-
-local UIStroke_Input = Instance.new("UIStroke")
-UIStroke_Input.Color = Color3.fromRGB(255, 0, 0)
-UIStroke_Input.Thickness = 1
-UIStroke_Input.Parent = AmountInput
-
+-- ปุ่มจัดการ (เล็ก)
 local ManageBtn = Instance.new("TextButton")
-ManageBtn.Name = "ManageBtn"
-ManageBtn.Parent = TrollPage
-ManageBtn.Size = UDim2.new(0.9, 0, 0, 45)
+ManageBtn.Size = UDim2.new(0, 80, 1, 0)
 ManageBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
 ManageBtn.Font = Enum.Font.GothamBold
-ManageBtn.Text = "จัดการ (Execute Spam)"
+ManageBtn.Text = "[จัดการ]"
 ManageBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-ManageBtn.TextSize = 16
+ManageBtn.TextSize = 12
+ManageBtn.Parent = TrollRow
+Instance.new("UICorner", ManageBtn).CornerRadius = UDim.new(0, 4)
 
-local UICorner_Btn = Instance.new("UICorner")
-UICorner_Btn.CornerRadius = UDim.new(0, 6)
-UICorner_Btn.Parent = ManageBtn
-
--- ระบบสแปมรีโมท
+-- ระบบสแปมรีโมท (Fixed)
 ManageBtn.MouseButton1Click:Connect(function()
-    local amount = tonumber(AmountInput.Text)
-    if amount then
-        for i = 1, amount do
-            local success, err = pcall(function()
-                game:GetService("Players").LocalPlayer:WaitForChild("Backpack"):WaitForChild("Fireflies"):WaitForChild("RemoteEvent"):FireServer()
-            end)
-            if not success then 
-                warn("Error: ต้องมีไอเทม Fireflies ในตัว!")
-                break 
+    local amt = tonumber(AmountInput.Text)
+    if amt then
+        local backpack = LocalPlayer:FindFirstChild("Backpack")
+        local fireflies = backpack and backpack:FindFirstChild("Fireflies")
+        local remote = fireflies and fireflies:FindFirstChild("RemoteEvent")
+        
+        if remote then
+            print("🚀 รุ่นใหญ่ HUB กำลังถล่มเซิร์ฟ: " .. amt .. " ครั้ง")
+            for i = 1, amt do
+                remote:FireServer()
             end
-            -- ไม่ใส่ wait เพื่อความเร็วสูงสุด (Server Crash Intent)
+            print("✅ ถล่มเสร็จสิ้น!")
+        else
+            warn("❌ ไม่พบไอเทม Fireflies! กรุณาถือไอเทมก่อน")
         end
     end
 end)
@@ -263,7 +240,8 @@ AvatarImg.Size = UDim2.new(0, 80, 0, 80)
 AvatarImg.BorderSizePixel = 0
 local thumbType = Enum.ThumbnailType.HeadShot
 local thumbSize = Enum.ThumbnailSize.Size150x150
-AvatarImg.Image = Players:GetUserThumbnailAsync(LocalPlayer.UserId, thumbType, thumbSize)
+local content, isReady = Players:GetUserThumbnailAsync(LocalPlayer.UserId, thumbType, thumbSize)
+AvatarImg.Image = isReady and content or "rbxassetid://0"
 
 local AvatarCorner = Instance.new("UICorner")
 AvatarCorner.CornerRadius = UDim.new(1, 0)
@@ -305,31 +283,27 @@ local Spacer = Instance.new("Frame")
 Spacer.Name = "Spacer"
 Spacer.Parent = HomePage
 Spacer.BackgroundTransparency = 1
-Spacer.Size = UDim2.new(1, 0, 0, 20) 
+Spacer.Size = UDim2.new(1, 0, 0, 15) 
 
 -- [[ ฟังก์ชันปุ่มพื้นฐาน ]] --
 local function CreateFunctionalButton(parent, text, callback)
     local Button = Instance.new("TextButton")
-    Button.Size = UDim2.new(0.95, 0, 0, 38)
+    Button.Size = UDim2.new(0.95, 0, 0, 35)
     Button.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
     Button.Font = Enum.Font.GothamBold
     Button.Text = text
     Button.TextColor3 = Color3.fromRGB(255, 255, 255)
     Button.TextSize = 13
-    Button.AutoButtonColor = true
     Button.Parent = parent
-    local Corner = Instance.new("UICorner")
-    Corner.CornerRadius = UDim.new(0, 6)
-    Corner.Parent = Button
-    local Stroke = Instance.new("UIStroke")
+    Instance.new("UICorner", Button).CornerRadius = UDim.new(0, 6)
+    local Stroke = Instance.new("UIStroke", Button)
     Stroke.Color = Color3.fromRGB(255, 0, 0)
     Stroke.Thickness = 1
-    Stroke.Parent = Button
     Button.MouseButton1Click:Connect(callback)
     return Button
 end
 
--- ตั้งค่าลิงก์ Discord และปุ่ม
+-- ลิงก์ Discord ของคุณ
 local MyDiscord = "https://discord.gg/D83uT6PFgg"
 
 CreateFunctionalButton(HomePage, "📢 คัดลอกลิงก์ Discord (รุ่นใหญ่ HUB)", function()
@@ -354,6 +328,5 @@ game:GetService("StarterGui"):SetCore("SendNotification", {
 
 print("---------------------------------------")
 print("  [🔫🌊!]🎐เมืองไทย 2 | BY: รุ่นใหญ่ HUB")
-print("  STATUS: ACTIVE")
-print("  TARGET: FIREFLIES SPAM")
+print("  STATUS: MINI UI & FIX SPAM")
 print("---------------------------------------")
