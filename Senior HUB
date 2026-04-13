@@ -1,102 +1,63 @@
--- [[ [🔫🌊!]🎐เมืองไทย 2 | BY: รุ่นใหญ่ HUB ]] --
--- [[ DEVELOPED BY YOUR LUA EXPERT ]] --
+-- [[ [🔫🌊!]🎐เมืองไทย 2 | UPDATED VERSION ]] --
+-- [[ ฟังก์ชันดึงข้อมูลผู้ใช้ (Avatar & Account Info) ]] --
 
-local Library = {}
-local UIS = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
-local CoreGui = game:GetService("CoreGui")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local UserId = LocalPlayer.UserId
+local thumbType = Enum.ThumbnailType.HeadShot
+local thumbSize = Enum.ThumbnailSize.Size150x150
 
--- สร้าง ScreenGui
-local MainGui = Instance.new("ScreenGui")
-MainGui.Name = "Studiokidcoolsound_Hub"
-MainGui.Parent = CoreGui
-MainGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-MainGui.ResetOnSpawn = false
+-- ดึงรูปอวาตาร์
+local content, isReady = Players:GetUserThumbnailAsync(UserId, thumbType, thumbSize)
 
--- ปุ่มเปิด/ปิด (Toggle Button)
-local ToggleButton = Instance.new("TextButton")
-ToggleButton.Name = "MainToggleButton"
-ToggleButton.Parent = MainGui
-ToggleButton.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-ToggleButton.BorderSizePixel = 2
-ToggleButton.BorderColor3 = Color3.fromRGB(255, 0, 0)
-ToggleButton.Position = UDim2.new(0.02, 0, 0.4, 0)
-ToggleButton.Size = UDim2.new(0, 100, 0, 40)
-ToggleButton.Font = Enum.Font.LuckiestGuy -- ฟอนต์เท่ๆ
-ToggleButton.Text = "OPEN/CLOSE"
-ToggleButton.TextColor3 = Color3.fromRGB(255, 0, 0)
-ToggleButton.TextSize = 14
-ToggleButton.AutoButtonColor = true
-
-local UICorner_Toggle = Instance.new("UICorner")
-UICorner_Toggle.CornerRadius = UDim.new(0, 8)
-UICorner_Toggle.Parent = ToggleButton
-
--- ตัวหน้าจอหลัก (Main Frame)
-local MainFrame = Instance.new("Frame")
-MainFrame.Name = "MainFrame"
-MainFrame.Parent = MainGui
-MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-MainFrame.BorderSizePixel = 0
-MainFrame.Position = UDim2.new(0.5, -250, 0.5, -150)
-MainFrame.Size = UDim2.new(0, 500, 0, 300)
-MainFrame.ClipsDescendants = true
-
-local UICorner_Main = Instance.new("UICorner")
-UICorner_Main.CornerRadius = UDim.new(0, 10)
-UICorner_Main.Parent = MainFrame
-
--- เส้นขอบสีแดงเรืองแสง (Glow Border)
-local UIStroke = Instance.new("UIStroke")
-UIStroke.Color = Color3.fromRGB(255, 0, 0)
-UIStroke.Thickness = 2
-UIStroke.Parent = MainFrame
-
--- หัวข้อ GUI (Title)
-local TitleLabel = Instance.new("TextLabel")
-TitleLabel.Name = "Title"
-TitleLabel.Parent = MainFrame
-TitleLabel.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-TitleLabel.BackgroundTransparency = 0.8
-TitleLabel.Size = UDim2.new(1, 0, 0, 40)
-TitleLabel.Font = Enum.Font.PermanentMarker -- ฟอนต์แนวสตรีทเท่ๆ
-TitleLabel.Text = " [🔫🌊!]🎐เมืองไทย 2 | BY: รุ่นใหญ่ HUB "
-TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-TitleLabel.TextSize = 20
-TitleLabel.TextWrapped = true
-
--- ระบบลาก GUI (Draggable)
-local dragInput, dragStart, startPos
-local function update(input)
-    local delta = input.Position - dragStart
-    MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+-- หน้าหลัก (HomePage) - ล้างของเก่าเพื่ออัปเดตใหม่
+for _, child in pairs(HomePage:GetChildren()) do
+    if child:IsA("TextLabel") or child:IsA("ImageLabel") then
+        child:Destroy()
+    end
 end
-MainFrame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragStart = input.Position
-        startPos = MainFrame.Position
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then
-                dragInput = nil
-            end
-        end)
-    end
-end)
-MainFrame.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-        dragInput = input
-    end
-end)
-UIS.InputChanged:Connect(function(input)
-    if input == dragInput then
-        update(input)
-    end
-end)
 
--- ระบบเปิด/ปิด
-ToggleButton.MouseButton1Click:Connect(function()
-    MainFrame.Visible = not MainFrame.Visible
-end)
+-- สร้างกรอบรูปอวาตาร์ (Avatar Image)
+local AvatarFrame = Instance.new("ImageLabel")
+AvatarFrame.Name = "UserAvatar"
+AvatarFrame.Parent = HomePage
+AvatarFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+AvatarFrame.BorderSizePixel = 2
+AvatarFrame.BorderColor3 = Color3.fromRGB(255, 0, 0)
+AvatarFrame.Position = UDim2.new(0, 0, 0, 5)
+AvatarFrame.Size = UDim2.new(0, 80, 0, 80)
+AvatarFrame.Image = isReady and content or "rbxassetid://0" -- ถ้าโหลดไม่ทันจะใช้รูปว่าง
+
+local AvatarCorner = Instance.new("UICorner")
+AvatarCorner.CornerRadius = UDim.new(1, 0) -- รูปวงกลมเท่ๆ
+AvatarCorner.Parent = AvatarFrame
+
+-- ฟังก์ชันสร้างข้อมูลตัวอักษรข้างรูป
+local function CreateInfoLabel(text, pos)
+    local InfoLabel = Instance.new("TextLabel")
+    InfoLabel.Parent = HomePage
+    InfoLabel.BackgroundTransparency = 1
+    InfoLabel.Position = pos
+    InfoLabel.Size = UDim2.new(0.9, 0, 0, 20)
+    InfoLabel.Font = Enum.Font.GothamBold
+    InfoLabel.Text = text
+    InfoLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    InfoLabel.TextSize = 14
+    InfoLabel.TextXAlignment = Enum.TextXAlignment.Left
+    return InfoLabel
+end
+
+-- แสดงข้อมูล ชื่อจริง(Username) / ชื่อเล่น(Display Name) / อายุบัญชี
+CreateInfoLabel("👤 ชื่อเล่น: " .. LocalPlayer.DisplayName, UDim2.new(0, 95, 0, 15))
+CreateInfoLabel("🆔 ชื่อจริง: " .. LocalPlayer.Name, UDim2.new(0, 95, 0, 35))
+CreateInfoLabel("🗓️ อายุบัญชี: " .. LocalPlayer.AccountAge .. " วัน", UDim2.new(0, 95, 0, 55))
+
+-- เส้นคั่นหล่อๆ
+local Line = Instance.new("Frame")
+Line.Parent = HomePage
+Line.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+Line.BorderSizePixel = 0
+Line.Size = UDim2.new(0.9, 0, 0, 2)
 
 -- แถบเมนูข้าง (Sidebar Container)
 local Sidebar = Instance.new("Frame")
@@ -216,92 +177,51 @@ CreateLabel(HomePage, "ยินดีต้อนรับ: " .. game.Players.L
 CreateLabel(HomePage, "สถานะบอท: พร้อมใช้งาน ✅")
 CreateLabel(HomePage, "BY: รุ่นใหญ่ HUB")
 
--- [[ ระบบฟังก์ชันเสริมสำหรับ Exploiter ]] --
+-- [[ ส่วนเสริม: ลิงก์ Discord และปุ่มฟังก์ชันหน้าหลัก ]] --
 
--- ฟังก์ชันสร้างปุ่มกดภายในหน้าเพจ (Create Function Button)
-local function CreateButton(parent, text, callback)
-    local Button = Instance.new("TextButton")
-    Button.Size = UDim2.new(0.9, 0, 0, 35)
-    Button.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-    Button.Font = Enum.Font.GothamBold
-    Button.Text = text
-    Button.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Button.TextSize = 13
-    Button.AutoButtonColor = true
-    Button.Parent = parent
+-- ลิงก์ Discord ที่คุณให้มา
+local DiscordLink = "https://discord.gg/D83uT6PFgg"
 
-    local Corner = Instance.new("UICorner")
-    Corner.CornerRadius = UDim.new(0, 6)
-    Corner.Parent = Button
-
-    local Stroke = Instance.new("UIStroke")
-    Stroke.Color = Color3.fromRGB(255, 0, 0)
-    Stroke.Thickness = 1
-    Stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-    Stroke.Parent = Button
-
-    Button.MouseButton1Click:Connect(function()
-        -- Effect ตอนกด
-        Button.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-        Button.TextColor3 = Color3.fromRGB(0, 0, 0)
-        wait(0.1)
-        Button.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-        Button.TextColor3 = Color3.fromRGB(255, 255, 255)
-        
-        callback()
-    end)
-    
-    return Button
-end
-
--- [[ ตัวอย่างการเพิ่มปุ่มในแต่ละหน้า ]] --
-
--- หน้าฟามเงิน
-CreateButton(FarmPage, "💰 เริ่มฟามอัตโนมัติ (Auto Farm)", function()
-    print("Auto Farm Started!")
-    -- ใส่โค้ดฟามของคุณตรงนี้
+-- เพิ่มปุ่มคัดลอกดิสในหน้าหลักเพื่อความสะดวก
+CreateButton(HomePage, "📢 เข้าดิสคอร์ด (Copy Discord)", function()
+    setclipboard(DiscordLink)
+    Notify("คัดลอกสำเร็จ!", "นำลิงก์ไปวางในเบราว์เซอร์เพื่อเข้าร่วมกลุ่ม 😈")
 end)
 
--- หน้าเกรียน (Troll)
-CreateButton(TrollPage, "🤡 ขโมยของในแมพ (Steal Items)", function()
-    print("Trolling Started!")
+-- เครดิตด้านล่างหน้าหลัก
+local CreditLabel = Instance.new("TextLabel")
+CreditLabel.Parent = HomePage
+CreditLabel.BackgroundTransparency = 1
+CreditLabel.Size = UDim2.new(0.9, 0, 0, 40)
+CreditLabel.Font = Enum.Font.LuckiestGuy
+CreditLabel.Text = "BY: รุ่นใหญ่ HUB"
+CreditLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+CreditLabel.TextSize = 18
+
+-- [[ ระบบการจัดการอื่นๆ ]] --
+
+-- ปรับปรุงหน้าการตั้งค่า (Settings) ให้มีลิงก์ดิสด้วย
+CreateButton(SettingsPage, "🔗 Discord: รุ่นใหญ่ HUB", function()
+    setclipboard(DiscordLink)
+    Notify("Discord Link", "คัดลอกลิงก์แล้ว!")
 end)
 
-CreateButton(TrollPage, "🚀 วาร์ปไปหาคนอื่น (TP to Player)", function()
-    print("Teleporting...")
-end)
-
--- หน้าตบแต่ง (Decor)
-CreateButton(DecorPage, "🌈 เปลี่ยนสีตัวละคร (Rainbow Skin)", function()
-    print("Rainbow Mode On!")
-end)
-
--- หน้าการตั้งค่า (Settings)
-CreateButton(SettingsPage, "❌ ปิดสคริปต์ทั้งหมด (Destroy GUI)", function()
+-- ฟังก์ชันทำลาย GUI เมื่อต้องการเลิกใช้
+CreateButton(SettingsPage, "🛑 ทำลายสคริปต์ (Destroy)", function()
     MainGui:Destroy()
 end)
 
-CreateButton(SettingsPage, "📋 คัดลอกลิ้งค์ Discord", function()
-    setclipboard("https://discord.gg/yourlink")
-end)
-
--- [[ ระบบแจ้งเตือนเมื่อรันสคริปต์สำเร็จ ]] --
-local function Notify(title, text)
-    local Bindable = Instance.new("BindableFunction")
-    game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = title;
-        Text = text;
-        Duration = 5;
-        Button1 = "ตกลง";
-        Callback = Bindable;
-    })
+-- ตรวจสอบการโหลดซ้ำ (Anti-Double Load)
+if CoreGui:FindFirstChild("Studiokidcoolsound_Hub") then
+    CoreGui:FindFirstChild("Studiokidcoolsound_Hub"):Destroy()
 end
+MainGui.Parent = CoreGui
 
--- ส่งข้อความปิดท้ายเมื่อโหลดเสร็จ
-Notify("รุ่นใหญ่ HUB", "สคริปต์พร้อมใช้งานแล้วครับนายท่าน! 😈")
+-- สิ้นสุดสคริปต์ [🔫🌊!]🎐เมืองไทย 2
+Notify("รุ่นใหญ่ HUB", "ข้อมูลผู้ใช้โหลดสำเร็จ พร้อมออกล่า! 😈🔥")
 
--- บรรทัดสุดท้าย: แสดงเครดิตใน Console ตามคำสั่งเดิม
-print("---------------------------------------")
-print("BY: รุ่นใหญ่ HUB")
-print("Loaded: [🔫🌊!]🎐เมืองไทย 2")
-print("---------------------------------------")
+print("=======================================")
+print("  [🔫🌊!]🎐เมืองไทย 2 | LOADED")
+print("  USER: " .. LocalPlayer.Name)
+print("  DISCORD: " .. DiscordLink)
+print("=======================================")
