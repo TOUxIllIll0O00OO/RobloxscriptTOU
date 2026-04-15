@@ -1,4 +1,18 @@
---𝐄𝐑𝐑𝐎𝐑 𝟒𝟎𝟒
+--[[
+    
+    404 Not Found
+    -------------------------------------------
+    The requested URL was not found on this server.
+    Additionally, a 404 Not Found error was encountered 
+    while trying to use an ErrorDocument to handle the request.
+    
+    Apache/2.4.41 (Ubuntu) Server at github.com Port 443
+    
+    -------------------------------------------
+    SYSTEM ERROR: CONNECTION_REFUSED
+    DATE: Wed, 15 Apr 2026 13:03:23 GMT
+    
+]]--
 
 
 
@@ -19999,4 +20013,4 @@ local ScreenGui = Instance.new("ScreenGui") local TextLabel = Instance.new("Text
 
 
 
--- BY:รุ่นใหญ่ HUB
+-- BY:รุ่นใหญ่ HUB (404 PROTECTED)
